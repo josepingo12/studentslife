@@ -9,6 +9,8 @@ import RegisterClient from "./pages/RegisterClient";
 import RegisterPartner from "./pages/RegisterPartner";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
+import ClientDashboard from "./pages/ClientDashboard";
+import PartnerDetails from "./pages/PartnerDetails";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +26,8 @@ const App = () => (
           <Route path="/register-partner" element={<RegisterPartner />} />
           <Route path="/login" element={<Login />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/client-dashboard" element={<ClientDashboard />} />
+          <Route path="/partner/:id" element={<PartnerDetails />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
