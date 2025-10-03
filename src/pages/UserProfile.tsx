@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Grid, Bookmark, Camera, Pencil } from "lucide-react";
+import { MessageCircle, Grid, Bookmark, Camera, Pencil, Users, Home, UserCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import ImageViewer from "@/components/social/ImageViewer";
@@ -427,6 +427,42 @@ const UserProfile = () => {
           imageUrl={selectedImage}
         />
       )}
+
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
+        <div className="flex items-center justify-around h-16 px-4 max-w-md mx-auto">
+          <button
+            onClick={() => navigate("/client-dashboard")}
+            className="flex flex-col items-center gap-1 text-muted-foreground transition-colors"
+          >
+            <Users className="w-6 h-6" />
+            <span className="text-xs font-medium">Social</span>
+          </button>
+          
+          <button
+            onClick={() => navigate("/client-dashboard")}
+            className="flex flex-col items-center gap-1 text-muted-foreground transition-colors"
+          >
+            <Home className="w-6 h-6" />
+            <span className="text-xs font-medium">Partner</span>
+          </button>
+
+          <button
+            onClick={() => navigate("/chats")}
+            className="flex flex-col items-center gap-1 text-muted-foreground transition-colors"
+          >
+            <MessageCircle className="w-6 h-6" />
+            <span className="text-xs font-medium">Chat</span>
+          </button>
+          
+          <button
+            className="flex flex-col items-center gap-1 text-primary transition-colors"
+          >
+            <UserCircle className="w-6 h-6" />
+            <span className="text-xs font-medium">Profilo</span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
