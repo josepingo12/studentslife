@@ -31,13 +31,15 @@ const PartnerDashboard = () => {
     }
 
     // Check if user is a partner
-    const { data: roleData } = await supabase
+    const { data: roleData, error: roleError } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
-    if (roleData?.role !== "partner") {
+    console.log("Partner dashboard - Role check:", roleData, "Error:", roleError);
+
+    if (!roleData || roleData.role !== "partner") {
       navigate("/login");
       return;
     }

@@ -29,13 +29,15 @@ const ClientDashboard = () => {
     }
 
     // Check if user is a client
-    const { data: roleData } = await supabase
+    const { data: roleData, error: roleError } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
-    if (roleData?.role !== "client") {
+    console.log("Client dashboard - Role check:", roleData, "Error:", roleError);
+
+    if (!roleData || roleData.role !== "client") {
       navigate("/login");
       return;
     }

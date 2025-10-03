@@ -30,11 +30,13 @@ const Login = () => {
 
       if (data.user) {
         // Get user role to redirect appropriately
-        const { data: roleData } = await supabase
+        const { data: roleData, error: roleError } = await supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", data.user.id)
-          .single();
+          .maybeSingle();
+
+        console.log("Role data:", roleData, "Error:", roleError);
 
         toast({
           title: "Accesso effettuato!",
@@ -46,8 +48,15 @@ const Login = () => {
           navigate("/admin");
         } else if (roleData?.role === "partner") {
           navigate("/partner-dashboard");
-        } else {
+        } else if (roleData?.role === "client") {
           navigate("/client-dashboard");
+        } else {
+          // No role found
+          toast({
+            title: "Errore",
+            description: "Ruolo utente non trovato. Contatta il supporto.",
+            variant: "destructive",
+          });
         }
       }
     } catch (error: any) {
