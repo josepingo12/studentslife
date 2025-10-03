@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Grid, Bookmark } from "lucide-react";
+import { MessageCircle, Grid, Bookmark, Camera, Pencil } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import ImageViewer from "@/components/social/ImageViewer";
@@ -20,6 +20,9 @@ const UserProfile = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"posts" | "saved">("posts");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [coverImage, setCoverImage] = useState<string | null>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     checkAuth();
@@ -46,6 +49,71 @@ const UserProfile = () => {
       .single();
 
     setProfile(data);
+    setCoverImage(data?.cover_image_url || null);
+  };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentUser) return;
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${currentUser.id}/cover-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ cover_image_url: publicUrl })
+        .eq('id', currentUser.id);
+
+      if (updateError) throw updateError;
+
+      setCoverImage(publicUrl);
+      toast({ title: "Copertina aggiornata" });
+    } catch (error: any) {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentUser) return;
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${currentUser.id}/avatar-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ profile_image_url: publicUrl })
+        .eq('id', currentUser.id);
+
+      if (updateError) throw updateError;
+
+      setProfile({ ...profile, profile_image_url: publicUrl });
+      toast({ title: "Immagine profilo aggiornata" });
+    } catch (error: any) {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    }
   };
 
   const loadUserContent = async (id: string) => {
@@ -171,39 +239,71 @@ const UserProfile = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary pb-24">
       {/* Profile Header - Modern Design */}
       <div className="relative">
-        {/* Cover gradient */}
-        <div className="h-32 bg-gradient-to-br from-primary to-primary/60" />
+        {/* Cover Image/Gradient with Upload */}
+        <div 
+          className="h-48 bg-gradient-to-br from-primary to-primary/60 relative group cursor-pointer"
+          style={coverImage ? { backgroundImage: `url(${coverImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+          onClick={() => isOwnProfile && coverInputRef.current?.click()}
+        >
+          {isOwnProfile && (
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <Camera className="w-8 h-8 text-white" />
+            </div>
+          )}
+        </div>
+        <input
+          ref={coverInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleCoverUpload}
+        />
         
-        {/* Profile Info Card */}
-        <div className="ios-card mx-4 -mt-16 p-6 relative">
-          <div className="flex items-start gap-4">
-            <Avatar className="h-24 w-24 border-4 border-background">
+        {/* Avatar and Info */}
+        <div className="px-4 -mt-16">
+          <div className="relative inline-block">
+            <Avatar className="h-32 w-32 border-4 border-background">
               <AvatarImage src={profile?.profile_image_url} />
-              <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+              <AvatarFallback className="bg-primary text-primary-foreground text-3xl">
                 {getDisplayName()[0]}
               </AvatarFallback>
             </Avatar>
+            {isOwnProfile && (
+              <button
+                onClick={() => avatarInputRef.current?.click()}
+                className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 transition-colors"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarUpload}
+          />
 
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold">{getDisplayName()}</h2>
-              {profile?.university && (
-                <p className="text-muted-foreground">{profile.university}</p>
-              )}
-              {profile?.business_description && (
-                <p className="text-sm text-muted-foreground mt-1">{profile.business_description}</p>
-              )}
-            </div>
+          <div className="mt-4">
+            <h2 className="text-2xl font-bold">{getDisplayName()}</h2>
+            {profile?.university && (
+              <p className="text-muted-foreground">{profile.university}</p>
+            )}
+            {profile?.business_description && (
+              <p className="text-sm text-muted-foreground mt-1">{profile.business_description}</p>
+            )}
           </div>
 
           {/* Stats */}
-          <div className="flex justify-around mt-6 pt-6 border-t">
+          <div className="flex gap-6 mt-4">
             <div className="text-center">
-              <p className="text-2xl font-bold">{posts.length}</p>
-              <p className="text-sm text-muted-foreground">Post</p>
+              <p className="text-xl font-bold">{posts.length}</p>
+              <p className="text-xs text-muted-foreground">Post</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold">{stories.length}</p>
-              <p className="text-sm text-muted-foreground">Storie</p>
+              <p className="text-xl font-bold">{stories.length}</p>
+              <p className="text-xs text-muted-foreground">Storie</p>
             </div>
           </div>
 
