@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, Search, X } from "lucide-react";
 import StoriesCarousel from "@/components/social/StoriesCarousel";
 import CreatePost from "@/components/social/CreatePost";
 import PostCard from "@/components/social/PostCard";
@@ -14,6 +15,9 @@ const Social = () => {
   const [profile, setProfile] = useState<any>(null);
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -76,6 +80,33 @@ const Social = () => {
     }));
   };
 
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    
+    if (!query.trim()) {
+      setSearchResults([]);
+      setSearching(false);
+      return;
+    }
+
+    setSearching(true);
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, first_name, last_name, business_name, profile_image_url")
+      .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,business_name.ilike.%${query}%`)
+      .limit(10);
+
+    setSearchResults(data || []);
+    setSearching(false);
+  };
+
+  const getDisplayName = (profile: any) => {
+    if (profile.first_name) {
+      return `${profile.first_name} ${profile.last_name || ""}`.trim();
+    }
+    return profile.business_name || "Utente";
+  };
+
   if (!user || !profile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary flex items-center justify-center">
@@ -90,17 +121,75 @@ const Social = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary pb-20">
       {/* Header */}
-      <div className="ios-card mx-4 mt-4 p-4 flex items-center justify-between">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate(-1)}
-          className="rounded-full"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <h1 className="text-2xl font-bold text-primary">Students Life Social</h1>
-        <div className="w-10" />
+      <div className="ios-card mx-4 mt-4 p-4">
+        <div className="flex items-center justify-between mb-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="rounded-full"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <h1 className="text-2xl font-bold text-primary">Students Life Social</h1>
+          <div className="w-10" />
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Cerca utenti..."
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+            className="pl-10 pr-10"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => handleSearch("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+            >
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
+          )}
+        </div>
+
+        {/* Search Results */}
+        {searchQuery && (
+          <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
+            {searching ? (
+              <p className="text-sm text-muted-foreground text-center py-4">Ricerca...</p>
+            ) : searchResults.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">Nessun utente trovato</p>
+            ) : (
+              searchResults.map((result) => (
+                <button
+                  key={result.id}
+                  onClick={() => {
+                    navigate(`/profile/${result.id}`);
+                    setSearchQuery("");
+                    setSearchResults([]);
+                  }}
+                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={result.profile_image_url} />
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {getDisplayName(result)[0].toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="text-left">
+                    <p className="font-semibold">{getDisplayName(result)}</p>
+                    {result.first_name && result.business_name && (
+                      <p className="text-xs text-muted-foreground">{result.business_name}</p>
+                    )}
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        )}
       </div>
 
       {/* Stories */}
