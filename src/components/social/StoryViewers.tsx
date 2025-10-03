@@ -97,47 +97,53 @@ const StoryViewers = ({ storyId, open, onOpenChange }: StoryViewersProps) => {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-3xl max-h-[80vh]">
-        <SheetHeader>
-          <SheetTitle className="flex items-center gap-2">
-            <Eye className="w-5 h-5" />
-            Visualizzazioni ({viewers.length})
-          </SheetTitle>
-        </SheetHeader>
+      <SheetContent side="bottom" className="rounded-t-3xl h-[70vh] bg-background p-0">
+        {/* Header with view count */}
+        <div className="sticky top-0 bg-background border-b border-border px-6 py-4 z-10">
+          <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-4" />
+          <div className="flex items-center justify-center gap-2">
+            <Eye className="w-5 h-5 text-foreground" />
+            <h3 className="text-base font-semibold">{viewers.length} visualizzazioni</h3>
+          </div>
+        </div>
 
-        <div className="mt-6 space-y-3 overflow-y-auto max-h-[60vh]">
+        {/* Scrollable viewers list */}
+        <div className="overflow-y-auto h-[calc(70vh-80px)] px-6 py-4">
           {loading ? (
-            <div className="text-center py-8">
-              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+            <div className="flex items-center justify-center py-12">
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
           ) : viewers.length === 0 ? (
-            <div className="text-center py-8">
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Eye className="w-12 h-12 text-muted-foreground mb-3 opacity-50" />
               <p className="text-muted-foreground">Nessuna visualizzazione ancora</p>
             </div>
           ) : (
-            viewers.map((viewer) => (
-              <div
-                key={viewer.id}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
-              >
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={viewer.profiles?.profile_image_url} />
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    {getDisplayName(viewer)[0]}
-                  </AvatarFallback>
-                </Avatar>
+            <div className="space-y-1">
+              {viewers.map((viewer) => (
+                <div
+                  key={viewer.id}
+                  className="flex items-center gap-3 py-3 active:bg-muted/50 transition-colors"
+                >
+                  <Avatar className="h-11 w-11 border border-border">
+                    <AvatarImage src={viewer.profiles?.profile_image_url} />
+                    <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                      {getDisplayName(viewer)[0]}
+                    </AvatarFallback>
+                  </Avatar>
 
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{getDisplayName(viewer)}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {formatDistanceToNow(new Date(viewer.viewed_at), {
-                      addSuffix: true,
-                      locale: it,
-                    })}
-                  </p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{getDisplayName(viewer)}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(viewer.viewed_at), {
+                        addSuffix: true,
+                        locale: it,
+                      })}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
       </SheetContent>
