@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Camera, Pencil, Edit2 } from "lucide-react";
+import { Camera, Pencil, Edit2, Plus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import PostDetailModal from "@/components/social/PostDetailModal";
-import CreatePost from "@/components/social/CreatePost";
+import UploadSheet from "@/components/shared/UploadSheet";
 import { Textarea } from "@/components/ui/textarea";
 
 interface PartnerSocialProfileProps {
@@ -28,6 +28,7 @@ const PartnerSocialProfile = ({ profile, userId, onUpdate }: PartnerSocialProfil
   const [totalViews, setTotalViews] = useState(0);
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [bioText, setBioText] = useState("");
+  const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -186,15 +187,14 @@ const PartnerSocialProfile = ({ profile, userId, onUpdate }: PartnerSocialProfil
   }
 
   return (
-    <div>
-      {/* Create Post Section */}
-      <div className="px-4 mb-4">
-        <CreatePost 
-          userId={userId} 
-          userProfile={profile}
-          onPostCreated={loadUserContent}
-        />
-      </div>
+    <div className="relative">
+      {/* Floating Add Button */}
+      <button
+        onClick={() => setUploadSheetOpen(true)}
+        className="fixed bottom-28 right-6 z-50 bg-gradient-to-br from-primary to-primary/80 rounded-full p-4 shadow-lg hover:scale-105 transition-transform"
+      >
+        <Plus className="w-6 h-6 text-white" />
+      </button>
 
       {/* Profile Header */}
       <div className="relative">
@@ -394,6 +394,14 @@ const PartnerSocialProfile = ({ profile, userId, onUpdate }: PartnerSocialProfil
           currentUserId={userId}
         />
       )}
+
+      {/* Upload Sheet */}
+      <UploadSheet
+        open={uploadSheetOpen}
+        onOpenChange={setUploadSheetOpen}
+        userId={userId}
+        onUploadComplete={loadUserContent}
+      />
     </div>
   );
 };
