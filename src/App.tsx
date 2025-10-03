@@ -18,7 +18,7 @@ import ChatConversation from "./pages/ChatConversation";
 import UserProfile from "./pages/UserProfile";
 
 import AdminDashboard from "./pages/AdminDashboard";
-
+import AdminSetup from "./pages/AdminSetup";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -42,6 +42,7 @@ const App = () => (
           <Route path="/profile/:userId?" element={<UserProfile />} />
           
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin-setup" element={<AdminSetup />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
