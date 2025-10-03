@@ -59,7 +59,7 @@ const PartnerDashboard = () => {
       .from("posts")
       .select(`
         *,
-        profiles(first_name, last_name, profile_image_url, business_name),
+        profiles!posts_user_id_fkey(first_name, last_name, profile_image_url, business_name),
         likes(id, user_id)
       `)
       .order("created_at", { ascending: false });
