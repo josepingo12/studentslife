@@ -368,12 +368,20 @@ const UserProfile = () => {
                   <p className="text-xs text-muted-foreground italic">Aggiungi una bio al tuo profilo</p>
                 ) : null}
                 {isOwnProfile && (
-                  <button
-                    onClick={() => setIsEditingBio(true)}
-                    className="absolute -right-6 top-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Edit2 className="w-4 h-4 text-muted-foreground hover:text-primary" />
-                  </button>
+                  <div className="absolute -right-6 top-0 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => setIsEditingBio(true)}
+                      className="hover:scale-110 transition-transform"
+                    >
+                      <Edit2 className="w-4 h-4 text-muted-foreground hover:text-primary" />
+                    </button>
+                    <button
+                      onClick={() => setSettingsSheetOpen(true)}
+                      className="hover:scale-110 transition-transform"
+                    >
+                      <Settings className="w-4 h-4 text-muted-foreground hover:text-primary" />
+                    </button>
+                  </div>
                 )}
               </div>
             )}
@@ -546,16 +554,6 @@ const UserProfile = () => {
             <UserCircle className="w-6 h-6" />
             <span className="text-xs font-medium">{t('navigation.profile')}</span>
           </button>
-
-          {isOwnProfile && (
-            <button
-              onClick={() => setSettingsSheetOpen(true)}
-              className="flex flex-col items-center gap-1 text-muted-foreground transition-colors"
-            >
-              <Settings className="w-6 h-6" />
-              <span className="text-xs font-medium">{t('settings.title')}</span>
-            </button>
-          )}
         </div>
       </div>
 
