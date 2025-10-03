@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import FavoritesCarousel from "@/components/chat/FavoritesCarousel";
 import UserListItem from "@/components/chat/UserListItem";
 import UploadSheet from "@/components/shared/UploadSheet";
+import NotificationBadge from "@/components/chat/NotificationBadge";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 
 const Chats = () => {
   const navigate = useNavigate();
@@ -19,6 +21,7 @@ const Chats = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
+  const totalUnread = useUnreadMessages(user?.id);
 
   useEffect(() => {
     checkAuth();
@@ -321,9 +324,12 @@ const Chats = () => {
           </button>
 
           <button
-            className="flex flex-col items-center gap-1 text-primary transition-colors"
+            className="flex flex-col items-center gap-1 text-primary transition-colors relative"
           >
-            <MessageCircle className="w-6 h-6" />
+            <div className="relative">
+              <MessageCircle className="w-6 h-6" />
+              <NotificationBadge count={totalUnread} />
+            </div>
             <span className="text-xs font-medium">Chat</span>
           </button>
           

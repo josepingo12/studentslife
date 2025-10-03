@@ -14,6 +14,8 @@ import StoriesCarousel from "@/components/social/StoriesCarousel";
 import CreatePost from "@/components/social/CreatePost";
 import PostCard from "@/components/social/PostCard";
 import UploadSheet from "@/components/shared/UploadSheet";
+import NotificationBadge from "@/components/chat/NotificationBadge";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 
 const ClientDashboard = () => {
   const navigate = useNavigate();
@@ -28,6 +30,7 @@ const ClientDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
+  const totalUnread = useUnreadMessages(user?.id);
 
   useEffect(() => {
     checkAuth();
@@ -352,11 +355,14 @@ const ClientDashboard = () => {
 
           <button
             onClick={() => setActiveTab("chats")}
-            className={`flex flex-col items-center gap-1 transition-colors ${
+            className={`flex flex-col items-center gap-1 transition-colors relative ${
               activeTab === "chats" ? "text-primary" : "text-muted-foreground"
             }`}
           >
-            <MessageCircle className="w-6 h-6" />
+            <div className="relative">
+              <MessageCircle className="w-6 h-6" />
+              <NotificationBadge count={totalUnread} />
+            </div>
             <span className="text-xs font-medium">Chat</span>
           </button>
           

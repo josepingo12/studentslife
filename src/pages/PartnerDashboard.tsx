@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Home, QrCode, BarChart3, UserCircle, Users, Plus, Calendar, Image as ImageIcon } from "lucide-react";
+import { Home, QrCode, BarChart3, UserCircle, Users, Plus, Calendar, Image as ImageIcon, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PartnerGalleryManager from "@/components/partner/PartnerGalleryManager";
 import PartnerEventsManager from "@/components/partner/PartnerEventsManager";
@@ -13,6 +13,8 @@ import StoriesCarousel from "@/components/social/StoriesCarousel";
 import CreatePost from "@/components/social/CreatePost";
 import PostCard from "@/components/social/PostCard";
 import UploadSheet from "@/components/shared/UploadSheet";
+import NotificationBadge from "@/components/chat/NotificationBadge";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 
 const PartnerDashboard = () => {
   const navigate = useNavigate();
@@ -23,6 +25,7 @@ const PartnerDashboard = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
+  const totalUnread = useUnreadMessages(user?.id);
 
   useEffect(() => {
     checkAuth();
@@ -247,6 +250,17 @@ const PartnerDashboard = () => {
           >
             <BarChart3 className="w-5 h-5" />
             <span className="text-xs font-medium">Stats</span>
+          </button>
+
+          <button
+            onClick={() => navigate("/chats")}
+            className="flex flex-col items-center gap-1 transition-colors text-muted-foreground relative"
+          >
+            <div className="relative">
+              <MessageCircle className="w-5 h-5" />
+              <NotificationBadge count={totalUnread} />
+            </div>
+            <span className="text-xs font-medium">Chat</span>
           </button>
           
           <button
