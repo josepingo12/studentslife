@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ interface PostCardProps {
 }
 
 const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps) => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   
@@ -93,7 +95,10 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
     <div className="ios-card overflow-hidden">
       {/* Header */}
       <div className="p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <button
+          onClick={() => navigate(`/profile/${post.user_id}`)}
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+        >
           <Avatar className="h-10 w-10">
             <AvatarImage src={post.profiles?.profile_image_url} />
             <AvatarFallback className="bg-primary text-primary-foreground">
@@ -106,7 +111,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
               {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: it })}
             </p>
           </div>
-        </div>
+        </button>
         {isOwner && (
           <Button
             variant="ghost"
