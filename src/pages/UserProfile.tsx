@@ -395,15 +395,15 @@ const UserProfile = () => {
           <div className="flex justify-center gap-8 py-4 border-y border-border/50 mb-4">
             <div className="text-center">
               <p className="text-xl font-bold">{posts.length}</p>
-              <p className="text-xs text-muted-foreground">Post</p>
+              <p className="text-xs text-muted-foreground">{t('profile.posts')}</p>
             </div>
             <div className="text-center">
               <p className="text-xl font-bold">{totalLikes}</p>
-              <p className="text-xs text-muted-foreground">Mi piace</p>
+              <p className="text-xs text-muted-foreground">{t('profile.likes')}</p>
             </div>
             <div className="text-center">
               <p className="text-xl font-bold">{totalViews}</p>
-              <p className="text-xs text-muted-foreground">Visualizzazioni</p>
+              <p className="text-xs text-muted-foreground">{t('profile.views')}</p>
             </div>
           </div>
 

@@ -86,17 +86,26 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
     if (!post?.id) return;
 
     try {
-      if (isLiked) {
+      // First check if like already exists
+      const { data: existingLike } = await supabase
+        .from("likes")
+        .select("id")
+        .eq("post_id", post.id)
+        .eq("user_id", currentUserId)
+        .maybeSingle();
+
+      if (existingLike) {
+        // Delete existing like
         const { error } = await supabase
           .from("likes")
           .delete()
-          .eq("post_id", post.id)
-          .eq("user_id", currentUserId);
+          .eq("id", existingLike.id);
 
         if (error) throw error;
-        setLikesCount((prev) => prev - 1);
+        setLikesCount((prev) => Math.max(0, prev - 1));
         setIsLiked(false);
       } else {
+        // Insert new like
         const { error } = await supabase
           .from("likes")
           .insert({
