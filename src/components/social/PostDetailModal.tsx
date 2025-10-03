@@ -156,10 +156,10 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl h-[95vh] p-0 gap-0 overflow-hidden animate-scale-in">
-        <div className="flex h-full w-full">
-          {/* Image Section - Left Side */}
-          <div className="flex-1 bg-black relative flex items-center justify-center">
+      <DialogContent className="max-w-7xl h-[90vh] p-0 gap-0 overflow-hidden animate-scale-in">
+        <div className="flex flex-col md:flex-row h-full w-full">
+          {/* Image Section - Top on mobile, Left on desktop */}
+          <div className="flex-1 bg-black relative flex items-center justify-center min-h-[50vh] md:min-h-full">
             <Button
               variant="ghost"
               size="icon"
@@ -172,12 +172,12 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
             <img
               src={post.image_url}
               alt="Post"
-              className="max-w-full max-h-full object-contain animate-fade-in"
+              className="w-full h-full object-contain animate-fade-in p-2"
             />
           </div>
 
-          {/* Details Section - Right Side */}
-          <div className="w-full md:w-[420px] flex flex-col bg-background/95 backdrop-blur-xl border-l border-border/50">
+          {/* Details Section - Bottom on mobile, Right on desktop */}
+          <div className="w-full md:w-[420px] flex flex-col bg-background/95 backdrop-blur-xl md:border-l border-t md:border-t-0 border-border/50">
             {/* Header with User Info */}
             <div className="p-4 border-b border-border/50 bg-gradient-to-b from-background to-transparent">
               <div 
