@@ -89,11 +89,11 @@ const Chats = () => {
   };
 
   const loadMessagesData = async (userId: string) => {
-    // Get all conversations
+    // Get all conversations where user is participant
     const { data: convData } = await supabase
-      .from("conversation_participants")
-      .select("conversation_id")
-      .eq("user_id", userId);
+      .from("conversations")
+      .select("*")
+      .or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
 
     if (!convData) return;
 
@@ -101,39 +101,34 @@ const Chats = () => {
     const unreadMap = new Map();
 
     for (const conv of convData) {
-      // Get other participant
-      const { data: otherParticipant } = await supabase
-        .from("conversation_participants")
-        .select("user_id")
-        .eq("conversation_id", conv.conversation_id)
-        .neq("user_id", userId)
-        .maybeSingle();
-
-      if (!otherParticipant) continue;
+      // Determine other user ID
+      const otherUserId = conv.user1_id === userId ? conv.user2_id : conv.user1_id;
+      
+      if (!otherUserId) continue;
 
       // Get last message
       const { data: lastMsg } = await supabase
         .from("messages")
         .select("*")
-        .eq("conversation_id", conv.conversation_id)
+        .eq("conversation_id", conv.id)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
       if (lastMsg) {
-        messagesMap.set(otherParticipant.user_id, lastMsg);
+        messagesMap.set(otherUserId, lastMsg);
       }
 
       // Count unread
       const { count } = await supabase
         .from("messages")
         .select("*", { count: "exact", head: true })
-        .eq("conversation_id", conv.conversation_id)
+        .eq("conversation_id", conv.id)
         .eq("is_read", false)
         .neq("sender_id", userId);
 
       if (count && count > 0) {
-        unreadMap.set(otherParticipant.user_id, count);
+        unreadMap.set(otherUserId, count);
       }
     }
 
@@ -145,43 +140,29 @@ const Chats = () => {
     if (!user) return;
 
     try {
-      // Check if conversation exists
+      // Check if conversation exists with this user
       const { data: existingConv } = await supabase
-        .from("conversation_participants")
-        .select("conversation_id")
-        .eq("user_id", user.id);
+        .from("conversations")
+        .select("*")
+        .or(`and(user1_id.eq.${user.id},user2_id.eq.${otherUserId}),and(user1_id.eq.${otherUserId},user2_id.eq.${user.id})`)
+        .maybeSingle();
 
-      if (existingConv && existingConv.length > 0) {
-        for (const conv of existingConv) {
-          const { data: otherParticipant } = await supabase
-            .from("conversation_participants")
-            .select("user_id")
-            .eq("conversation_id", conv.conversation_id)
-            .eq("user_id", otherUserId)
-            .maybeSingle();
-
-          if (otherParticipant) {
-            navigate(`/chat/${conv.conversation_id}`);
-            return;
-          }
-        }
+      if (existingConv) {
+        navigate(`/chat/${existingConv.id}`);
+        return;
       }
 
       // Create new conversation
       const { data: newConv, error } = await supabase
         .from("conversations")
-        .insert({})
+        .insert({
+          user1_id: user.id,
+          user2_id: otherUserId
+        })
         .select()
         .single();
 
       if (error) throw error;
-
-      await supabase
-        .from("conversation_participants")
-        .insert([
-          { conversation_id: newConv.id, user_id: user.id },
-          { conversation_id: newConv.id, user_id: otherUserId },
-        ]);
 
       navigate(`/chat/${newConv.id}`);
     } catch (error: any) {

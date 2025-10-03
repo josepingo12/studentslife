@@ -117,23 +117,31 @@ const ChatConversation = () => {
   };
 
   const loadOtherUser = async (userId: string) => {
-    const { data: otherParticipant } = await supabase
-      .from("conversation_participants")
-      .select(`
-        user_id,
-        profiles!conversation_participants_user_id_fkey(
-          first_name,
-          last_name,
-          business_name,
-          profile_image_url
-        )
-      `)
-      .eq("conversation_id", conversationId)
-      .neq("user_id", userId)
+    // Get conversation to find the other user
+    const { data: conversation } = await supabase
+      .from("conversations")
+      .select("*")
+      .eq("id", conversationId)
       .single();
 
-    if (otherParticipant) {
-      setOtherUser(otherParticipant.profiles);
+    if (!conversation) return;
+
+    // Determine other user ID
+    const otherUserId = conversation.user1_id === userId 
+      ? conversation.user2_id 
+      : conversation.user1_id;
+
+    if (!otherUserId) return;
+
+    // Get other user's profile
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("first_name, last_name, business_name, profile_image_url")
+      .eq("id", otherUserId)
+      .single();
+
+    if (profile) {
+      setOtherUser(profile);
     }
   };
 

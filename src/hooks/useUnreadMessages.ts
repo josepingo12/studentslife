@@ -8,11 +8,11 @@ export const useUnreadMessages = (userId: string | undefined) => {
     if (!userId) return;
 
     const loadUnreadCount = async () => {
-      // Get all conversations
+      // Get all conversations where user is participant
       const { data: convData } = await supabase
-        .from('conversation_participants')
-        .select('conversation_id')
-        .eq('user_id', userId);
+        .from('conversations')
+        .select('*')
+        .or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
 
       if (!convData) return;
 
@@ -23,7 +23,7 @@ export const useUnreadMessages = (userId: string | undefined) => {
         const { count } = await supabase
           .from('messages')
           .select('*', { count: 'exact', head: true })
-          .eq('conversation_id', conv.conversation_id)
+          .eq('conversation_id', conv.id)
           .eq('is_read', false)
           .neq('sender_id', userId);
 
