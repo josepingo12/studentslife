@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Students Life - iOS Style Blue & White Theme */
+    --background: 0 0% 100%;
+    --foreground: 210 15% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 210 15% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 15% 20%;
+
+    --primary: 210 100% 56%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 100% 95%;
+    --secondary-foreground: 210 100% 40%;
+
+    --muted: 210 20% 96%;
+    --muted-foreground: 210 10% 45%;
+
+    --accent: 210 100% 90%;
+    --accent-foreground: 210 100% 40%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 20% 90%;
+    --input: 210 20% 90%;
+    --ring: 210 100% 56%;
+
+    --radius: 12px;
+
+    /* iOS Style Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    --background: 210 20% 8%;
+    --foreground: 210 10% 95%;
+
+    --card: 210 20% 10%;
+    --card-foreground: 210 10% 95%;
+
+    --popover: 210 20% 10%;
+    --popover-foreground: 210 10% 95%;
+
+    --primary: 210 100% 56%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 20% 15%;
+    --secondary-foreground: 210 10% 90%;
+
+    --muted: 210 20% 15%;
+    --muted-foreground: 210 10% 60%;
+
+    --accent: 210 20% 20%;
+    --accent-foreground: 210 10% 90%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 20% 20%;
+    --input: 210 20% 20%;
+    --ring: 210 100% 56%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  .ios-card {
+    @apply bg-card rounded-2xl shadow-md border border-border/50;
+  }
+  
+  .ios-button {
+    @apply bg-primary text-primary-foreground rounded-xl font-semibold shadow-sm;
+    transition: var(--transition-smooth);
+  }
+  
+  .ios-button:hover {
+    @apply brightness-110;
+  }
+  
+  .ios-button:active {
+    @apply scale-95;
+  }
+  
+  .ios-input {
+    @apply bg-secondary/50 border-border rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent;
+    transition: var(--transition-smooth);
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
