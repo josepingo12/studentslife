@@ -361,25 +361,29 @@ const UserProfile = () => {
                 </div>
               </div>
             ) : (
-              <div className="relative group">
-                {profile?.business_description ? (
-                  <p className="text-sm text-foreground/80 leading-relaxed">{profile.business_description}</p>
-                ) : isOwnProfile ? (
-                  <p className="text-xs text-muted-foreground italic">Aggiungi una bio al tuo profilo</p>
-                ) : null}
+              <div className="space-y-2">
+                <div>
+                  {profile?.business_description ? (
+                    <p className="text-sm text-foreground/80 leading-relaxed">{profile.business_description}</p>
+                  ) : isOwnProfile ? (
+                    <p className="text-xs text-muted-foreground italic">Aggiungi una bio al tuo profilo</p>
+                  ) : null}
+                </div>
                 {isOwnProfile && (
-                  <div className="absolute -right-6 top-0 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex gap-3 justify-center">
                     <button
                       onClick={() => setIsEditingBio(true)}
-                      className="hover:scale-110 transition-transform"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
                     >
-                      <Edit2 className="w-4 h-4 text-muted-foreground hover:text-primary" />
+                      <Edit2 className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs font-medium">Modifica Bio</span>
                     </button>
                     <button
                       onClick={() => setSettingsSheetOpen(true)}
-                      className="hover:scale-110 transition-transform"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
                     >
-                      <Settings className="w-4 h-4 text-muted-foreground hover:text-primary" />
+                      <Settings className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs font-medium">Impostazioni</span>
                     </button>
                   </div>
                 )}
