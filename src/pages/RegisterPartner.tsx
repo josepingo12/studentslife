@@ -65,6 +65,12 @@ const RegisterPartner = () => {
       if (authError) throw authError;
 
       if (authData.user) {
+        console.log("User signed up:", authData.user.id);
+        
+        // Wait for session to be established
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log("Session after signup:", session);
+
         // Update profile with partner data
         const { error: profileError } = await supabase
           .from("profiles")
@@ -76,17 +82,28 @@ const RegisterPartner = () => {
           })
           .eq("id", authData.user.id);
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error("Profile update error:", profileError);
+          throw profileError;
+        }
+
+        console.log("Profile updated successfully");
 
         // Assign partner role
-        const { error: roleError } = await supabase
+        const { data: roleData, error: roleError } = await supabase
           .from("user_roles")
           .insert({
             user_id: authData.user.id,
             role: "partner",
-          });
+          })
+          .select();
 
-        if (roleError) throw roleError;
+        console.log("Role insert result:", { roleData, roleError });
+
+        if (roleError) {
+          console.error("Role insert error:", roleError);
+          throw roleError;
+        }
 
         toast({
           title: "Registrazione completata!",
