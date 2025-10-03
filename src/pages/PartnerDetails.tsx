@@ -144,23 +144,32 @@ const PartnerDetails = () => {
       <div className="mt-6 px-4">
         <h2 className="text-xl font-bold mb-4">Posizione</h2>
         <div className="ios-card p-4">
-          <div className="aspect-video bg-muted rounded-xl flex items-center justify-center">
-            <div className="text-center">
-              <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">
-                {partner.business_address}, {partner.business_city}
-              </p>
-              <Button
-                variant="outline"
-                className="mt-4"
-                onClick={() => {
-                  const address = `${partner.business_address}, ${partner.business_city}`;
-                  window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
-                }}
-              >
-                Apri in Google Maps
-              </Button>
-            </div>
+          <div className="aspect-video bg-muted rounded-xl overflow-hidden">
+            <iframe
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+              src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(`${partner.business_address}, ${partner.business_city}`)}`}
+            />
+          </div>
+          <div className="mt-4 flex items-center gap-2 text-muted-foreground">
+            <MapPin className="w-4 h-4" />
+            <p className="text-sm flex-1">
+              {partner.business_address}, {partner.business_city}
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const address = `${partner.business_address}, ${partner.business_city}`;
+                window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
+              }}
+            >
+              Apri in Maps
+            </Button>
           </div>
         </div>
       </div>
