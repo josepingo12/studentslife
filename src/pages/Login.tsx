@@ -35,18 +35,25 @@ const Login = () => {
 
         console.log("Role check via RPC:", { role }, "Error:", roleError);
 
-        // Se l'utente non ha ancora un ruolo, assegniamo automaticamente "client"
+        // Se l'utente non ha ancora un ruolo, deduciamolo dal profilo (partner se ha business_category)
         let effectiveRole = role as string | null;
         if (!roleError && !role) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("business_category")
+            .eq("id", data.user.id)
+            .maybeSingle();
+
+          const inferredRole = profile?.business_category ? "partner" : "client";
           const { error: insertRoleError } = await supabase
             .from("user_roles")
-            .insert({ user_id: data.user.id, role: "client" });
+            .insert({ user_id: data.user.id, role: inferredRole });
 
           if (!insertRoleError) {
-            effectiveRole = "client";
+            effectiveRole = inferredRole;
             toast({
               title: "Profilo completato",
-              description: "Ruolo 'cliente' assegnato automaticamente.",
+              description: `Ruolo '${inferredRole === "partner" ? "partner" : "cliente"}' assegnato automaticamente.`,
             });
           }
         }
