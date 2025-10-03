@@ -1,5 +1,12 @@
+import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { QrCode, CheckCircle2, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { QrCode, CheckCircle2, XCircle, Download } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import QRCodeLib from "qrcode";
+import { Filesystem, Directory } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
+import { Capacitor } from "@capacitor/core";
 
 interface QRCodeModalProps {
   event: any;
@@ -8,6 +15,91 @@ interface QRCodeModalProps {
 }
 
 const QRCodeModal = ({ event, open, onClose }: QRCodeModalProps) => {
+  const { toast } = useToast();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  useEffect(() => {
+    if (open && event.qrCode && canvasRef.current) {
+      generateQRCode();
+    }
+  }, [open, event.qrCode]);
+
+  const generateQRCode = async () => {
+    if (!canvasRef.current || !event.qrCode) return;
+    
+    try {
+      await QRCodeLib.toCanvas(canvasRef.current, event.qrCode.code, {
+        width: 400,
+        margin: 2,
+        color: {
+          dark: "#000000",
+          light: "#FFFFFF",
+        },
+      });
+    } catch (err) {
+      console.error("Errore generazione QR:", err);
+    }
+  };
+
+  const downloadQRCode = async () => {
+    if (!canvasRef.current || !event.qrCode) return;
+    
+    setDownloading(true);
+    
+    try {
+      const canvas = canvasRef.current;
+      const dataUrl = canvas.toDataURL("image/png");
+      const fileName = `qr-${event.qrCode.code}.png`;
+
+      if (Capacitor.isNativePlatform()) {
+        // Mobile: salva nel dispositivo usando Capacitor
+        const base64Data = dataUrl.split(",")[1];
+        
+        const savedFile = await Filesystem.writeFile({
+          path: fileName,
+          data: base64Data,
+          directory: Directory.Documents,
+        });
+
+        // Condividi il file
+        await Share.share({
+          title: `QR Code - ${event.title}`,
+          text: `Il tuo QR code per ${event.title}`,
+          url: savedFile.uri,
+          dialogTitle: "Salva il tuo QR Code",
+        });
+
+        toast({
+          title: "QR Code salvato",
+          description: "Il QR code è stato salvato sul tuo dispositivo",
+        });
+      } else {
+        // Web: download normale
+        const link = document.createElement("a");
+        link.download = fileName;
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        toast({
+          title: "QR Code scaricato",
+          description: "Il QR code è stato scaricato",
+        });
+      }
+    } catch (err) {
+      console.error("Errore download QR:", err);
+      toast({
+        title: "Errore",
+        description: "Impossibile salvare il QR code",
+        variant: "destructive",
+      });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   if (!event.qrCode) return null;
 
   return (
@@ -19,16 +111,27 @@ const QRCodeModal = ({ event, open, onClose }: QRCodeModalProps) => {
 
         <div className="space-y-6">
           {/* QR Code Display */}
-          <div className="bg-white p-8 rounded-2xl">
-            <div className="aspect-square bg-gradient-to-br from-primary/10 to-secondary/10 rounded-xl flex items-center justify-center">
-              <div className="text-center">
-                <QrCode className="w-32 h-32 mx-auto mb-4 text-primary" />
-                <p className="text-2xl font-bold font-mono tracking-wider">
-                  {event.qrCode.code}
-                </p>
-              </div>
-            </div>
+          <div className="bg-white p-4 rounded-2xl">
+            <canvas
+              ref={canvasRef}
+              className="w-full h-auto rounded-xl"
+            />
+            <p className="text-center mt-4 text-lg font-bold font-mono tracking-wider">
+              {event.qrCode.code}
+            </p>
           </div>
+
+          {/* Download Button */}
+          {!event.qrCode.is_used && (
+            <Button
+              onClick={downloadQRCode}
+              disabled={downloading}
+              className="w-full ios-button h-12"
+            >
+              <Download className="w-5 h-5 mr-2" />
+              {downloading ? "Salvataggio..." : "Salva QR Code"}
+            </Button>
+          )}
 
           {/* Status */}
           <div className={`
