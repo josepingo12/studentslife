@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, User, Home, Users } from "lucide-react";
+import { LogOut, Settings, User, Home, Users, MessageCircle, UserCircle } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import CategoryCarousel from "@/components/client/CategoryCarousel";
@@ -18,7 +18,7 @@ const ClientDashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"social" | "partners">("social");
+  const [activeTab, setActiveTab] = useState<"social" | "partners" | "chats" | "profile">("social");
   const [posts, setPosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
 
@@ -214,6 +214,26 @@ const ClientDashboard = () => {
             )}
           </div>
         </>
+      ) : activeTab === "chats" ? (
+        <div className="text-center py-12 ios-card mx-4 mt-4">
+          <p className="text-muted-foreground mb-4">Le chat si aprono in una pagina dedicata</p>
+          <button
+            onClick={() => navigate("/chats")}
+            className="text-primary hover:underline"
+          >
+            Vai alle Chat
+          </button>
+        </div>
+      ) : activeTab === "profile" ? (
+        <div className="text-center py-12 ios-card mx-4 mt-4">
+          <p className="text-muted-foreground mb-4">Il profilo si apre in una pagina dedicata</p>
+          <button
+            onClick={() => navigate("/profile")}
+            className="text-primary hover:underline"
+          >
+            Vai al Profilo
+          </button>
+        </div>
       ) : (
         <>
           {/* Category Carousel */}
@@ -253,6 +273,15 @@ const ClientDashboard = () => {
             <span className="text-xs font-medium">Social</span>
           </button>
           <button
+            onClick={() => setActiveTab("chats")}
+            className={`flex flex-col items-center gap-1 transition-colors ${
+              activeTab === "chats" ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            <MessageCircle className="w-6 h-6" />
+            <span className="text-xs font-medium">Chat</span>
+          </button>
+          <button
             onClick={() => setActiveTab("partners")}
             className={`flex flex-col items-center gap-1 transition-colors ${
               activeTab === "partners" ? "text-primary" : "text-muted-foreground"
@@ -260,6 +289,15 @@ const ClientDashboard = () => {
           >
             <Home className="w-6 h-6" />
             <span className="text-xs font-medium">Partner</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("profile")}
+            className={`flex flex-col items-center gap-1 transition-colors ${
+              activeTab === "profile" ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            <UserCircle className="w-6 h-6" />
+            <span className="text-xs font-medium">Profilo</span>
           </button>
         </div>
       </div>

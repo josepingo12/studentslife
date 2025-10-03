@@ -13,6 +13,9 @@ import ClientDashboard from "./pages/ClientDashboard";
 import PartnerDetails from "./pages/PartnerDetails";
 import PartnerDashboard from "./pages/PartnerDashboard";
 import Social from "./pages/Social";
+import Chats from "./pages/Chats";
+import ChatConversation from "./pages/ChatConversation";
+import UserProfile from "./pages/UserProfile";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +35,9 @@ const App = () => (
           <Route path="/partner/:id" element={<PartnerDetails />} />
           <Route path="/partner-dashboard" element={<PartnerDashboard />} />
           <Route path="/social" element={<Social />} />
+          <Route path="/chats" element={<Chats />} />
+          <Route path="/chat/:conversationId" element={<ChatConversation />} />
+          <Route path="/profile/:userId?" element={<UserProfile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
