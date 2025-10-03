@@ -102,7 +102,8 @@
     "back": "Zurück",
     "next": "Weiter",
     "upload": "Hochladen",
-    "search": "Suchen"
+    "search": "Suchen",
+    "user": "Benutzer"
   },
   "errors": {
     "fillAllFields": "Fülle alle Felder aus",

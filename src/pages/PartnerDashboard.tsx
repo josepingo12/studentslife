@@ -237,15 +237,15 @@ const PartnerDashboard = () => {
             <div className="px-4">
               {/* Switch Back Button */}
               <div className="mb-4 flex justify-center">
-                <Button
-                  onClick={() => setProfileView("social")}
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                >
-                  <ArrowLeftRight className="w-4 h-4" />
-                  Profilo Social
-                </Button>
+          <Button
+            onClick={() => setProfileView("social")}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+          >
+            <ArrowLeftRight className="w-4 h-4" />
+            {t('profile.socialProfile')}
+          </Button>
               </div>
               <PartnerProfileEdit profile={profile} onUpdate={checkAuth} />
             </div>

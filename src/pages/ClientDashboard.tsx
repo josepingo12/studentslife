@@ -17,10 +17,12 @@ import UploadSheet from "@/components/shared/UploadSheet";
 import NotificationBadge from "@/components/chat/NotificationBadge";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import ChatsList from "@/components/chat/ChatsList";
+import { useTranslation } from "react-i18next";
 
 const ClientDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -161,8 +163,8 @@ const ClientDashboard = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast({
-      title: "Disconnesso",
-      description: "Logout effettuato con successo",
+      title: t('auth.logout'),
+      description: t('success.loggedOut'),
     });
     navigate("/login");
   };
@@ -172,7 +174,7 @@ const ClientDashboard = () => {
       <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Caricamento...</p>
+          <p className="text-muted-foreground">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -189,7 +191,7 @@ const ClientDashboard = () => {
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
               <Input
                 type="text"
-                placeholder="Cerca utenti..."
+                placeholder={t('common.search')}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="pl-10 pr-10 border-none bg-transparent focus-visible:ring-0"
@@ -207,9 +209,9 @@ const ClientDashboard = () => {
               {searchQuery && (
                 <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-lg shadow-lg border border-border z-50 max-h-80 overflow-y-auto">
                   {searching ? (
-                    <p className="text-sm text-muted-foreground text-center py-6">Ricerca...</p>
+                    <p className="text-sm text-muted-foreground text-center py-6">{t('common.loading')}</p>
                   ) : searchResults.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-6">Nessun utente trovato</p>
+                    <p className="text-sm text-muted-foreground text-center py-6">{t('common.search')}</p>
                   ) : (
                     <div className="py-2">
                       {searchResults.map((result) => (
@@ -265,7 +267,7 @@ const ClientDashboard = () => {
               </div>
             ) : posts.length === 0 ? (
               <div className="text-center py-12 ios-card">
-                <p className="text-muted-foreground">Nessun post ancora. Sii il primo a postare!</p>
+                <p className="text-muted-foreground">{t('post.noPosts')}</p>
               </div>
             ) : (
               posts.map((post) => (
@@ -293,14 +295,14 @@ const ClientDashboard = () => {
 
           {/* Category Carousel */}
           <div className="mt-6 px-4">
-            <h3 className="text-xl font-bold mb-4">Categorie</h3>
+            <h3 className="text-xl font-bold mb-4">{t('partner.category')}</h3>
             <CategoryCarousel onSelectCategory={setSelectedCategory} />
           </div>
 
           {/* Partners List */}
           {selectedCategory && (
             <div className="mt-6">
-              <h3 className="text-xl font-bold mb-4 px-4">Partner disponibili</h3>
+              <h3 className="text-xl font-bold mb-4 px-4">{t('navigation.partners')}</h3>
               <div className="px-4">
                 <PartnersList category={selectedCategory} />
               </div>
@@ -310,7 +312,7 @@ const ClientDashboard = () => {
           {!selectedCategory && (
             <div className="mt-12 text-center px-4">
               <p className="text-muted-foreground">
-                Seleziona una categoria per vedere i partner disponibili
+                {t('partner.category')}
               </p>
             </div>
           )}
@@ -327,7 +329,7 @@ const ClientDashboard = () => {
             }`}
           >
             <Users className="w-6 h-6" />
-            <span className="text-xs font-medium">Social</span>
+            <span className="text-xs font-medium">{t('navigation.social')}</span>
           </button>
           
           <button
@@ -337,7 +339,7 @@ const ClientDashboard = () => {
             }`}
           >
             <Home className="w-6 h-6" />
-            <span className="text-xs font-medium">Partner</span>
+            <span className="text-xs font-medium">{t('navigation.partners')}</span>
           </button>
 
           {/* Central Upload Button */}
@@ -358,7 +360,7 @@ const ClientDashboard = () => {
               <MessageCircle className="w-6 h-6" />
               <NotificationBadge count={totalUnread} />
             </div>
-            <span className="text-xs font-medium">Chat</span>
+            <span className="text-xs font-medium">{t('navigation.chat')}</span>
           </button>
           
           <button
@@ -366,7 +368,7 @@ const ClientDashboard = () => {
             className="flex flex-col items-center gap-1 transition-colors text-muted-foreground"
           >
             <UserCircle className="w-6 h-6" />
-            <span className="text-xs font-medium">Profilo</span>
+            <span className="text-xs font-medium">{t('navigation.profile')}</span>
           </button>
         </div>
       </div>

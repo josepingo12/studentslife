@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import PostDetailModal from "@/components/social/PostDetailModal";
 import UploadSheet from "@/components/shared/UploadSheet";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "react-i18next";
 
 interface PartnerSocialProfileProps {
   profile: any;
@@ -18,6 +19,7 @@ interface PartnerSocialProfileProps {
 
 const PartnerSocialProfile = ({ profile, userId, onUpdate, onSwitchToBusiness }: PartnerSocialProfileProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [posts, setPosts] = useState<any[]>([]);
   const [savedPosts, setSavedPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,9 +52,9 @@ const PartnerSocialProfile = ({ profile, userId, onUpdate, onSwitchToBusiness }:
 
       setIsEditingBio(false);
       onUpdate();
-      toast({ title: "Bio aggiornata" });
+      toast({ title: t('success.profileUpdated') });
     } catch (error: any) {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
+      toast({ title: t('common.error'), description: error.message, variant: "destructive" });
     }
   };
 
@@ -83,9 +85,9 @@ const PartnerSocialProfile = ({ profile, userId, onUpdate, onSwitchToBusiness }:
 
       setCoverImage(publicUrl);
       onUpdate();
-      toast({ title: "Copertina aggiornata" });
+      toast({ title: t('success.profileUpdated') });
     } catch (error: any) {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
+      toast({ title: t('common.error'), description: error.message, variant: "destructive" });
     }
   };
 
@@ -115,9 +117,9 @@ const PartnerSocialProfile = ({ profile, userId, onUpdate, onSwitchToBusiness }:
       if (updateError) throw updateError;
 
       onUpdate();
-      toast({ title: "Immagine profilo aggiornata" });
+      toast({ title: t('success.profileUpdated') });
     } catch (error: any) {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
+      toast({ title: t('common.error'), description: error.message, variant: "destructive" });
     }
   };
 
@@ -254,17 +256,17 @@ const PartnerSocialProfile = ({ profile, userId, onUpdate, onSwitchToBusiness }:
                 <Textarea
                   value={bioText}
                   onChange={(e) => setBioText(e.target.value)}
-                  placeholder="Scrivi qualcosa su di te..."
+                  placeholder={t('profile.bio')}
                   className="resize-none text-sm"
                   rows={3}
                   maxLength={150}
                 />
                 <div className="flex gap-2">
-                  <Button size="sm" onClick={handleBioSave}>Salva</Button>
+                  <Button size="sm" onClick={handleBioSave}>{t('profile.saveBio')}</Button>
                   <Button size="sm" variant="outline" onClick={() => {
                     setIsEditingBio(false);
                     setBioText(profile?.business_description || "");
-                  }}>Annulla</Button>
+                  }}>{t('profile.cancel')}</Button>
                 </div>
               </div>
             ) : (
@@ -272,7 +274,7 @@ const PartnerSocialProfile = ({ profile, userId, onUpdate, onSwitchToBusiness }:
                 {profile?.business_description ? (
                   <p className="text-sm text-foreground/80 leading-relaxed">{profile.business_description}</p>
                 ) : (
-                  <p className="text-xs text-muted-foreground italic">Aggiungi una bio al tuo profilo</p>
+                  <p className="text-xs text-muted-foreground italic">{t('profile.editBio')}</p>
                 )}
                 <button
                   onClick={() => setIsEditingBio(true)}
@@ -293,7 +295,7 @@ const PartnerSocialProfile = ({ profile, userId, onUpdate, onSwitchToBusiness }:
               className="gap-2"
             >
               <Edit2 className="w-4 h-4" />
-              Profilo Aziendale
+              {t('profile.businessProfile')}
             </Button>
           </div>
 
@@ -301,15 +303,15 @@ const PartnerSocialProfile = ({ profile, userId, onUpdate, onSwitchToBusiness }:
           <div className="flex justify-center gap-8 py-4 border-y border-border/50 mb-4">
             <div className="text-center">
               <p className="text-xl font-bold">{posts.length}</p>
-              <p className="text-xs text-muted-foreground">Post</p>
+              <p className="text-xs text-muted-foreground">{t('profile.posts')}</p>
             </div>
             <div className="text-center">
               <p className="text-xl font-bold">{totalLikes}</p>
-              <p className="text-xs text-muted-foreground">Mi piace</p>
+              <p className="text-xs text-muted-foreground">{t('profile.likes')}</p>
             </div>
             <div className="text-center">
               <p className="text-xl font-bold">{totalViews}</p>
-              <p className="text-xs text-muted-foreground">Visualizzazioni</p>
+              <p className="text-xs text-muted-foreground">{t('profile.views')}</p>
             </div>
           </div>
         </div>
@@ -320,17 +322,17 @@ const PartnerSocialProfile = ({ profile, userId, onUpdate, onSwitchToBusiness }:
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="px-4">
           <TabsList className="grid grid-cols-2 w-full">
             <TabsTrigger value="posts" className="gap-2">
-              Post
+              {t('profile.posts')}
             </TabsTrigger>
             <TabsTrigger value="saved" className="gap-2">
-              Post salvati
+              {t('profile.savedPosts')}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="posts" className="mt-4">
             {posts.length === 0 ? (
               <div className="text-center py-12 ios-card">
-                <p className="text-muted-foreground">Nessun post ancora</p>
+                <p className="text-muted-foreground">{t('post.noPosts')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-1">
@@ -365,7 +367,7 @@ const PartnerSocialProfile = ({ profile, userId, onUpdate, onSwitchToBusiness }:
           <TabsContent value="saved" className="mt-4">
             {savedPosts.length === 0 ? (
               <div className="text-center py-12 ios-card">
-                <p className="text-muted-foreground">Nessun post salvato ancora</p>
+                <p className="text-muted-foreground">{t('post.noPosts')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-1">

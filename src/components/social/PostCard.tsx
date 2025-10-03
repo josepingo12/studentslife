@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, Bookmark, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
-import { it } from "date-fns/locale";
+import { it, enUS, es, fr, de } from "date-fns/locale";
 import CommentsSheet from "./CommentsSheet";
 import ImageViewer from "./ImageViewer";
+import { useTranslation } from "react-i18next";
 
 interface PostCardProps {
   post: any;
@@ -20,6 +21,7 @@ interface PostCardProps {
 const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
@@ -81,7 +83,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
       }
     } catch (error: any) {
       toast({
-        title: "Errore",
+        title: t('common.error'),
         description: error.message,
         variant: "destructive",
       });
@@ -91,7 +93,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
   };
 
   const handleDelete = async () => {
-    if (!confirm("Sei sicuro di voler eliminare questo post?")) return;
+    if (!confirm(t('post.delete') + "?")) return;
 
     setLoading(true);
     try {
@@ -103,14 +105,14 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
       if (error) throw error;
 
       toast({
-        title: "Post eliminato",
-        description: "Il post è stato eliminato con successo",
+        title: t('success.postDeleted'),
+        description: t('success.postDeleted'),
       });
 
       onDelete(post.id);
     } catch (error: any) {
       toast({
-        title: "Errore",
+        title: t('common.error'),
         description: error.message,
         variant: "destructive",
       });
@@ -132,7 +134,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
         if (error) throw error;
         setIsSaved(false);
         toast({
-          title: "Post rimosso dai salvati",
+          title: t('success.postDeleted'),
         });
       } else {
         const { error } = await supabase
@@ -145,12 +147,12 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
         if (error) throw error;
         setIsSaved(true);
         toast({
-          title: "Post salvato",
+          title: t('success.postCreated'),
         });
       }
     } catch (error: any) {
       toast({
-        title: "Errore",
+        title: t('common.error'),
         description: error.message,
         variant: "destructive",
       });
@@ -161,7 +163,17 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
 
   const displayName = post.public_profiles?.first_name 
     ? `${post.public_profiles.first_name} ${post.public_profiles.last_name || ''}`.trim()
-    : post.public_profiles?.business_name || "Utente";
+    : post.public_profiles?.business_name || t('common.user');
+
+  const getDateLocale = () => {
+    switch (i18n.language) {
+      case 'en': return enUS;
+      case 'es': return es;
+      case 'fr': return fr;
+      case 'de': return de;
+      default: return it;
+    }
+  };
 
   return (
     <div className="ios-card overflow-hidden">
@@ -180,7 +192,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
           <div>
             <p className="font-semibold">{displayName}</p>
             <p className="text-xs text-muted-foreground">
-              {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: it })}
+              {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: getDateLocale() })}
             </p>
           </div>
         </button>
@@ -221,11 +233,11 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
       {/* Stats */}
       <div className="px-4 py-2 border-t border-border flex items-center gap-4">
         <p className="text-sm text-muted-foreground">
-          {likesCount} {likesCount === 1 ? "like" : "likes"}
+          {likesCount} {t('profile.likes').toLowerCase()}
         </p>
         {commentsCount > 0 && (
           <p className="text-sm text-muted-foreground">
-            {commentsCount} {commentsCount === 1 ? "commento" : "commenti"}
+            {commentsCount} {t('post.comments').toLowerCase()}
           </p>
         )}
       </div>
@@ -242,7 +254,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
           <Heart 
             className={`w-5 h-5 ${isLiked ? "fill-red-500 text-red-500" : ""}`}
           />
-          Mi piace
+          {t('post.like')}
         </Button>
         <Button
           variant="ghost"
@@ -251,7 +263,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
           onClick={() => setCommentsOpen(true)}
         >
           <MessageCircle className="w-5 h-5" />
-          Commenta
+          {t('post.comment')}
         </Button>
         <Button
           variant="ghost"
@@ -261,7 +273,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
           disabled={loading}
         >
           <Bookmark className={`w-5 h-5 ${isSaved ? "fill-current" : ""}`} />
-          Salva
+          {t('common.save')}
         </Button>
       </div>
 

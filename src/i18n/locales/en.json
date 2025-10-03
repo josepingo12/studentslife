@@ -102,7 +102,8 @@
     "back": "Back",
     "next": "Next",
     "upload": "Upload",
-    "search": "Search"
+    "search": "Search",
+    "user": "User"
   },
   "errors": {
     "fillAllFields": "Fill in all fields",

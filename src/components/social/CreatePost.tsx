@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Send, X, Image as ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageUpload from "@/components/shared/ImageUpload";
+import { useTranslation } from "react-i18next";
 
 interface CreatePostProps {
   userId: string;
@@ -15,6 +16,7 @@ interface CreatePostProps {
 
 const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -25,8 +27,8 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
     
     if (!content.trim() && !imageUrl) {
       toast({
-        title: "Errore",
-        description: "Scrivi qualcosa o aggiungi un'immagine",
+        title: t('common.error'),
+        description: t('errors.fillAllFields'),
         variant: "destructive",
       });
       return;
@@ -46,8 +48,8 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
       if (error) throw error;
 
       toast({
-        title: "Post pubblicato!",
-        description: "Il tuo post è stato condiviso con successo",
+        title: t('success.postCreated'),
+        description: t('success.postCreated'),
       });
 
       setContent("");
@@ -56,7 +58,7 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
       onPostCreated();
     } catch (error: any) {
       toast({
-        title: "Errore",
+        title: t('common.error'),
         description: error.message,
         variant: "destructive",
       });
@@ -75,7 +77,7 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
           </AvatarFallback>
         </Avatar>
         <Textarea
-          placeholder="Cosa stai pensando?"
+          placeholder={t('post.whatsOnYourMind')}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           className="min-h-[80px] resize-none"
@@ -122,7 +124,7 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
           disabled={loading || !!imageUrl}
         >
           <ImageIcon className="w-4 h-4" />
-          {showImageUpload ? "Nascondi" : "Aggiungi foto"}
+          {showImageUpload ? t('common.cancel') : t('common.upload')}
         </Button>
         <Button
           type="submit"
@@ -130,7 +132,7 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
           className="gap-2"
           disabled={loading || (!content.trim() && !imageUrl)}
         >
-          {loading ? "Pubblicazione..." : "Pubblica"}
+          {loading ? t('settings.saving') : t('post.publish')}
           <Send className="w-4 h-4" />
         </Button>
       </div>
