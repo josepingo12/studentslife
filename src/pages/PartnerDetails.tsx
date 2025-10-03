@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, MapPin, Phone, Star, Calendar, Percent } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import PartnerGallery from "@/components/client/PartnerGallery";
 import PartnerEvents from "@/components/client/PartnerEvents";
 import PartnerReviews from "@/components/client/PartnerReviews";
@@ -13,6 +14,7 @@ const PartnerDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [partner, setPartner] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -48,8 +50,8 @@ const PartnerDetails = () => {
 
     if (error) {
       toast({
-        title: "Errore",
-        description: "Impossibile caricare i dettagli del partner",
+        title: t("common.error"),
+        description: t("errors.fillAllFields"),
         variant: "destructive",
       });
       navigate("/client-dashboard");
@@ -75,7 +77,7 @@ const PartnerDetails = () => {
       <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Caricamento...</p>
+          <p className="text-muted-foreground">{t("common.loading")}</p>
         </div>
       </div>
     );
@@ -92,7 +94,7 @@ const PartnerDetails = () => {
           className="flex items-center gap-2 text-primary hover:opacity-80 transition-opacity mb-4"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span className="font-semibold">Indietro</span>
+          <span className="font-semibold">{t("partner.back")}</span>
         </button>
 
         <div className="flex gap-4 items-start">
@@ -110,7 +112,7 @@ const PartnerDetails = () => {
               <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
               <span className="font-bold text-lg">{partner.avgRating}</span>
               <span className="text-sm text-muted-foreground">
-                ({partner.reviewCount} recensioni)
+                ({partner.reviewCount} {t("partner.reviews").toLowerCase()})
               </span>
             </div>
 
@@ -144,19 +146,19 @@ const PartnerDetails = () => {
 
       {/* Gallery */}
       <div className="mt-6 px-4">
-        <h2 className="text-xl font-bold mb-4">Gallery</h2>
+        <h2 className="text-xl font-bold mb-4">{t("partner.gallery")}</h2>
         <PartnerGallery partnerId={id!} />
       </div>
 
       {/* Events */}
       <div className="mt-6 px-4">
-        <h2 className="text-xl font-bold mb-4">Eventi in Programma</h2>
+        <h2 className="text-xl font-bold mb-4">{t("partner.upcomingEvents")}</h2>
         <PartnerEvents partnerId={id!} />
       </div>
 
       {/* Map */}
       <div className="mt-6 px-4">
-        <h2 className="text-xl font-bold mb-4">Posizione</h2>
+        <h2 className="text-xl font-bold mb-4">{t("partner.location")}</h2>
         <div className="ios-card p-4">
           <div className="aspect-video bg-muted rounded-xl overflow-hidden">
             <iframe
@@ -182,7 +184,7 @@ const PartnerDetails = () => {
                 window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
               }}
             >
-              Apri in Maps
+              {t("partner.openInMaps")}
             </Button>
           </div>
         </div>
@@ -190,7 +192,7 @@ const PartnerDetails = () => {
 
       {/* Reviews */}
       <div className="mt-6 px-4">
-        <h2 className="text-xl font-bold mb-4">Recensioni</h2>
+        <h2 className="text-xl font-bold mb-4">{t("partner.reviews")}</h2>
         <PartnerReviews partnerId={id!} reviews={partner.reviews || []} onReviewAdded={fetchPartnerDetails} />
       </div>
     </div>

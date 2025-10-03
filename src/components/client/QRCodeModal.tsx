@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { QrCode, CheckCircle2, XCircle, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import QRCodeLib from "qrcode";
 import { Filesystem, Directory } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
@@ -16,6 +17,7 @@ interface QRCodeModalProps {
 
 const QRCodeModal = ({ event, open, onClose }: QRCodeModalProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [downloading, setDownloading] = useState(false);
 
@@ -30,7 +32,7 @@ const QRCodeModal = ({ event, open, onClose }: QRCodeModalProps) => {
     
     try {
       await QRCodeLib.toCanvas(canvasRef.current, event.qrCode.code, {
-        width: 400,
+        width: 300,
         margin: 2,
         color: {
           dark: "#000000",
@@ -71,8 +73,8 @@ const QRCodeModal = ({ event, open, onClose }: QRCodeModalProps) => {
         });
 
         toast({
-          title: "QR Code salvato",
-          description: "Il QR code è stato salvato sul tuo dispositivo",
+          title: t("events.qrCodeSaved"),
+          description: t("events.qrCodeSaved"),
         });
       } else {
         // Web: download normale
@@ -84,15 +86,15 @@ const QRCodeModal = ({ event, open, onClose }: QRCodeModalProps) => {
         document.body.removeChild(link);
 
         toast({
-          title: "QR Code scaricato",
-          description: "Il QR code è stato scaricato",
+          title: t("events.qrCodeDownloaded"),
+          description: t("events.qrCodeDownloaded"),
         });
       }
     } catch (err) {
       console.error("Errore download QR:", err);
       toast({
-        title: "Errore",
-        description: "Impossibile salvare il QR code",
+        title: t("common.error"),
+        description: t("events.errorSaving"),
         variant: "destructive",
       });
     } finally {
@@ -111,10 +113,11 @@ const QRCodeModal = ({ event, open, onClose }: QRCodeModalProps) => {
 
         <div className="space-y-6">
           {/* QR Code Display */}
-          <div className="bg-white p-4 rounded-2xl">
+          <div className="bg-white p-6 rounded-2xl flex flex-col items-center">
             <canvas
               ref={canvasRef}
-              className="w-full h-auto rounded-xl"
+              className="w-full max-w-[300px] h-auto"
+              style={{ display: 'block' }}
             />
             <p className="text-center mt-4 text-lg font-bold font-mono tracking-wider">
               {event.qrCode.code}
@@ -129,7 +132,7 @@ const QRCodeModal = ({ event, open, onClose }: QRCodeModalProps) => {
               className="w-full ios-button h-12"
             >
               <Download className="w-5 h-5 mr-2" />
-              {downloading ? "Salvataggio..." : "Salva QR Code"}
+              {downloading ? t("events.saving") : t("events.saveQRCode")}
             </Button>
           )}
 
@@ -142,9 +145,9 @@ const QRCodeModal = ({ event, open, onClose }: QRCodeModalProps) => {
               <>
                 <XCircle className="w-6 h-6 text-destructive" />
                 <div>
-                  <p className="font-semibold text-destructive">QR Code già utilizzato</p>
+                  <p className="font-semibold text-destructive">{t("events.qrCodeUsed")}</p>
                   <p className="text-sm text-muted-foreground">
-                    Utilizzato il {new Date(event.qrCode.used_at).toLocaleString("it-IT")}
+                    {t("events.usedOn")} {new Date(event.qrCode.used_at).toLocaleString()}
                   </p>
                 </div>
               </>
@@ -152,9 +155,9 @@ const QRCodeModal = ({ event, open, onClose }: QRCodeModalProps) => {
               <>
                 <CheckCircle2 className="w-6 h-6 text-primary" />
                 <div>
-                  <p className="font-semibold text-primary">QR Code valido</p>
+                  <p className="font-semibold text-primary">{t("events.qrCodeValid")}</p>
                   <p className="text-sm text-muted-foreground">
-                    Mostra questo codice al partner per utilizzare l'offerta
+                    {t("events.showToPartner")}
                   </p>
                 </div>
               </>
@@ -163,7 +166,7 @@ const QRCodeModal = ({ event, open, onClose }: QRCodeModalProps) => {
 
           {/* Event Details */}
           <div className="text-center text-sm text-muted-foreground">
-            <p>Questo QR code può essere utilizzato una sola volta</p>
+            <p>{t("events.oneTimeUse")}</p>
           </div>
         </div>
       </DialogContent>

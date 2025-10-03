@@ -99,7 +99,12 @@
     "businessDescription": "Descripción",
     "address": "Dirección",
     "phone": "Teléfono",
-    "category": "Categoría"
+    "category": "Categoría",
+    "location": "Ubicación",
+    "upcomingEvents": "Eventos Próximos",
+    "openInMaps": "Abrir en Mapas",
+    "back": "Atrás",
+    "avgRating": "Valoración media"
   },
   "events": {
     "title": "Eventos",
@@ -110,7 +115,17 @@
     "endDate": "Fecha de Fin",
     "discount": "Descuento",
     "active": "Activo",
-    "noEvents": "No hay eventos disponibles"
+    "noEvents": "No hay eventos disponibles",
+    "qrCodeValid": "Código QR válido",
+    "qrCodeUsed": "Código QR ya utilizado",
+    "usedOn": "Utilizado el",
+    "showToPartner": "Muestra este código al socio para usar la oferta",
+    "oneTimeUse": "Este código QR se puede usar solo una vez",
+    "saveQRCode": "Guardar código QR",
+    "saving": "Guardando...",
+    "qrCodeSaved": "Código QR guardado",
+    "qrCodeDownloaded": "Código QR descargado",
+    "errorSaving": "No se pudo guardar el código QR"
   },
   "common": {
     "save": "Guardar",
