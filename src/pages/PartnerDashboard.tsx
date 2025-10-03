@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Home, QrCode, BarChart3, UserCircle, Users, Plus, Calendar, Image as ImageIcon, MessageCircle, ArrowLeftRight } from "lucide-react";
+import { Home, QrCode, BarChart3, UserCircle, Users, Plus, Calendar, Image as ImageIcon, MessageCircle, ArrowLeftRight, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PartnerGalleryManager from "@/components/partner/PartnerGalleryManager";
 import PartnerEventsManager from "@/components/partner/PartnerEventsManager";
@@ -16,6 +16,7 @@ import PostCard from "@/components/social/PostCard";
 import UploadSheet from "@/components/shared/UploadSheet";
 import NotificationBadge from "@/components/chat/NotificationBadge";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import SettingsSheet from "@/components/partner/SettingsSheet";
 
 const PartnerDashboard = () => {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ const PartnerDashboard = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
+  const [settingsSheetOpen, setSettingsSheetOpen] = useState(false);
   const totalUnread = useUnreadMessages(user?.id);
 
   useEffect(() => {
@@ -209,6 +211,18 @@ const PartnerDashboard = () => {
         </div>
       ) : (
         <div className="mt-4">
+          {/* Settings Icon */}
+          <div className="px-4 mb-4 flex justify-end">
+            <Button
+              onClick={() => setSettingsSheetOpen(true)}
+              variant="ghost"
+              size="icon"
+              className="rounded-full"
+            >
+              <Settings className="w-5 h-5" />
+            </Button>
+          </div>
+
           {/* Profile Content */}
           {profileView === "social" ? (
             <PartnerSocialProfile 
@@ -311,6 +325,12 @@ const PartnerDashboard = () => {
             loadPosts();
           }
         }}
+      />
+
+      {/* Settings Sheet */}
+      <SettingsSheet
+        open={settingsSheetOpen}
+        onOpenChange={setSettingsSheetOpen}
       />
     </div>
   );
