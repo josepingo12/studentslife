@@ -11,6 +11,7 @@ import UploadSheet from "@/components/shared/UploadSheet";
 import { Textarea } from "@/components/ui/textarea";
 import SettingsSheet from "@/components/partner/SettingsSheet";
 import { useTranslation } from "react-i18next";
+import LikesSheet from "@/components/social/LikesSheet";
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ const UserProfile = () => {
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [bioText, setBioText] = useState("");
   const [settingsSheetOpen, setSettingsSheetOpen] = useState(false);
+  const [likesSheetOpen, setLikesSheetOpen] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -417,10 +419,13 @@ const UserProfile = () => {
               <p className="text-xl font-bold">{posts.length}</p>
               <p className="text-xs text-muted-foreground">{t('profile.posts')}</p>
             </div>
-            <div className="text-center">
+            <button 
+              onClick={() => setLikesSheetOpen(true)}
+              className="text-center hover:opacity-80 transition-opacity"
+            >
               <p className="text-xl font-bold">{totalLikes}</p>
               <p className="text-xs text-muted-foreground">{t('profile.likes')}</p>
-            </div>
+            </button>
             <div className="text-center">
               <p className="text-xl font-bold">{totalViews}</p>
               <p className="text-xs text-muted-foreground">{t('profile.views')}</p>
@@ -535,6 +540,13 @@ const UserProfile = () => {
         onOpenChange={setPostDetailOpen}
         post={selectedPost}
         currentUserId={currentUser?.id || ""}
+      />
+
+      {/* Likes Sheet */}
+      <LikesSheet
+        open={likesSheetOpen}
+        onOpenChange={setLikesSheetOpen}
+        postIds={posts.map(p => p.id)}
       />
 
       {/* Bottom Navigation */}

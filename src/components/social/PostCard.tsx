@@ -9,6 +9,7 @@ import { formatDistanceToNow } from "date-fns";
 import { it, enUS, es, fr, de } from "date-fns/locale";
 import CommentsSheet from "./CommentsSheet";
 import ImageViewer from "./ImageViewer";
+import LikesSheet from "./LikesSheet";
 import { useTranslation } from "react-i18next";
 
 interface PostCardProps {
@@ -25,6 +26,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
   const [loading, setLoading] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
+  const [likesSheetOpen, setLikesSheetOpen] = useState(false);
   const [commentsCount, setCommentsCount] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
 
@@ -232,9 +234,12 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
 
       {/* Stats */}
       <div className="px-4 py-2 border-t border-border flex items-center gap-4">
-        <p className="text-sm text-muted-foreground">
+        <button 
+          onClick={() => setLikesSheetOpen(true)}
+          className="text-sm font-semibold hover:text-primary transition-colors"
+        >
           {likesCount} {t('profile.likes').toLowerCase()}
-        </p>
+        </button>
         {commentsCount > 0 && (
           <p className="text-sm text-muted-foreground">
             {commentsCount} {t('post.comments').toLowerCase()}
@@ -296,6 +301,13 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
           imageUrl={post.image_url}
         />
       )}
+
+      {/* Likes Sheet */}
+      <LikesSheet
+        open={likesSheetOpen}
+        onOpenChange={setLikesSheetOpen}
+        postId={post.id}
+      />
     </div>
   );
 };

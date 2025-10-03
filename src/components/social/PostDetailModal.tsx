@@ -6,6 +6,7 @@ import { Heart, MessageCircle, Eye, X, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import CommentsSheet from "./CommentsSheet";
+import LikesSheet from "./LikesSheet";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,6 +31,7 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
+  const [likesSheetOpen, setLikesSheetOpen] = useState(false);
 
   useEffect(() => {
     if (open && post) {
@@ -228,10 +230,13 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
 
               {/* Stats */}
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
+                <button 
+                  onClick={() => setLikesSheetOpen(true)}
+                  className="flex items-center gap-1.5 hover:text-primary transition-colors"
+                >
                   <Heart className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-medium">{likesCount}</span>
-                </div>
+                  <span className="text-sm font-semibold">{likesCount}</span>
+                </button>
                 <div className="flex items-center gap-1.5">
                   <MessageCircle className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium">{commentsCount}</span>
@@ -319,6 +324,13 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
           </div>
         </div>
       </DialogContent>
+
+      {/* Likes Sheet */}
+      <LikesSheet
+        open={likesSheetOpen}
+        onOpenChange={setLikesSheetOpen}
+        postId={post?.id}
+      />
     </Dialog>
   );
 };
