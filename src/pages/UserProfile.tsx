@@ -40,6 +40,18 @@ const UserProfile = () => {
     checkAuth();
   }, [userId]);
 
+  // Refresh data when page becomes visible (e.g., returning from Social)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && currentUser) {
+        loadUserContent(userId || currentUser.id);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [currentUser, userId]);
+
   const checkAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     
