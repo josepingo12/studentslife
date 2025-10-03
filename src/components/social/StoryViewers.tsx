@@ -39,21 +39,29 @@ const StoryViewers = ({ storyId, open, onOpenChange }: StoryViewersProps) => {
     setLoading(true);
     const { data } = await supabase
       .from("story_views")
-      .select(`
-        id,
-        viewer_id,
-        viewed_at,
-        profiles!story_views_viewer_id_fkey(
-          first_name,
-          last_name,
-          business_name,
-          profile_image_url
-        )
-      `)
+      .select("id, viewer_id, viewed_at")
       .eq("story_id", storyId)
       .order("viewed_at", { ascending: false });
 
-    setViewers(data || []);
+    if (data) {
+      // Load profiles separately
+      const viewersWithProfiles = await Promise.all(
+        data.map(async (view) => {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("first_name, last_name, business_name, profile_image_url")
+            .eq("id", view.viewer_id)
+            .single();
+
+          return {
+            ...view,
+            profiles: profile || {}
+          };
+        })
+      );
+      
+      setViewers(viewersWithProfiles);
+    }
     setLoading(false);
   };
 

@@ -101,6 +101,7 @@ const StoriesCarousel = ({ currentUserId }: StoriesCarouselProps) => {
       {selectedStory && (
         <StoryViewer
           storyGroup={selectedStory}
+          currentUserId={currentUserId}
           onClose={() => setSelectedStory(null)}
         />
       )}

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { X, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import StoryViewers from "./StoryViewers";
 
 interface StoryViewerProps {
   storyGroup: {
@@ -8,12 +10,16 @@ interface StoryViewerProps {
     profile: any;
     stories: any[];
   };
+  currentUserId: string;
   onClose: () => void;
 }
 
-const StoryViewer = ({ storyGroup, onClose }: StoryViewerProps) => {
+const StoryViewer = ({ storyGroup, currentUserId, onClose }: StoryViewerProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [viewersOpen, setViewersOpen] = useState(false);
+  const [viewsCount, setViewsCount] = useState(0);
+  const isOwnStory = storyGroup.user_id === currentUserId;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -33,6 +39,38 @@ const StoryViewer = ({ storyGroup, onClose }: StoryViewerProps) => {
 
     return () => clearInterval(timer);
   }, [currentIndex, storyGroup.stories.length, onClose]);
+
+  useEffect(() => {
+    const currentStory = storyGroup.stories[currentIndex];
+    if (currentStory && !isOwnStory) {
+      trackView(currentStory.id);
+    }
+    if (currentStory) {
+      loadViewsCount(currentStory.id);
+    }
+  }, [currentIndex, isOwnStory]);
+
+  const trackView = async (storyId: string) => {
+    try {
+      await supabase
+        .from("story_views")
+        .upsert(
+          { story_id: storyId, viewer_id: currentUserId },
+          { onConflict: "story_id,viewer_id" }
+        );
+    } catch (error) {
+      console.error("Error tracking story view:", error);
+    }
+  };
+
+  const loadViewsCount = async (storyId: string) => {
+    const { count } = await supabase
+      .from("story_views")
+      .select("*", { count: "exact", head: true })
+      .eq("story_id", storyId);
+    
+    setViewsCount(count || 0);
+  };
 
   const handleNext = () => {
     if (currentIndex < storyGroup.stories.length - 1) {
@@ -77,14 +115,28 @@ const StoryViewer = ({ storyGroup, onClose }: StoryViewerProps) => {
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary" />
           <span className="font-semibold">{displayName}</span>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          className="text-white hover:bg-white/20"
-        >
-          <X className="w-6 h-6" />
-        </Button>
+        
+        <div className="flex items-center gap-2">
+          {isOwnStory && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setViewersOpen(true)}
+              className="text-white hover:bg-white/20 gap-2"
+            >
+              <Eye className="w-4 h-4" />
+              <span className="text-sm">{viewsCount}</span>
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="text-white hover:bg-white/20"
+          >
+            <X className="w-6 h-6" />
+          </Button>
+        </div>
       </div>
 
       {/* Story image */}
@@ -105,6 +157,15 @@ const StoryViewer = ({ storyGroup, onClose }: StoryViewerProps) => {
           onClick={handleNext}
         />
       </div>
+
+      {/* Story Viewers Sheet */}
+      {isOwnStory && (
+        <StoryViewers
+          storyId={currentStory.id}
+          open={viewersOpen}
+          onOpenChange={setViewersOpen}
+        />
+      )}
     </div>
   );
 };
