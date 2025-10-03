@@ -42,12 +42,14 @@ const Login = () => {
         let effectiveRole = role as string | null;
         const { data: profile } = await supabase
           .from("profiles")
-          .select("business_category")
+          .select("business_category, business_name")
           .eq("id", data.user.id)
           .maybeSingle();
 
         if (!roleError && !role) {
-          const inferredRole = profile?.business_category ? "partner" : "client";
+          const inferredRole = (profile?.business_category || profile?.business_name)
+            ? "partner"
+            : "client";
           const { error: insertRoleError } = await supabase
             .from("user_roles")
             .insert({ user_id: data.user.id, role: inferredRole });
@@ -60,8 +62,8 @@ const Login = () => {
             });
           }
         }
-        // Upgrade automatico: se ha business_category ma ruolo client, promuovi a partner
-        if (effectiveRole === "client" && profile?.business_category) {
+        // Upgrade automatico: se ha dati business ma ruolo client, promuovi a partner
+        if (effectiveRole === "client" && (profile?.business_category || profile?.business_name)) {
           const { error: ensurePartnerError } = await supabase
             .from("user_roles")
             .insert({ user_id: data.user.id, role: "partner" });
