@@ -23,7 +23,7 @@ const PartnersList = ({ category }: PartnersListProps) => {
       .from("profiles")
       .select(`
         *,
-        reviews(rating),
+        reviews!reviews_partner_id_fkey(rating),
         gallery(image_url)
       `)
       .eq("business_category", category);
