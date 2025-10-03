@@ -21,6 +21,9 @@ const Login = () => {
     setLoading(true);
 
     try {
+      // Ensure we clear any previous session to avoid stale account mixups
+      await supabase.auth.signOut();
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,

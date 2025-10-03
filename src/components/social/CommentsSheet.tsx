@@ -34,7 +34,7 @@ const CommentsSheet = ({ open, onOpenChange, postId, currentUserId }: CommentsSh
       .from("comments")
       .select(`
         *,
-        profiles!comments_user_id_fkey(first_name, last_name, profile_image_url, business_name)
+        public_profiles!comments_user_id_fkey(first_name, last_name, profile_image_url, business_name)
       `)
       .eq("post_id", postId)
       .order("created_at", { ascending: false });
@@ -116,15 +116,15 @@ const CommentsSheet = ({ open, onOpenChange, postId, currentUserId }: CommentsSh
             comments.map((comment) => (
               <div key={comment.id} className="flex gap-3">
                 <Avatar className="h-10 w-10 flex-shrink-0">
-                  <AvatarImage src={comment.profiles?.profile_image_url} />
+                  <AvatarImage src={comment.public_profiles?.profile_image_url} />
                   <AvatarFallback className="bg-primary text-primary-foreground">
-                    {getDisplayName(comment.profiles)[0]}
+                    {getDisplayName(comment.public_profiles)[0]}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-sm">
-                      {getDisplayName(comment.profiles)}
+                      {getDisplayName(comment.public_profiles)}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(comment.created_at), {
