@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import ImageUploader from "@/components/shared/ImageUploader";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import PartnerGalleryManager from "@/components/partner/PartnerGalleryManager";
 
 interface PartnerProfileEditProps {
   profile: any;
@@ -152,6 +153,15 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
           {loading ? "Salvataggio..." : "Salva Modifiche"}
         </Button>
       </form>
+
+      {/* Gallery Section */}
+      <div className="mt-8">
+        <h2 className="text-xl font-bold mb-4">Galleria Foto</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Le foto della galleria verranno mostrate nella pagina dettagli del tuo profilo
+        </p>
+        <PartnerGalleryManager partnerId={profile.id} />
+      </div>
     </div>
   );
 };
