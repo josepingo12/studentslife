@@ -19,6 +19,7 @@ import UserProfile from "./pages/UserProfile";
 
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminSetup from "./pages/AdminSetup";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -26,7 +27,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename="/studentslife">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/register-client" element={<RegisterClient />} />
