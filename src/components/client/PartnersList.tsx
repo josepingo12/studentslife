@@ -19,21 +19,6 @@ const PartnersList = ({ category }: PartnersListProps) => {
 
     console.log('Fetching partners for category:', category);
 
-    // Get partner user IDs from user_roles
-    const { data: partnerRoles } = await supabase
-      .from("user_roles")
-      .select("user_id")
-      .eq("role", "partner");
-
-    const partnerIds = partnerRoles?.map(r => r.user_id) || [];
-
-    if (partnerIds.length === 0) {
-      setPartners([]);
-      setLoading(false);
-      return;
-    }
-
-    // Fetch profiles matching category and partner role
     const { data, error } = await supabase
       .from("profiles")
       .select(`
@@ -41,8 +26,7 @@ const PartnersList = ({ category }: PartnersListProps) => {
         reviews(rating),
         gallery(image_url)
       `)
-      .eq("business_category", category)
-      .in("id", partnerIds);
+      .eq("business_category", category);
 
     console.log('Partners query result:', { data, error, category });
 
