@@ -19,7 +19,7 @@ const ClientDashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"social" | "partners" | "chats" | "profile">("social");
+  const [activeTab, setActiveTab] = useState<"social" | "partners" | "chats">("social");
   const [posts, setPosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
@@ -194,15 +194,6 @@ const ClientDashboard = () => {
             Vai alle Chat
           </button>
         </div>
-      ) : activeTab === "profile" ? (
-        <div className="ios-card mx-4 mt-4">
-          {/* Profile content will be shown inline */}
-          <iframe 
-            src="/profile" 
-            className="w-full h-[calc(100vh-200px)] border-0"
-            title="Profilo"
-          />
-        </div>
       ) : (
         <>
           {/* Category Carousel */}
@@ -271,10 +262,8 @@ const ClientDashboard = () => {
           </button>
           
           <button
-            onClick={() => setActiveTab("profile")}
-            className={`flex flex-col items-center gap-1 transition-colors ${
-              activeTab === "profile" ? "text-primary" : "text-muted-foreground"
-            }`}
+            onClick={() => navigate("/profile")}
+            className="flex flex-col items-center gap-1 transition-colors text-muted-foreground"
           >
             <UserCircle className="w-6 h-6" />
             <span className="text-xs font-medium">Profilo</span>
