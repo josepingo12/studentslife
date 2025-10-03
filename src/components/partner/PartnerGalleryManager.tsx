@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Trash2, Image as ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ImageUploader from "@/components/shared/ImageUploader";
 
 interface PartnerGalleryManagerProps {
   partnerId: string;
@@ -16,7 +17,7 @@ const PartnerGalleryManager = ({ partnerId }: PartnerGalleryManagerProps) => {
   const [images, setImages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
-  const [imageUrl, setImageUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [caption, setCaption] = useState("");
 
   useEffect(() => {
@@ -36,6 +37,15 @@ const PartnerGalleryManager = ({ partnerId }: PartnerGalleryManagerProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!imageUrl) {
+      toast({
+        title: "Errore",
+        description: "Carica un'immagine prima di salvare",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const { error } = await supabase.from("gallery").insert({
       partner_id: partnerId,
@@ -58,7 +68,7 @@ const PartnerGalleryManager = ({ partnerId }: PartnerGalleryManagerProps) => {
     });
 
     setShowDialog(false);
-    setImageUrl("");
+    setImageUrl(null);
     setCaption("");
     fetchGallery();
   };
@@ -98,18 +108,12 @@ const PartnerGalleryManager = ({ partnerId }: PartnerGalleryManagerProps) => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label>URL Immagine *</Label>
-              <Input
-                type="url"
-                required
-                placeholder="https://..."
-                className="ios-input"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
+              <Label>Carica Immagine *</Label>
+              <ImageUploader
+                bucket="gallery"
+                userId={partnerId}
+                onUploadComplete={setImageUrl}
               />
-              <p className="text-xs text-muted-foreground">
-                Inserisci l'URL di un'immagine online
-              </p>
             </div>
 
             <div className="space-y-2">
@@ -121,24 +125,7 @@ const PartnerGalleryManager = ({ partnerId }: PartnerGalleryManagerProps) => {
               />
             </div>
 
-            {imageUrl && (
-              <div className="aspect-square overflow-hidden rounded-xl">
-                <img
-                  src={imageUrl}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                  onError={() => {
-                    toast({
-                      title: "URL non valido",
-                      description: "L'immagine non può essere caricata",
-                      variant: "destructive",
-                    });
-                  }}
-                />
-              </div>
-            )}
-
-            <Button type="submit" className="w-full ios-button">
+            <Button type="submit" className="w-full ios-button" disabled={!imageUrl}>
               Aggiungi
             </Button>
           </form>

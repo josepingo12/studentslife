@@ -2,10 +2,9 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import ImageUploader from "@/components/shared/ImageUploader";
 
 interface CreateStoryDialogProps {
   open: boolean;
@@ -16,16 +15,16 @@ interface CreateStoryDialogProps {
 
 const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: CreateStoryDialogProps) => {
   const { toast } = useToast();
-  const [imageUrl, setImageUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!imageUrl.trim()) {
+    if (!imageUrl) {
       toast({
         title: "Errore",
-        description: "Inserisci l'URL di un'immagine",
+        description: "Carica un'immagine per la storia",
         variant: "destructive",
       });
       return;
@@ -38,7 +37,7 @@ const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: Creat
         .from("stories")
         .insert({
           user_id: userId,
-          image_url: imageUrl.trim(),
+          image_url: imageUrl,
         });
 
       if (error) throw error;
@@ -48,7 +47,7 @@ const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: Creat
         description: "La tua storia sarà visibile per 24 ore",
       });
 
-      setImageUrl("");
+      setImageUrl(null);
       onStoryCreated();
     } catch (error: any) {
       toast({
@@ -69,14 +68,10 @@ const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: Creat
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="imageUrl">URL Immagine</Label>
-            <Input
-              id="imageUrl"
-              type="url"
-              placeholder="https://esempio.com/immagine.jpg"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              disabled={loading}
+            <ImageUploader
+              bucket="stories"
+              userId={userId}
+              onUploadComplete={setImageUrl}
             />
             <p className="text-xs text-muted-foreground">
               La tua storia sarà visibile per 24 ore

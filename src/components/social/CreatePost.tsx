@@ -3,8 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Image, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ImageUploader from "@/components/shared/ImageUploader";
 
 interface CreatePostProps {
   userId: string;
@@ -15,15 +16,16 @@ interface CreatePostProps {
 const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => {
   const { toast } = useToast();
   const [content, setContent] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!content.trim()) {
+    if (!content.trim() && !imageUrl) {
       toast({
         title: "Errore",
-        description: "Scrivi qualcosa prima di postare",
+        description: "Scrivi qualcosa o aggiungi un'immagine",
         variant: "destructive",
       });
       return;
@@ -36,7 +38,8 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
         .from("posts")
         .insert({
           user_id: userId,
-          content: content.trim(),
+          content: content.trim() || null,
+          image_url: imageUrl,
         });
 
       if (error) throw error;
@@ -47,6 +50,7 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
       });
 
       setContent("");
+      setImageUrl(null);
       onPostCreated();
     } catch (error: any) {
       toast({
@@ -76,22 +80,19 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
           disabled={loading}
         />
       </div>
-      <div className="flex items-center justify-between">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="gap-2"
-          disabled
-        >
-          <Image className="w-4 h-4" />
-          Foto (prossimamente)
-        </Button>
+      
+      <ImageUploader
+        bucket="posts"
+        userId={userId}
+        onUploadComplete={setImageUrl}
+      />
+
+      <div className="flex items-center justify-end">
         <Button
           type="submit"
           size="sm"
           className="gap-2"
-          disabled={loading || !content.trim()}
+          disabled={loading || (!content.trim() && !imageUrl)}
         >
           {loading ? "Pubblicazione..." : "Pubblica"}
           <Send className="w-4 h-4" />

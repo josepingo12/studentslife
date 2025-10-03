@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import ImageUploader from "@/components/shared/ImageUploader";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface PartnerProfileEditProps {
   profile: any;
@@ -102,25 +104,23 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
         </div>
 
         <div className="space-y-2">
-          <Label>URL Foto Profilo</Label>
-          <Input
-            type="url"
-            placeholder="https://..."
-            className="ios-input"
-            value={formData.profile_image_url}
-            onChange={(e) => setFormData({ ...formData, profile_image_url: e.target.value })}
+          <Label>Foto Profilo</Label>
+          {formData.profile_image_url && (
+            <div className="flex justify-center mb-3">
+              <Avatar className="h-24 w-24">
+                <AvatarImage src={formData.profile_image_url} />
+                <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+                  {formData.business_name?.[0]}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+          )}
+          <ImageUploader
+            bucket="avatars"
+            userId={profile.id}
+            onUploadComplete={(url) => setFormData({ ...formData, profile_image_url: url })}
           />
         </div>
-
-        {formData.profile_image_url && (
-          <div className="aspect-square max-w-xs overflow-hidden rounded-xl mx-auto">
-            <img
-              src={formData.profile_image_url}
-              alt="Preview"
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
 
         <Button
           type="submit"
