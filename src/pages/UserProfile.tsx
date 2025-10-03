@@ -295,15 +295,17 @@ const UserProfile = () => {
           <h2 className="text-2xl font-bold mb-1">{getDisplayName()}</h2>
           
           {profile?.university && (
-            <p className="text-sm text-muted-foreground mb-3">{profile.university}</p>
+            <p className="text-sm text-muted-foreground mb-2">{profile.university}</p>
           )}
 
-          {/* Bio */}
-          {profile?.business_description && (
-            <div className="max-w-sm mx-auto mb-4">
-              <p className="text-sm text-muted-foreground leading-relaxed">{profile.business_description}</p>
-            </div>
-          )}
+          {/* Bio - Always show, even if empty for own profile */}
+          <div className="max-w-sm mx-auto mb-4 px-4">
+            {profile?.business_description ? (
+              <p className="text-sm text-foreground/80 leading-relaxed">{profile.business_description}</p>
+            ) : isOwnProfile ? (
+              <p className="text-xs text-muted-foreground italic">Aggiungi una bio al tuo profilo</p>
+            ) : null}
+          </div>
 
           {/* Stats */}
           <div className="flex justify-center gap-8 py-4 border-y border-border/50 mb-4">
