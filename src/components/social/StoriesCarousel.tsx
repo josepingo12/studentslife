@@ -25,7 +25,7 @@ const StoriesCarousel = ({ currentUserId }: StoriesCarouselProps) => {
       .from("stories")
       .select(`
         *,
-        profiles!stories_user_id_fkey(first_name, last_name, profile_image_url, business_name)
+        profiles(first_name, last_name, profile_image_url, business_name)
       `)
       .gt("expires_at", new Date().toISOString())
       .order("created_at", { ascending: false });
