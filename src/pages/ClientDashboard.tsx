@@ -8,7 +8,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useToast } from "@/hooks/use-toast";
 import CategoryCarousel from "@/components/client/CategoryCarousel";
 import PartnersList from "@/components/client/PartnersList";
-import MostUsedPartners from "@/components/client/MostUsedPartners";
 import RecentPartners from "@/components/client/RecentPartners";
 import StoriesCarousel from "@/components/social/StoriesCarousel";
 import CreatePost from "@/components/social/CreatePost";
@@ -198,11 +197,6 @@ const ClientDashboard = () => {
         </div>
       ) : (
         <>
-          {/* Most Used Partners */}
-          <div className="mt-6">
-            <MostUsedPartners userId={user.id} />
-          </div>
-
           {/* Recent Partners */}
           <div className="mt-6">
             <RecentPartners userId={user.id} />
