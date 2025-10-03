@@ -276,12 +276,14 @@ const PartnerDashboard = () => {
             <span className="text-xs font-medium">{t('navigation.events')}</span>
           </button>
 
-          {/* Central Upload Button */}
           <button
             onClick={() => setActiveTab("scanner")}
-            className="relative -mt-6 bg-gradient-to-br from-primary to-primary/80 rounded-full p-4 shadow-lg hover:scale-105 transition-transform"
+            className={`flex flex-col items-center gap-1 transition-colors ${
+              activeTab === "scanner" ? "text-primary" : "text-muted-foreground"
+            }`}
           >
-            <QrCode className="w-8 h-8 text-white" />
+            <QrCode className="w-5 h-5" />
+            <span className="text-xs font-medium">{t('navigation.scanner')}</span>
           </button>
 
           <button
