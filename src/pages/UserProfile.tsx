@@ -3,17 +3,20 @@ import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Grid, Bookmark, Camera, Pencil, Users, Home, UserCircle, Plus, Edit2 } from "lucide-react";
+import { MessageCircle, Grid, Bookmark, Camera, Pencil, Users, Home, UserCircle, Plus, Edit2, Settings } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import PostDetailModal from "@/components/social/PostDetailModal";
 import UploadSheet from "@/components/shared/UploadSheet";
 import { Textarea } from "@/components/ui/textarea";
+import SettingsSheet from "@/components/partner/SettingsSheet";
+import { useTranslation } from "react-i18next";
 
 const UserProfile = () => {
   const navigate = useNavigate();
   const { userId } = useParams();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [posts, setPosts] = useState<any[]>([]);
@@ -29,6 +32,7 @@ const UserProfile = () => {
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [bioText, setBioText] = useState("");
+  const [settingsSheetOpen, setSettingsSheetOpen] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -282,6 +286,20 @@ const UserProfile = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary pb-24">
+      {/* Settings Icon - Only for own profile */}
+      {isOwnProfile && (
+        <div className="px-4 pt-4 flex justify-end">
+          <Button
+            onClick={() => setSettingsSheetOpen(true)}
+            variant="ghost"
+            size="icon"
+            className="rounded-full"
+          >
+            <Settings className="w-5 h-5" />
+          </Button>
+        </div>
+      )}
+
       {/* Profile Header - Modern Design */}
       <div className="relative">
         {/* Cover Image/Gradient with Upload */}
@@ -553,6 +571,12 @@ const UserProfile = () => {
         onUploadComplete={() => {
           loadUserContent(userId || currentUser?.id || "");
         }}
+      />
+
+      {/* Settings Sheet */}
+      <SettingsSheet
+        open={settingsSheetOpen}
+        onOpenChange={setSettingsSheetOpen}
       />
     </div>
   );
