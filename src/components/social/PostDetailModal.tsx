@@ -156,10 +156,10 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-7xl h-[90vh] p-0 gap-0 overflow-hidden animate-scale-in">
-        <div className="flex flex-col md:flex-row h-full w-full">
-          {/* Image Section - Top on mobile, Left on desktop */}
-          <div className="flex-1 bg-black relative flex items-center justify-center min-h-[50vh] md:min-h-full">
+      <DialogContent className="max-w-6xl h-[90vh] p-0 gap-0 overflow-hidden animate-scale-in">
+        <div className="flex h-full w-full">
+          {/* Image Section - Left Side */}
+          <div className="flex-1 bg-black relative flex items-center justify-center">
             <Button
               variant="ghost"
               size="icon"
@@ -172,14 +172,14 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
             <img
               src={post.image_url}
               alt="Post"
-              className="w-full h-full object-contain animate-fade-in p-2"
+              className="max-w-full max-h-full object-contain animate-fade-in"
             />
           </div>
 
-          {/* Details Section - Bottom on mobile, Right on desktop */}
-          <div className="w-full md:w-[420px] flex flex-col bg-background/95 backdrop-blur-xl md:border-l border-t md:border-t-0 border-border/50">
+          {/* Details Section - Right Side */}
+          <div className="w-full md:w-[420px] flex flex-col bg-background border-l border-border/50">
             {/* Header with User Info */}
-            <div className="p-4 border-b border-border/50 bg-gradient-to-b from-background to-transparent">
+            <div className="p-4 border-b border-border">
               <div 
                 className="flex items-center gap-3 cursor-pointer group"
                 onClick={() => {
@@ -187,14 +187,14 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
                   onOpenChange(false);
                 }}
               >
-                <Avatar className="w-12 h-12 ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all">
+                <Avatar className="w-10 h-10">
                   <AvatarImage src={post.public_profiles?.profile_image_url} />
-                  <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10">
+                  <AvatarFallback className="bg-primary text-primary-foreground">
                     {getDisplayName().charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                  <p className="font-semibold text-foreground">
                     {getDisplayName()}
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -207,31 +207,25 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
               </div>
 
               {post.content && (
-                <p className="mt-3 text-sm text-foreground/90 leading-relaxed">
+                <p className="mt-3 text-sm text-foreground leading-relaxed">
                   {post.content}
                 </p>
               )}
             </div>
 
             {/* Stats Bar */}
-            <div className="px-4 py-3 border-b border-border/50 bg-muted/30">
+            <div className="px-4 py-3 border-b border-border">
               <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2 group cursor-pointer">
-                  <div className="p-2 rounded-full bg-red-500/10 group-hover:bg-red-500/20 transition-colors">
-                    <Heart className="w-4 h-4 text-red-500" />
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium">{likesCount}</span>
                 </div>
-                <div className="flex items-center gap-2 group cursor-pointer">
-                  <div className="p-2 rounded-full bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
-                    <MessageCircle className="w-4 h-4 text-blue-500" />
-                  </div>
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium">{commentsCount}</span>
                 </div>
-                <div className="flex items-center gap-2 group cursor-pointer">
-                  <div className="p-2 rounded-full bg-green-500/10 group-hover:bg-green-500/20 transition-colors">
-                    <Eye className="w-4 h-4 text-green-500" />
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium">{viewsCount}</span>
                 </div>
               </div>
@@ -239,38 +233,34 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
 
             {/* Comments Section */}
             <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {comments.length === 0 ? (
                   <div className="text-center py-8">
-                    <MessageCircle className="w-12 h-12 text-muted-foreground/30 mx-auto mb-2" />
+                    <MessageCircle className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
                     <p className="text-sm text-muted-foreground">Nessun commento ancora</p>
-                    <p className="text-xs text-muted-foreground/70 mt-1">Sii il primo a commentare!</p>
                   </div>
                 ) : (
                   comments.map((comment) => (
-                    <div key={comment.id} className="flex gap-3 animate-fade-in group">
-                      <Avatar className="w-9 h-9 ring-2 ring-transparent group-hover:ring-primary/20 transition-all">
+                    <div key={comment.id} className="flex gap-2 animate-fade-in">
+                      <Avatar className="w-8 h-8">
                         <AvatarImage src={comment.profiles?.profile_image_url} />
-                        <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/5 text-xs">
+                        <AvatarFallback className="bg-primary/10 text-xs">
                           {getDisplayName(comment.profiles).charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <div className="bg-muted/50 rounded-2xl px-4 py-2.5 group-hover:bg-muted/70 transition-colors">
-                          <div className="flex items-center gap-2 mb-1">
-                            <p className="text-sm font-semibold text-foreground">
-                              {getDisplayName(comment.profiles)}
-                            </p>
-                            <span className="text-xs text-muted-foreground">·</span>
-                            <p className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(comment.created_at), {
-                                addSuffix: true,
-                                locale: it,
-                              })}
-                            </p>
-                          </div>
-                          <p className="text-sm text-foreground/90 leading-relaxed break-words">
+                        <div className="bg-muted rounded-lg px-3 py-2">
+                          <p className="text-sm font-semibold text-foreground">
+                            {getDisplayName(comment.profiles)}
+                          </p>
+                          <p className="text-sm text-foreground leading-relaxed break-words">
                             {comment.content}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {formatDistanceToNow(new Date(comment.created_at), {
+                              addSuffix: true,
+                              locale: it,
+                            })}
                           </p>
                         </div>
                       </div>
@@ -281,17 +271,13 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
             </ScrollArea>
 
             {/* Action Bar */}
-            <div className="p-4 border-t border-border/50 bg-gradient-to-t from-background to-transparent">
+            <div className="p-4 border-t border-border">
               <div className="flex gap-2 mb-3">
                 <Button
                   variant={isLiked ? "default" : "outline"}
                   size="sm"
                   onClick={handleLike}
-                  className={`flex-1 gap-2 transition-all ${
-                    isLiked 
-                      ? "bg-red-500 hover:bg-red-600 text-white" 
-                      : "hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/50"
-                  }`}
+                  className="flex-1 gap-2"
                 >
                   <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
                   {isLiked ? "Ti piace" : "Mi piace"}
@@ -304,7 +290,7 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Scrivi un commento..."
-                  className="min-h-[44px] max-h-[120px] resize-none rounded-2xl bg-muted/50 border-muted"
+                  className="min-h-[40px] max-h-[120px] resize-none"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -316,7 +302,7 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
                   type="submit"
                   disabled={loading || !newComment.trim()}
                   size="icon"
-                  className="h-11 w-11 rounded-full bg-primary hover:scale-105 transition-transform"
+                  className="h-10 w-10"
                 >
                   <Send className="w-4 h-4" />
                 </Button>
