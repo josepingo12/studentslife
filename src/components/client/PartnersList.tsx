@@ -22,9 +22,7 @@ const PartnersList = ({ category }: PartnersListProps) => {
     const { data, error } = await supabase
       .from("profiles")
       .select(`
-        *,
-        reviews!reviews_partner_id_fkey(rating),
-        gallery(image_url)
+        id, business_name, business_address, business_city, profile_image_url, cover_image_url
       `)
       .eq("business_category", category);
 
