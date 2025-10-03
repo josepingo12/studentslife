@@ -44,15 +44,15 @@ const RecentPartners = ({ userId }: RecentPartnersProps) => {
     // Take only top 5
     const recentPartnerIds = uniquePartnerIds.slice(0, 5);
 
-    // Fetch partner details with reviews and gallery
-    const { data: partnersData } = await supabase
-      .from("profiles")
-      .select(`
-        *,
-        reviews(rating),
-        gallery(image_url)
-      `)
-      .in("id", recentPartnerIds);
+      // Fetch partner details with reviews and gallery
+      const { data: partnersData } = await supabase
+        .from("profiles")
+        .select(`
+          *,
+          reviews!reviews_partner_id_fkey(rating),
+          gallery(image_url)
+        `)
+        .in("id", recentPartnerIds);
 
     if (partnersData) {
       // Sort partners by the order in recentPartnerIds

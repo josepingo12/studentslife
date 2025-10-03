@@ -22,7 +22,7 @@ const MostUsedPartners = ({ userId }: MostUsedPartnersProps) => {
       .from("profiles")
       .select(`
         *,
-        reviews(rating),
+        reviews!reviews_partner_id_fkey(rating),
         gallery(image_url)
       `)
       .not('business_category', 'is', null)
