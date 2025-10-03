@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Home, QrCode, BarChart3, UserCircle, Users, Plus, Calendar, Image as ImageIcon, MessageCircle } from "lucide-react";
+import { Home, QrCode, BarChart3, UserCircle, Users, Plus, Calendar, Image as ImageIcon, MessageCircle, ArrowLeftRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PartnerGalleryManager from "@/components/partner/PartnerGalleryManager";
 import PartnerEventsManager from "@/components/partner/PartnerEventsManager";
 import QRScanner from "@/components/partner/QRScanner";
 import PartnerStats from "@/components/partner/PartnerStats";
 import PartnerProfileEdit from "@/components/partner/PartnerProfileEdit";
+import PartnerSocialProfile from "@/components/partner/PartnerSocialProfile";
 import StoriesCarousel from "@/components/social/StoriesCarousel";
 import CreatePost from "@/components/social/CreatePost";
 import PostCard from "@/components/social/PostCard";
@@ -22,6 +23,7 @@ const PartnerDashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<"social" | "events" | "gallery" | "scanner" | "stats" | "profile">("social");
+  const [profileView, setProfileView] = useState<"social" | "business">("social");
   const [posts, setPosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
@@ -206,8 +208,32 @@ const PartnerDashboard = () => {
           <PartnerStats partnerId={user.id} />
         </div>
       ) : (
-        <div className="px-4 mt-4">
-          <PartnerProfileEdit profile={profile} onUpdate={checkAuth} />
+        <div className="mt-4">
+          {/* Profile View Toggle */}
+          <div className="px-4 mb-4 flex justify-center">
+            <Button
+              onClick={() => setProfileView(profileView === "social" ? "business" : "social")}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <ArrowLeftRight className="w-4 h-4" />
+              {profileView === "social" ? "Profilo Aziendale" : "Profilo Social"}
+            </Button>
+          </div>
+
+          {/* Profile Content */}
+          {profileView === "social" ? (
+            <PartnerSocialProfile 
+              profile={profile} 
+              userId={user.id}
+              onUpdate={checkAuth}
+            />
+          ) : (
+            <div className="px-4">
+              <PartnerProfileEdit profile={profile} onUpdate={checkAuth} />
+            </div>
+          )}
         </div>
       )}
 
