@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Share2, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, Bookmark, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
@@ -24,10 +24,23 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [commentsCount, setCommentsCount] = useState(0);
+  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     loadCommentsCount();
+    checkIfSaved();
   }, [post.id]);
+
+  const checkIfSaved = async () => {
+    const { data } = await supabase
+      .from("saved_posts")
+      .select("id")
+      .eq("post_id", post.id)
+      .eq("user_id", currentUserId)
+      .single();
+
+    setIsSaved(!!data);
+  };
 
   const loadCommentsCount = async () => {
     const { count } = await supabase
@@ -94,6 +107,46 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
       });
 
       onDelete(post.id);
+    } catch (error: any) {
+      toast({
+        title: "Errore",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveToggle = async () => {
+    setLoading(true);
+    try {
+      if (isSaved) {
+        const { error } = await supabase
+          .from("saved_posts")
+          .delete()
+          .eq("post_id", post.id)
+          .eq("user_id", currentUserId);
+
+        if (error) throw error;
+        setIsSaved(false);
+        toast({
+          title: "Post rimosso dai salvati",
+        });
+      } else {
+        const { error } = await supabase
+          .from("saved_posts")
+          .insert({
+            post_id: post.id,
+            user_id: currentUserId,
+          });
+
+        if (error) throw error;
+        setIsSaved(true);
+        toast({
+          title: "Post salvato",
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Errore",
@@ -203,10 +256,11 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
           variant="ghost"
           size="sm"
           className="gap-2"
-          disabled
+          onClick={handleSaveToggle}
+          disabled={loading}
         >
-          <Share2 className="w-5 h-5" />
-          Condividi
+          <Bookmark className={`w-5 h-5 ${isSaved ? "fill-current" : ""}`} />
+          Salva
         </Button>
       </div>
 

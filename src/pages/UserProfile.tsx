@@ -3,9 +3,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MessageCircle, Grid, Play } from "lucide-react";
+import { MessageCircle, Grid, Bookmark } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import ImageViewer from "@/components/social/ImageViewer";
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -14,9 +15,11 @@ const UserProfile = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [posts, setPosts] = useState<any[]>([]);
+  const [savedPosts, setSavedPosts] = useState<any[]>([]);
   const [stories, setStories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"posts" | "media">("posts");
+  const [activeTab, setActiveTab] = useState<"posts" | "saved">("posts");
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -59,6 +62,24 @@ const UserProfile = () => {
       .order("created_at", { ascending: false });
 
     setPosts(postsData || []);
+
+    // Load saved posts for own profile
+    if (id === currentUser?.id) {
+      const { data: savedPostsData } = await supabase
+        .from("saved_posts")
+        .select(`
+          post_id,
+          posts(
+            *,
+            likes(id, user_id),
+            profiles(first_name, last_name, profile_image_url, business_name)
+          )
+        `)
+        .eq("user_id", id)
+        .order("created_at", { ascending: false });
+
+      setSavedPosts(savedPostsData?.map(sp => sp.posts).filter(Boolean) || []);
+    }
 
     // Load stories
     const { data: storiesData } = await supabase
@@ -137,7 +158,6 @@ const UserProfile = () => {
   };
 
   const isOwnProfile = currentUser?.id === (userId || currentUser?.id);
-  const mediaContent = posts.filter(p => p.image_url);
 
   if (loading) {
     return (
@@ -149,62 +169,54 @@ const UserProfile = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary pb-24">
-      {/* Header */}
-      <div className="ios-card mx-4 mt-4 p-4 flex items-center justify-between">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate(-1)}
-          className="rounded-full"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <h1 className="text-xl font-bold">Profilo</h1>
-        <div className="w-10" />
-      </div>
+      {/* Profile Header - Modern Design */}
+      <div className="relative">
+        {/* Cover gradient */}
+        <div className="h-32 bg-gradient-to-br from-primary to-primary/60" />
+        
+        {/* Profile Info Card */}
+        <div className="ios-card mx-4 -mt-16 p-6 relative">
+          <div className="flex items-start gap-4">
+            <Avatar className="h-24 w-24 border-4 border-background">
+              <AvatarImage src={profile?.profile_image_url} />
+              <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+                {getDisplayName()[0]}
+              </AvatarFallback>
+            </Avatar>
 
-      {/* Profile Info */}
-      <div className="ios-card mx-4 mt-4 p-6">
-        <div className="flex items-center gap-4">
-          <Avatar className="h-20 w-20">
-            <AvatarImage src={profile?.profile_image_url} />
-            <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
-              {getDisplayName()[0]}
-            </AvatarFallback>
-          </Avatar>
-
-          <div className="flex-1">
-            <h2 className="text-xl font-bold">{getDisplayName()}</h2>
-            {profile?.university && (
-              <p className="text-sm text-muted-foreground">{profile.university}</p>
-            )}
-            {profile?.business_description && (
-              <p className="text-sm text-muted-foreground mt-1">{profile.business_description}</p>
-            )}
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold">{getDisplayName()}</h2>
+              {profile?.university && (
+                <p className="text-muted-foreground">{profile.university}</p>
+              )}
+              {profile?.business_description && (
+                <p className="text-sm text-muted-foreground mt-1">{profile.business_description}</p>
+              )}
+            </div>
           </div>
+
+          {/* Stats */}
+          <div className="flex justify-around mt-6 pt-6 border-t">
+            <div className="text-center">
+              <p className="text-2xl font-bold">{posts.length}</p>
+              <p className="text-sm text-muted-foreground">Post</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold">{stories.length}</p>
+              <p className="text-sm text-muted-foreground">Storie</p>
+            </div>
+          </div>
+
+          {!isOwnProfile && (
+            <Button
+              onClick={handleStartChat}
+              className="w-full mt-4 gap-2"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Invia messaggio
+            </Button>
+          )}
         </div>
-
-        {/* Stats */}
-        <div className="flex justify-around mt-6 pt-6 border-t">
-          <div className="text-center">
-            <p className="text-2xl font-bold">{posts.length}</p>
-            <p className="text-sm text-muted-foreground">Post</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold">{stories.length}</p>
-            <p className="text-sm text-muted-foreground">Storie</p>
-          </div>
-        </div>
-
-        {!isOwnProfile && (
-          <Button
-            onClick={handleStartChat}
-            className="w-full mt-4 gap-2"
-          >
-            <MessageCircle className="w-4 h-4" />
-            Invia messaggio
-          </Button>
-        )}
       </div>
 
       {/* Content Tabs */}
@@ -215,10 +227,12 @@ const UserProfile = () => {
               <Grid className="w-4 h-4" />
               Post
             </TabsTrigger>
-            <TabsTrigger value="media" className="gap-2">
-              <Play className="w-4 h-4" />
-              Media
-            </TabsTrigger>
+            {isOwnProfile && (
+              <TabsTrigger value="saved" className="gap-2">
+                <Bookmark className="w-4 h-4" />
+                Post salvati
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="posts" className="mt-4">
@@ -232,7 +246,7 @@ const UserProfile = () => {
                   <div
                     key={post.id}
                     className="aspect-square bg-card rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={() => navigate(`/social`)}
+                    onClick={() => post.image_url && setSelectedImage(post.image_url)}
                   >
                     {post.image_url ? (
                       <img
@@ -253,31 +267,50 @@ const UserProfile = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="media" className="mt-4">
-            {mediaContent.length === 0 ? (
-              <div className="text-center py-12 ios-card">
-                <p className="text-muted-foreground">Nessun media ancora</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-1">
-                {mediaContent.map((post) => (
-                  <div
-                    key={post.id}
-                    className="aspect-square bg-card rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={() => navigate(`/social`)}
-                  >
-                    <img
-                      src={post.image_url}
-                      alt="Media"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </TabsContent>
+          {isOwnProfile && (
+            <TabsContent value="saved" className="mt-4">
+              {savedPosts.length === 0 ? (
+                <div className="text-center py-12 ios-card">
+                  <p className="text-muted-foreground">Nessun post salvato ancora</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-1">
+                  {savedPosts.map((post: any) => (
+                    <div
+                      key={post.id}
+                      className="aspect-square bg-card rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => post.image_url && setSelectedImage(post.image_url)}
+                    >
+                      {post.image_url ? (
+                        <img
+                          src={post.image_url}
+                          alt="Post"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-muted p-2">
+                          <p className="text-xs text-muted-foreground line-clamp-3 text-center">
+                            {post.content}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          )}
         </Tabs>
       </div>
+
+      {/* Image Viewer */}
+      {selectedImage && (
+        <ImageViewer
+          open={!!selectedImage}
+          onOpenChange={(open) => !open && setSelectedImage(null)}
+          imageUrl={selectedImage}
+        />
+      )}
     </div>
   );
 };
