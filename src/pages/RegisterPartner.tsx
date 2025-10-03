@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
+interface Category {
+  id: string;
+  name: string;
+  display_name: string;
+}
+
 const RegisterPartner = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -22,12 +29,23 @@ const RegisterPartner = () => {
     businessCategory: "",
   });
 
-  const categories = [
-    { value: "bar_restaurant", label: "Bar e Ristoranti" },
-    { value: "fitness", label: "Fitness" },
-    { value: "entertainment", label: "Intrattenimento" },
-    { value: "health_beauty", label: "Salute e Bellezza" },
-  ];
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .order("display_name");
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -189,8 +207,8 @@ const RegisterPartner = () => {
               </SelectTrigger>
               <SelectContent>
                 {categories.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.value}>
-                    {cat.label}
+                  <SelectItem key={cat.id} value={cat.name}>
+                    {cat.display_name}
                   </SelectItem>
                 ))}
               </SelectContent>
