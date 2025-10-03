@@ -171,13 +171,15 @@ const PartnerEvents = ({ partnerId }: PartnerEventsProps) => {
                 </Button>
               )}
               
-              <Button
-                onClick={() => handleDownloadQR(event)}
-                className="w-full ios-button h-12"
-              >
-                <Download className="w-5 h-5 mr-2" />
-                Scarica QR Code
-              </Button>
+              {event.qr_enabled && (
+                <Button
+                  onClick={() => handleDownloadQR(event)}
+                  className="w-full ios-button h-12"
+                >
+                  <Download className="w-5 h-5 mr-2" />
+                  Scarica QR Code
+                </Button>
+              )}
             </div>
           </div>
         ))}

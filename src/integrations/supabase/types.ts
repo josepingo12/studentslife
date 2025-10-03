@@ -172,6 +172,7 @@ export type Database = {
           is_active: boolean | null
           link_url: string | null
           partner_id: string
+          qr_enabled: boolean
           start_date: string
           title: string
           updated_at: string | null
@@ -186,6 +187,7 @@ export type Database = {
           is_active?: boolean | null
           link_url?: string | null
           partner_id: string
+          qr_enabled?: boolean
           start_date: string
           title: string
           updated_at?: string | null
@@ -200,6 +202,7 @@ export type Database = {
           is_active?: boolean | null
           link_url?: string | null
           partner_id?: string
+          qr_enabled?: boolean
           start_date?: string
           title?: string
           updated_at?: string | null

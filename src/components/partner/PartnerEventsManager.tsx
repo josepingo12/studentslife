@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Calendar, Percent, Plus, Trash2, BarChart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageUpload from "@/components/shared/ImageUpload";
+import { Switch } from "@/components/ui/switch";
 
 interface PartnerEventsManagerProps {
   partnerId: string;
@@ -26,6 +27,7 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
     end_date: "",
     image_url: "",
     link_url: "",
+    qr_enabled: true,
   });
 
   useEffect(() => {
@@ -77,6 +79,7 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
       end_date: "",
       image_url: "",
       link_url: "",
+      qr_enabled: true,
     });
     fetchEvents();
   };
@@ -195,6 +198,20 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
               </div>
             </div>
 
+            <div className="ios-card p-4 flex items-center justify-between">
+              <Label htmlFor="qr-enabled" className="flex flex-col gap-1">
+                <span className="font-semibold">Abilita QR Code</span>
+                <span className="text-xs text-muted-foreground">
+                  I clienti potranno scaricare un QR code per questo evento
+                </span>
+              </Label>
+              <Switch
+                id="qr-enabled"
+                checked={formData.qr_enabled}
+                onCheckedChange={(checked) => setFormData({ ...formData, qr_enabled: checked })}
+              />
+            </div>
+
             <Button type="submit" className="w-full ios-button">
               Crea Evento
             </Button>
@@ -255,13 +272,41 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
                   </div>
                 </div>
 
-                <div className="ios-card bg-primary/10 p-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <BarChart className="w-5 h-5 text-primary" />
-                    <span className="font-semibold">QR scaricati:</span>
-                  </div>
-                  <span className="text-2xl font-bold text-primary">{qrCount}</span>
+                <div className="ios-card p-3 mb-3 flex items-center justify-between">
+                  <span className="font-semibold text-sm">QR Code Abilitato</span>
+                  <Switch
+                    checked={event.qr_enabled}
+                    onCheckedChange={async (checked) => {
+                      const { error } = await supabase
+                        .from("events")
+                        .update({ qr_enabled: checked })
+                        .eq("id", event.id);
+
+                      if (error) {
+                        toast({
+                          title: "Errore",
+                          description: "Impossibile aggiornare l'evento",
+                          variant: "destructive",
+                        });
+                      } else {
+                        toast({
+                          title: checked ? "QR Code abilitato" : "QR Code disabilitato",
+                        });
+                        fetchEvents();
+                      }
+                    }}
+                  />
                 </div>
+
+                {event.qr_enabled && (
+                  <div className="ios-card bg-primary/10 p-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <BarChart className="w-5 h-5 text-primary" />
+                      <span className="font-semibold">QR scaricati:</span>
+                    </div>
+                    <span className="text-2xl font-bold text-primary">{qrCount}</span>
+                  </div>
+                )}
               </div>
             );
           })}
