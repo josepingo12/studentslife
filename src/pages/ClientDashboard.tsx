@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, User, Home, Users, MessageCircle, UserCircle, Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { LogOut, Settings, User, Home, Users, MessageCircle, UserCircle, Plus, Search, X } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import CategoryCarousel from "@/components/client/CategoryCarousel";
@@ -24,6 +25,9 @@ const ClientDashboard = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -123,6 +127,33 @@ const ClientDashboard = () => {
     }));
   };
 
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    
+    if (!query.trim()) {
+      setSearchResults([]);
+      setSearching(false);
+      return;
+    }
+
+    setSearching(true);
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, first_name, last_name, business_name, profile_image_url")
+      .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,business_name.ilike.%${query}%`)
+      .limit(10);
+
+    setSearchResults(data || []);
+    setSearching(false);
+  };
+
+  const getDisplayName = (profile: any) => {
+    if (profile.first_name) {
+      return `${profile.first_name} ${profile.last_name || ""}`.trim();
+    }
+    return profile.business_name || "Utente";
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast({
@@ -148,6 +179,66 @@ const ClientDashboard = () => {
       {/* Content based on active tab */}
       {activeTab === "social" ? (
         <>
+          {/* Search Bar */}
+          <div className="mx-4 mt-4">
+            <div className="relative ios-card p-3">
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
+              <Input
+                type="text"
+                placeholder="Cerca utenti..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-10 pr-10 border-none bg-transparent focus-visible:ring-0"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => handleSearch("")}
+                  className="absolute right-6 top-1/2 -translate-y-1/2 z-10"
+                >
+                  <X className="w-4 h-4 text-muted-foreground" />
+                </button>
+              )}
+
+              {/* Search Results Dropdown */}
+              {searchQuery && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-lg shadow-lg border border-border z-50 max-h-80 overflow-y-auto">
+                  {searching ? (
+                    <p className="text-sm text-muted-foreground text-center py-6">Ricerca...</p>
+                  ) : searchResults.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-6">Nessun utente trovato</p>
+                  ) : (
+                    <div className="py-2">
+                      {searchResults.map((result) => (
+                        <button
+                          key={result.id}
+                          onClick={() => {
+                            navigate(`/profile/${result.id}`);
+                            setSearchQuery("");
+                            setSearchResults([]);
+                          }}
+                          className="w-full flex items-center gap-3 p-3 hover:bg-muted transition-colors"
+                        >
+                          <Avatar className="h-12 w-12">
+                            <AvatarImage src={result.profile_image_url} />
+                            <AvatarFallback className="bg-primary text-primary-foreground">
+                              {getDisplayName(result)[0].toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="text-left flex-1">
+                            <p className="font-semibold">{getDisplayName(result)}</p>
+                            {result.first_name && result.business_name && (
+                              <p className="text-xs text-muted-foreground">{result.business_name}</p>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Stories */}
           <div className="mt-4">
             <StoriesCarousel currentUserId={user.id} />
