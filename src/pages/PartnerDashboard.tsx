@@ -36,7 +36,11 @@ const PartnerDashboard = () => {
     console.log("Partner dashboard - Role check:", { role }, "Error:", roleError);
 
     if (role !== "partner") {
-      navigate("/login");
+      if (role === "client") {
+        navigate("/client-dashboard");
+      } else {
+        navigate("/login");
+      }
       return;
     }
 

@@ -35,15 +35,15 @@ const Login = () => {
 
         console.log("Role check via RPC:", { role }, "Error:", roleError);
 
-        // Se l'utente non ha ancora un ruolo, deduciamolo dal profilo (partner se ha business_category)
+        // Deduci/aggiorna ruolo dal profilo se necessario
         let effectiveRole = role as string | null;
-        if (!roleError && !role) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("business_category")
-            .eq("id", data.user.id)
-            .maybeSingle();
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("business_category")
+          .eq("id", data.user.id)
+          .maybeSingle();
 
+        if (!roleError && !role) {
           const inferredRole = profile?.business_category ? "partner" : "client";
           const { error: insertRoleError } = await supabase
             .from("user_roles")
@@ -55,6 +55,15 @@ const Login = () => {
               title: "Profilo completato",
               description: `Ruolo '${inferredRole === "partner" ? "partner" : "cliente"}' assegnato automaticamente.`,
             });
+          }
+        }
+        // Upgrade automatico: se ha business_category ma ruolo client, promuovi a partner
+        if (effectiveRole === "client" && profile?.business_category) {
+          const { error: ensurePartnerError } = await supabase
+            .from("user_roles")
+            .insert({ user_id: data.user.id, role: "partner" });
+          if (!ensurePartnerError) {
+            effectiveRole = "partner";
           }
         }
 
