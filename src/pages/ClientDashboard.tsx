@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useToast } from "@/hooks/use-toast";
 import CategoryCarousel from "@/components/client/CategoryCarousel";
 import PartnersList from "@/components/client/PartnersList";
+import MostUsedPartners from "@/components/client/MostUsedPartners";
 import StoriesCarousel from "@/components/social/StoriesCarousel";
 import CreatePost from "@/components/social/CreatePost";
 import PostCard from "@/components/social/PostCard";
@@ -196,6 +197,11 @@ const ClientDashboard = () => {
         </div>
       ) : (
         <>
+          {/* Most Used Partners */}
+          <div className="mt-6">
+            <MostUsedPartners userId={user.id} />
+          </div>
+
           {/* Category Carousel */}
           <div className="mt-6 px-4">
             <h3 className="text-xl font-bold mb-4">Categorie</h3>
@@ -204,9 +210,11 @@ const ClientDashboard = () => {
 
           {/* Partners List */}
           {selectedCategory && (
-            <div className="mt-6 px-4">
-              <h3 className="text-xl font-bold mb-4">Partner disponibili</h3>
-              <PartnersList category={selectedCategory} />
+            <div className="mt-6">
+              <h3 className="text-xl font-bold mb-4 px-4">Partner disponibili</h3>
+              <div className="px-4">
+                <PartnersList category={selectedCategory} />
+              </div>
             </div>
           )}
 

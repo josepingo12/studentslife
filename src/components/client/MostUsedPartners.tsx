@@ -1,23 +1,24 @@
 import { useEffect, useState } from "react";
-import PartnerCard from "./PartnerCard";
 import { supabase } from "@/integrations/supabase/client";
+import PartnerCard from "./PartnerCard";
 
-interface PartnersListProps {
-  category: string;
+interface MostUsedPartnersProps {
+  userId: string;
 }
 
-const PartnersList = ({ category }: PartnersListProps) => {
+const MostUsedPartners = ({ userId }: MostUsedPartnersProps) => {
   const [partners, setPartners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchPartners();
-  }, [category]);
+    loadMostUsed();
+  }, [userId]);
 
-  const fetchPartners = async () => {
+  const loadMostUsed = async () => {
     setLoading(true);
 
-    const { data, error } = await supabase
+    // Get partners with reviews and gallery
+    const { data } = await supabase
       .from("profiles")
       .select(`
         *,
@@ -25,11 +26,18 @@ const PartnersList = ({ category }: PartnersListProps) => {
         reviews(rating),
         gallery(image_url)
       `)
-      .eq("business_category", category)
-      .eq("user_roles.role", "partner");
+      .eq("user_roles.role", "partner")
+      .limit(10);
 
-    if (!error && data) {
-      setPartners(data);
+    if (data) {
+      // Sort by number of reviews (most popular)
+      const sorted = data.sort((a, b) => {
+        const aReviews = a.reviews?.length || 0;
+        const bReviews = b.reviews?.length || 0;
+        return bReviews - aReviews;
+      });
+      
+      setPartners(sorted.slice(0, 5));
     }
 
     setLoading(false);
@@ -53,22 +61,19 @@ const PartnersList = ({ category }: PartnersListProps) => {
   }
 
   if (partners.length === 0) {
-    return (
-      <div className="ios-card p-8 text-center">
-        <p className="text-muted-foreground">
-          Nessun partner disponibile in questa categoria
-        </p>
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-      {partners.map((partner) => (
-        <PartnerCard key={partner.id} partner={partner} />
-      ))}
+    <div className="mb-8">
+      <h3 className="text-lg font-bold mb-4 px-4">Più utilizzati</h3>
+      <div className="flex gap-4 overflow-x-auto pb-4 px-4 scrollbar-hide">
+        {partners.map((partner) => (
+          <PartnerCard key={partner.id} partner={partner} />
+        ))}
+      </div>
     </div>
   );
 };
 
-export default PartnersList;
+export default MostUsedPartners;
