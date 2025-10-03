@@ -170,6 +170,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean | null
+          link_url: string | null
           partner_id: string
           start_date: string
           title: string
@@ -183,6 +184,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          link_url?: string | null
           partner_id: string
           start_date: string
           title: string
@@ -196,6 +198,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          link_url?: string | null
           partner_id?: string
           start_date?: string
           title?: string

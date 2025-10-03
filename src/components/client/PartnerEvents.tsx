@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Calendar, Percent, Download } from "lucide-react";
+import { Calendar, Percent, Download, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import QRCodeModal from "./QRCodeModal";
 
@@ -159,13 +159,26 @@ const PartnerEvents = ({ partnerId }: PartnerEventsProps) => {
               )}
             </div>
 
-            <Button
-              onClick={() => handleDownloadQR(event)}
-              className="w-full ios-button h-12"
-            >
-              <Download className="w-5 h-5 mr-2" />
-              Scarica QR Code
-            </Button>
+            <div className="space-y-2">
+              {event.link_url && (
+                <Button
+                  onClick={() => window.open(event.link_url, "_blank")}
+                  variant="outline"
+                  className="w-full ios-button h-12 mb-2"
+                >
+                  <ExternalLink className="w-5 h-5 mr-2" />
+                  Visita Sito Ufficiale
+                </Button>
+              )}
+              
+              <Button
+                onClick={() => handleDownloadQR(event)}
+                className="w-full ios-button h-12"
+              >
+                <Download className="w-5 h-5 mr-2" />
+                Scarica QR Code
+              </Button>
+            </div>
           </div>
         ))}
       </div>

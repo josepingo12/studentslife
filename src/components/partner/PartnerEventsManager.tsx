@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Calendar, Percent, Plus, Trash2, BarChart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ImageUpload from "@/components/shared/ImageUpload";
 
 interface PartnerEventsManagerProps {
   partnerId: string;
@@ -23,6 +24,8 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
     discount_percentage: 10,
     start_date: "",
     end_date: "",
+    image_url: "",
+    link_url: "",
   });
 
   useEffect(() => {
@@ -72,6 +75,8 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
       discount_percentage: 10,
       start_date: "",
       end_date: "",
+      image_url: "",
+      link_url: "",
     });
     fetchEvents();
   };
@@ -126,6 +131,30 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
                 className="ios-input"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Immagine Evento</Label>
+              <ImageUpload
+                bucket="gallery"
+                userId={partnerId}
+                onImageUploaded={(url) => setFormData({ ...formData, image_url: url })}
+                showPreview
+              />
+              {formData.image_url && (
+                <p className="text-xs text-muted-foreground">✓ Immagine caricata</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Link Esterno (es. acquisto biglietti)</Label>
+              <Input
+                type="url"
+                placeholder="https://..."
+                className="ios-input"
+                value={formData.link_url}
+                onChange={(e) => setFormData({ ...formData, link_url: e.target.value })}
               />
             </div>
 
