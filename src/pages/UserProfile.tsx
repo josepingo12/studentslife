@@ -3,10 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Grid, Bookmark, Camera, Pencil, Users, Home, UserCircle } from "lucide-react";
+import { MessageCircle, Grid, Bookmark, Camera, Pencil, Users, Home, UserCircle, Plus, Edit2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import ImageViewer from "@/components/social/ImageViewer";
+import UploadSheet from "@/components/shared/UploadSheet";
+import { Textarea } from "@/components/ui/textarea";
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -22,6 +24,9 @@ const UserProfile = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [totalLikes, setTotalLikes] = useState(0);
+  const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [bioText, setBioText] = useState("");
   const coverInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -51,6 +56,26 @@ const UserProfile = () => {
 
     setProfile(data);
     setCoverImage(data?.cover_image_url || null);
+    setBioText(data?.business_description || "");
+  };
+
+  const handleBioSave = async () => {
+    if (!currentUser) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ business_description: bioText.trim() })
+        .eq('id', currentUser.id);
+
+      if (error) throw error;
+
+      setProfile({ ...profile, business_description: bioText.trim() });
+      setIsEditingBio(false);
+      toast({ title: "Bio aggiornata" });
+    } catch (error: any) {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    }
   };
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -300,11 +325,41 @@ const UserProfile = () => {
 
           {/* Bio - Always show, even if empty for own profile */}
           <div className="max-w-sm mx-auto mb-4 px-4">
-            {profile?.business_description ? (
-              <p className="text-sm text-foreground/80 leading-relaxed">{profile.business_description}</p>
-            ) : isOwnProfile ? (
-              <p className="text-xs text-muted-foreground italic">Aggiungi una bio al tuo profilo</p>
-            ) : null}
+            {isEditingBio && isOwnProfile ? (
+              <div className="space-y-2">
+                <Textarea
+                  value={bioText}
+                  onChange={(e) => setBioText(e.target.value)}
+                  placeholder="Scrivi qualcosa su di te..."
+                  className="resize-none text-sm"
+                  rows={3}
+                  maxLength={150}
+                />
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={handleBioSave}>Salva</Button>
+                  <Button size="sm" variant="outline" onClick={() => {
+                    setIsEditingBio(false);
+                    setBioText(profile?.business_description || "");
+                  }}>Annulla</Button>
+                </div>
+              </div>
+            ) : (
+              <div className="relative group">
+                {profile?.business_description ? (
+                  <p className="text-sm text-foreground/80 leading-relaxed">{profile.business_description}</p>
+                ) : isOwnProfile ? (
+                  <p className="text-xs text-muted-foreground italic">Aggiungi una bio al tuo profilo</p>
+                ) : null}
+                {isOwnProfile && (
+                  <button
+                    onClick={() => setIsEditingBio(true)}
+                    className="absolute -right-6 top-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Edit2 className="w-4 h-4 text-muted-foreground hover:text-primary" />
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Stats */}
@@ -430,7 +485,7 @@ const UserProfile = () => {
 
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
-        <div className="flex items-center justify-around h-16 px-4 max-w-md mx-auto">
+        <div className="flex items-center justify-between h-20 px-4 max-w-md mx-auto">
           <button
             onClick={() => navigate("/client-dashboard")}
             className="flex flex-col items-center gap-1 text-muted-foreground transition-colors"
@@ -445,6 +500,14 @@ const UserProfile = () => {
           >
             <Home className="w-6 h-6" />
             <span className="text-xs font-medium">Partner</span>
+          </button>
+
+          {/* Central Upload Button */}
+          <button
+            onClick={() => setUploadSheetOpen(true)}
+            className="relative -mt-6 bg-gradient-to-br from-primary to-primary/80 rounded-full p-4 shadow-lg hover:scale-105 transition-transform"
+          >
+            <Plus className="w-8 h-8 text-white" />
           </button>
 
           <button
@@ -463,6 +526,16 @@ const UserProfile = () => {
           </button>
         </div>
       </div>
+
+      {/* Upload Sheet */}
+      <UploadSheet
+        open={uploadSheetOpen}
+        onOpenChange={setUploadSheetOpen}
+        userId={currentUser?.id || ""}
+        onUploadComplete={() => {
+          loadUserContent(userId || currentUser?.id || "");
+        }}
+      />
     </div>
   );
 };
