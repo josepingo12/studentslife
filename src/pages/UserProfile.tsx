@@ -21,6 +21,7 @@ const UserProfile = () => {
   const [activeTab, setActiveTab] = useState<"posts" | "saved">("posts");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [coverImage, setCoverImage] = useState<string | null>(null);
+  const [totalLikes, setTotalLikes] = useState(0);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -130,6 +131,12 @@ const UserProfile = () => {
       .order("created_at", { ascending: false });
 
     setPosts(postsData || []);
+
+    // Count total likes on user's posts
+    if (postsData) {
+      const likes = postsData.reduce((acc, post) => acc + (post.likes?.length || 0), 0);
+      setTotalLikes(likes);
+    }
 
     // Load saved posts for own profile
     if (id === currentUser?.id) {
@@ -241,7 +248,7 @@ const UserProfile = () => {
       <div className="relative">
         {/* Cover Image/Gradient with Upload */}
         <div 
-          className="h-48 bg-gradient-to-br from-primary to-primary/60 relative group cursor-pointer"
+          className="h-32 bg-gradient-to-br from-primary to-primary/60 relative group cursor-pointer"
           style={coverImage ? { backgroundImage: `url(${coverImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
           onClick={() => isOwnProfile && coverInputRef.current?.click()}
         >
@@ -260,11 +267,11 @@ const UserProfile = () => {
         />
         
         {/* Avatar and Info */}
-        <div className="px-4 -mt-16">
+        <div className="px-4 -mt-12">
           <div className="relative inline-block">
-            <Avatar className="h-32 w-32 border-4 border-background">
+            <Avatar className="h-24 w-24 border-4 border-background">
               <AvatarImage src={profile?.profile_image_url} />
-              <AvatarFallback className="bg-primary text-primary-foreground text-3xl">
+              <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
                 {getDisplayName()[0]}
               </AvatarFallback>
             </Avatar>
@@ -273,7 +280,7 @@ const UserProfile = () => {
                 onClick={() => avatarInputRef.current?.click()}
                 className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 transition-colors"
               >
-                <Pencil className="w-4 h-4" />
+                <Pencil className="w-3 h-3" />
               </button>
             )}
           </div>
@@ -285,32 +292,35 @@ const UserProfile = () => {
             onChange={handleAvatarUpload}
           />
 
-          <div className="mt-4">
-            <h2 className="text-2xl font-bold">{getDisplayName()}</h2>
-            {profile?.university && (
-              <p className="text-muted-foreground">{profile.university}</p>
-            )}
-            {profile?.business_description && (
-              <p className="text-sm text-muted-foreground mt-1">{profile.business_description}</p>
-            )}
+          <div className="mt-3">
+            <h2 className="text-xl font-bold">{getDisplayName()}</h2>
           </div>
 
+          {/* Bio */}
+          {profile?.business_description && (
+            <p className="text-sm text-muted-foreground mt-2 mb-3">{profile.business_description}</p>
+          )}
+
           {/* Stats */}
-          <div className="flex gap-6 mt-4">
+          <div className="flex gap-6 mt-3 mb-4">
             <div className="text-center">
-              <p className="text-xl font-bold">{posts.length}</p>
+              <p className="text-lg font-bold">{posts.length}</p>
               <p className="text-xs text-muted-foreground">Post</p>
             </div>
             <div className="text-center">
-              <p className="text-xl font-bold">{stories.length}</p>
-              <p className="text-xs text-muted-foreground">Storie</p>
+              <p className="text-lg font-bold">{totalLikes}</p>
+              <p className="text-xs text-muted-foreground">Mi piace</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold">0</p>
+              <p className="text-xs text-muted-foreground">Visualizzazioni</p>
             </div>
           </div>
 
           {!isOwnProfile && (
             <Button
               onClick={handleStartChat}
-              className="w-full mt-4 gap-2"
+              className="w-full mt-2 gap-2"
             >
               <MessageCircle className="w-4 h-4" />
               Invia messaggio
