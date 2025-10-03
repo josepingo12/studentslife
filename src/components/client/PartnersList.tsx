@@ -19,6 +19,15 @@ const PartnersList = ({ category }: PartnersListProps) => {
 
     console.log('Fetching partners for category:', category);
 
+    // First get partner user IDs
+    const { data: partnerRoles } = await supabase
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "partner");
+
+    const partnerIds = partnerRoles?.map(r => r.user_id) || [];
+
+    // Then fetch partner profiles
     const { data, error } = await supabase
       .from("profiles")
       .select(`
@@ -26,7 +35,8 @@ const PartnersList = ({ category }: PartnersListProps) => {
         reviews(rating),
         gallery(image_url)
       `)
-      .eq("business_category", category);
+      .eq("business_category", category)
+      .in("id", partnerIds);
 
     console.log('Partners query result:', { data, error, category });
 
