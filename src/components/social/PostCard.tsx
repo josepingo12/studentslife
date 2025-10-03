@@ -37,7 +37,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
       .select("id")
       .eq("post_id", post.id)
       .eq("user_id", currentUserId)
-      .single();
+      .maybeSingle();
 
     setIsSaved(!!data);
   };
