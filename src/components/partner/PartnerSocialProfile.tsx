@@ -13,9 +13,10 @@ interface PartnerSocialProfileProps {
   profile: any;
   userId: string;
   onUpdate: () => void;
+  onSwitchToBusiness: () => void;
 }
 
-const PartnerSocialProfile = ({ profile, userId, onUpdate }: PartnerSocialProfileProps) => {
+const PartnerSocialProfile = ({ profile, userId, onUpdate, onSwitchToBusiness }: PartnerSocialProfileProps) => {
   const { toast } = useToast();
   const [posts, setPosts] = useState<any[]>([]);
   const [savedPosts, setSavedPosts] = useState<any[]>([]);
@@ -247,7 +248,7 @@ const PartnerSocialProfile = ({ profile, userId, onUpdate }: PartnerSocialProfil
           )}
 
           {/* Bio */}
-          <div className="max-w-sm mx-auto mb-4 px-4">
+          <div className="max-w-sm mx-auto mb-3 px-4">
             {isEditingBio ? (
               <div className="space-y-2">
                 <Textarea
@@ -281,6 +282,19 @@ const PartnerSocialProfile = ({ profile, userId, onUpdate }: PartnerSocialProfil
                 </button>
               </div>
             )}
+          </div>
+
+          {/* Switch to Business Profile Button */}
+          <div className="px-4 mb-4 flex justify-center">
+            <Button
+              onClick={onSwitchToBusiness}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <Edit2 className="w-4 h-4" />
+              Profilo Aziendale
+            </Button>
           </div>
 
           {/* Stats */}

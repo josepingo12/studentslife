@@ -209,28 +209,28 @@ const PartnerDashboard = () => {
         </div>
       ) : (
         <div className="mt-4">
-          {/* Profile View Toggle */}
-          <div className="px-4 mb-4 flex justify-center">
-            <Button
-              onClick={() => setProfileView(profileView === "social" ? "business" : "social")}
-              variant="outline"
-              size="sm"
-              className="gap-2"
-            >
-              <ArrowLeftRight className="w-4 h-4" />
-              {profileView === "social" ? "Profilo Aziendale" : "Profilo Social"}
-            </Button>
-          </div>
-
           {/* Profile Content */}
           {profileView === "social" ? (
             <PartnerSocialProfile 
               profile={profile} 
               userId={user.id}
               onUpdate={checkAuth}
+              onSwitchToBusiness={() => setProfileView("business")}
             />
           ) : (
             <div className="px-4">
+              {/* Switch Back Button */}
+              <div className="mb-4 flex justify-center">
+                <Button
+                  onClick={() => setProfileView("social")}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <ArrowLeftRight className="w-4 h-4" />
+                  Profilo Social
+                </Button>
+              </div>
               <PartnerProfileEdit profile={profile} onUpdate={checkAuth} />
             </div>
           )}
