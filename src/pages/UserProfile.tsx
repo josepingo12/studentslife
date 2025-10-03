@@ -286,20 +286,6 @@ const UserProfile = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary pb-24">
-      {/* Settings Icon - Only for own profile */}
-      {isOwnProfile && (
-        <div className="px-4 pt-4 flex justify-end">
-          <Button
-            onClick={() => setSettingsSheetOpen(true)}
-            variant="ghost"
-            size="icon"
-            className="rounded-full"
-          >
-            <Settings className="w-5 h-5" />
-          </Button>
-        </div>
-      )}
-
       {/* Profile Header - Modern Design */}
       <div className="relative">
         {/* Cover Image/Gradient with Upload */}
@@ -527,7 +513,7 @@ const UserProfile = () => {
             className="flex flex-col items-center gap-1 text-muted-foreground transition-colors"
           >
             <Users className="w-6 h-6" />
-            <span className="text-xs font-medium">Social</span>
+            <span className="text-xs font-medium">{t('navigation.social')}</span>
           </button>
           
           <button
@@ -535,7 +521,7 @@ const UserProfile = () => {
             className="flex flex-col items-center gap-1 text-muted-foreground transition-colors"
           >
             <Home className="w-6 h-6" />
-            <span className="text-xs font-medium">Partner</span>
+            <span className="text-xs font-medium">{t('navigation.partners')}</span>
           </button>
 
           {/* Central Upload Button */}
@@ -551,15 +537,25 @@ const UserProfile = () => {
             className="flex flex-col items-center gap-1 text-muted-foreground transition-colors"
           >
             <MessageCircle className="w-6 h-6" />
-            <span className="text-xs font-medium">Chat</span>
+            <span className="text-xs font-medium">{t('navigation.chat')}</span>
           </button>
           
           <button
             className="flex flex-col items-center gap-1 text-primary transition-colors"
           >
             <UserCircle className="w-6 h-6" />
-            <span className="text-xs font-medium">Profilo</span>
+            <span className="text-xs font-medium">{t('navigation.profile')}</span>
           </button>
+
+          {isOwnProfile && (
+            <button
+              onClick={() => setSettingsSheetOpen(true)}
+              className="flex flex-col items-center gap-1 text-muted-foreground transition-colors"
+            >
+              <Settings className="w-6 h-6" />
+              <span className="text-xs font-medium">{t('settings.title')}</span>
+            </button>
+          )}
         </div>
       </div>
 
