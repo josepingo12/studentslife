@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, Settings, User } from "lucide-react";
+import { LogOut, Settings, User, Users } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import CategoryCarousel from "@/components/client/CategoryCarousel";
@@ -127,7 +127,17 @@ const ClientDashboard = () => {
             <p className="text-sm text-muted-foreground">{profile.university}</p>
           </div>
         </div>
-        <h1 className="text-2xl font-bold text-primary">Students Life</h1>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/social")}
+            className="rounded-full"
+          >
+            <Users className="w-5 h-5" />
+          </Button>
+          <h1 className="text-2xl font-bold text-primary">Students Life</h1>
+        </div>
       </div>
 
       {/* Category Carousel */}

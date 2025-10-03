@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Plus, QrCode, BarChart3, User } from "lucide-react";
+import { LogOut, Plus, QrCode, BarChart3, User, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PartnerGalleryManager from "@/components/partner/PartnerGalleryManager";
 import PartnerEventsManager from "@/components/partner/PartnerEventsManager";
@@ -85,14 +85,24 @@ const PartnerDashboard = () => {
             <h1 className="text-2xl font-bold text-primary">Students Life</h1>
             <p className="text-muted-foreground">{profile.business_name}</p>
           </div>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleLogout}
-            className="rounded-full"
-          >
-            <LogOut className="w-5 h-5" />
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigate("/social")}
+              className="rounded-full"
+            >
+              <Users className="w-5 h-5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleLogout}
+              className="rounded-full"
+            >
+              <LogOut className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
       </div>
 
