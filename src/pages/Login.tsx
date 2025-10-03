@@ -6,10 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import logo from "@/assets/logo.png";
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -75,8 +78,8 @@ const Login = () => {
 
 
         toast({
-          title: "Accesso effettuato!",
-          description: "Benvenuto su Students Life",
+          title: t("auth.loginSuccess"),
+          description: t("auth.welcome"),
         });
 
         // Redirect based on role
@@ -89,15 +92,15 @@ const Login = () => {
         } else {
           // Nessun ruolo determinato: guida alla registrazione
           toast({
-            title: "Completa la registrazione",
-            description: "Seleziona il tuo ruolo per continuare.",
+            title: t("auth.registrationComplete"),
+            description: t("auth.verifyEmail"),
           });
           navigate("/register-client");
         }
       }
     } catch (error: any) {
       toast({
-        title: "Errore durante l'accesso",
+        title: t("errors.loginFailed"),
         description: error.message,
         variant: "destructive",
       });
@@ -110,13 +113,13 @@ const Login = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary flex items-center justify-center p-4">
       <div className="w-full max-w-md ios-card p-6 space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-primary">Students Life</h1>
-          <p className="text-muted-foreground mt-2">Accedi al tuo account</p>
+          <img src={logo} alt="Students Life" className="w-32 h-32 mx-auto mb-2" />
+          <p className="text-muted-foreground mt-2">{t("auth.loginTitle")}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("auth.email")}</Label>
             <Input
               id="email"
               type="email"
@@ -128,7 +131,7 @@ const Login = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t("auth.password")}</Label>
             <Input
               id="password"
               type="password"
@@ -144,7 +147,7 @@ const Login = () => {
               to="/reset-password"
               className="text-sm text-primary hover:underline"
             >
-              Password dimenticata?
+              {t("auth.forgotPassword")}
             </Link>
           </div>
 
@@ -156,28 +159,28 @@ const Login = () => {
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Accesso...
+                {t("auth.loggingIn")}
               </>
             ) : (
-              "Accedi"
+              t("auth.login")
             )}
           </Button>
 
           <div className="text-center space-y-2">
-            <p className="text-sm text-muted-foreground">Non hai un account?</p>
+            <p className="text-sm text-muted-foreground">{t("auth.noAccount")}</p>
             <div className="flex gap-2 justify-center">
               <Link
                 to="/register-client"
                 className="text-sm text-primary hover:underline"
               >
-                Registrati come Cliente
+                {t("auth.registerClient")}
               </Link>
-              <span className="text-muted-foreground">o</span>
+              <span className="text-muted-foreground">{t("auth.orText")}</span>
               <Link
                 to="/register-partner"
                 className="text-sm text-primary hover:underline"
               >
-                Partner
+                {t("auth.registerPartner")}
               </Link>
             </div>
           </div>

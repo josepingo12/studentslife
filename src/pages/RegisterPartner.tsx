@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import logo from "@/assets/logo.png";
 
 interface Category {
   id: string;
@@ -17,6 +19,7 @@ interface Category {
 const RegisterPartner = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [formData, setFormData] = useState({
@@ -52,8 +55,8 @@ const RegisterPartner = () => {
 
     if (formData.password !== formData.confirmPassword) {
       toast({
-        title: "Errore",
-        description: "Le password non corrispondono",
+        title: t("common.error"),
+        description: t("errors.passwordMismatch"),
         variant: "destructive",
       });
       return;
@@ -61,8 +64,8 @@ const RegisterPartner = () => {
 
     if (formData.password.length < 6) {
       toast({
-        title: "Errore",
-        description: "La password deve essere di almeno 6 caratteri",
+        title: t("common.error"),
+        description: t("errors.passwordTooShort"),
         variant: "destructive",
       });
       return;
@@ -133,15 +136,15 @@ const RegisterPartner = () => {
         }
 
         toast({
-          title: "Registrazione completata!",
-          description: "Verifica la tua email per confermare l'account",
+          title: t("auth.registrationComplete"),
+          description: t("auth.verifyEmail"),
         });
 
         navigate("/login");
       }
     } catch (error: any) {
       toast({
-        title: "Errore durante la registrazione",
+        title: t("errors.signupFailed"),
         description: error.message,
         variant: "destructive",
       });
@@ -154,13 +157,13 @@ const RegisterPartner = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary flex items-center justify-center p-4">
       <div className="w-full max-w-md ios-card p-6 space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-primary">Students Life</h1>
-          <p className="text-muted-foreground mt-2">Registrati come Partner</p>
+          <img src={logo} alt="Students Life" className="w-32 h-32 mx-auto mb-2" />
+          <p className="text-muted-foreground mt-2">{t("auth.registerPartner")}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="email">{t("auth.email")} *</Label>
             <Input
               id="email"
               type="email"
@@ -172,7 +175,7 @@ const RegisterPartner = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="businessName">Nome Attività *</Label>
+            <Label htmlFor="businessName">{t("auth.businessName")} *</Label>
             <Input
               id="businessName"
               required
@@ -183,7 +186,7 @@ const RegisterPartner = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="businessAddress">Via Attività *</Label>
+            <Label htmlFor="businessAddress">{t("auth.businessAddress")} *</Label>
             <Input
               id="businessAddress"
               required
@@ -194,7 +197,7 @@ const RegisterPartner = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="businessCity">Località *</Label>
+            <Label htmlFor="businessCity">{t("auth.businessCity")} *</Label>
             <Input
               id="businessCity"
               required
@@ -205,14 +208,14 @@ const RegisterPartner = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="businessCategory">Categoria *</Label>
+            <Label htmlFor="businessCategory">{t("partner.category")} *</Label>
             <Select
               value={formData.businessCategory}
               onValueChange={(value) => setFormData({ ...formData, businessCategory: value })}
               required
             >
               <SelectTrigger className="ios-input">
-                <SelectValue placeholder="Seleziona categoria" />
+                <SelectValue placeholder={t("auth.selectCategory")} />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((cat) => (
@@ -225,7 +228,7 @@ const RegisterPartner = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password *</Label>
+            <Label htmlFor="password">{t("auth.password")} *</Label>
             <Input
               id="password"
               type="password"
@@ -237,7 +240,7 @@ const RegisterPartner = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Conferma Password *</Label>
+            <Label htmlFor="confirmPassword">{t("auth.confirmPassword")} *</Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -256,10 +259,10 @@ const RegisterPartner = () => {
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Registrazione...
+                {t("auth.registering")}
               </>
             ) : (
-              "Registrati"
+              t("auth.signup")
             )}
           </Button>
 
@@ -268,13 +271,13 @@ const RegisterPartner = () => {
               to="/register-client"
               className="text-sm text-primary hover:underline block"
             >
-              Sei un cliente? Registrati qui
+              {t("auth.isClient")}
             </Link>
             <Link
               to="/login"
               className="text-sm text-muted-foreground hover:text-foreground block"
             >
-              Hai già un account? Accedi
+              {t("auth.hasAccount")} {t("auth.login")}
             </Link>
           </div>
         </form>

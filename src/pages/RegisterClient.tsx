@@ -6,10 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import logo from "@/assets/logo.png";
 
 const RegisterClient = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -27,8 +30,8 @@ const RegisterClient = () => {
 
     if (formData.password !== formData.confirmPassword) {
       toast({
-        title: "Errore",
-        description: "Le password non corrispondono",
+        title: t("common.error"),
+        description: t("errors.passwordMismatch"),
         variant: "destructive",
       });
       return;
@@ -36,8 +39,8 @@ const RegisterClient = () => {
 
     if (formData.password.length < 6) {
       toast({
-        title: "Errore",
-        description: "La password deve essere di almeno 6 caratteri",
+        title: t("common.error"),
+        description: t("errors.passwordTooShort"),
         variant: "destructive",
       });
       return;
@@ -100,15 +103,15 @@ const RegisterClient = () => {
         }
 
         toast({
-          title: "Registrazione completata!",
-          description: "Verifica la tua email per confermare l'account",
+          title: t("auth.registrationComplete"),
+          description: t("auth.verifyEmail"),
         });
 
         navigate("/login");
       }
     } catch (error: any) {
       toast({
-        title: "Errore durante la registrazione",
+        title: t("errors.signupFailed"),
         description: error.message,
         variant: "destructive",
       });
@@ -121,13 +124,13 @@ const RegisterClient = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary flex items-center justify-center p-4">
       <div className="w-full max-w-md ios-card p-6 space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-primary">Students Life</h1>
-          <p className="text-muted-foreground mt-2">Registrati come Cliente</p>
+          <img src={logo} alt="Students Life" className="w-32 h-32 mx-auto mb-2" />
+          <p className="text-muted-foreground mt-2">{t("auth.registerClient")}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="email">{t("auth.email")} *</Label>
             <Input
               id="email"
               type="email"
@@ -140,7 +143,7 @@ const RegisterClient = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName">Nome *</Label>
+              <Label htmlFor="firstName">{t("auth.firstName")} *</Label>
               <Input
                 id="firstName"
                 required
@@ -151,7 +154,7 @@ const RegisterClient = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="lastName">Cognome *</Label>
+              <Label htmlFor="lastName">{t("auth.lastName")} *</Label>
               <Input
                 id="lastName"
                 required
@@ -163,7 +166,7 @@ const RegisterClient = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">Telefono</Label>
+            <Label htmlFor="phone">{t("auth.phone")}</Label>
             <Input
               id="phone"
               type="tel"
@@ -174,7 +177,7 @@ const RegisterClient = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="university">Università *</Label>
+            <Label htmlFor="university">{t("auth.university")} *</Label>
             <Input
               id="university"
               required
@@ -185,7 +188,7 @@ const RegisterClient = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="country">Paese *</Label>
+            <Label htmlFor="country">{t("auth.country")} *</Label>
             <Input
               id="country"
               required
@@ -196,7 +199,7 @@ const RegisterClient = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password *</Label>
+            <Label htmlFor="password">{t("auth.password")} *</Label>
             <Input
               id="password"
               type="password"
@@ -208,7 +211,7 @@ const RegisterClient = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Conferma Password *</Label>
+            <Label htmlFor="confirmPassword">{t("auth.confirmPassword")} *</Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -227,10 +230,10 @@ const RegisterClient = () => {
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Registrazione...
+                {t("auth.registering")}
               </>
             ) : (
-              "Registrati"
+              t("auth.signup")
             )}
           </Button>
 
@@ -239,13 +242,13 @@ const RegisterClient = () => {
               to="/register-partner"
               className="text-sm text-primary hover:underline block"
             >
-              Sei un partner? Registrati qui
+              {t("auth.isPartner")}
             </Link>
             <Link
               to="/login"
               className="text-sm text-muted-foreground hover:text-foreground block"
             >
-              Hai già un account? Accedi
+              {t("auth.hasAccount")} {t("auth.login")}
             </Link>
           </div>
         </form>
