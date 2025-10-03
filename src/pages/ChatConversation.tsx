@@ -15,6 +15,7 @@ const ChatConversation = () => {
   const { conversationId } = useParams();
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const [otherUser, setOtherUser] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -113,6 +114,18 @@ const ChatConversation = () => {
     }
 
     setUser(user);
+    
+    // Load current user profile
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("first_name, last_name, business_name, profile_image_url")
+      .eq("id", user.id)
+      .single();
+    
+    if (profile) {
+      setUserProfile(profile);
+    }
+    
     await loadOtherUser(user.id);
   };
 
@@ -364,6 +377,15 @@ const ChatConversation = () => {
                   )}
                 </div>
               </div>
+              
+              {isOwn && (
+                <Avatar className="h-8 w-8 flex-shrink-0">
+                  <AvatarImage src={userProfile?.profile_image_url} />
+                  <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                    {userProfile?.first_name?.[0] || userProfile?.business_name?.[0] || "U"}
+                  </AvatarFallback>
+                </Avatar>
+              )}
             </div>
           );
         })}
