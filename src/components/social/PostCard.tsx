@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,6 +7,8 @@ import { Heart, MessageCircle, Share2, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
+import CommentsSheet from "./CommentsSheet";
+import ImageViewer from "./ImageViewer";
 
 interface PostCardProps {
   post: any;
@@ -19,6 +21,22 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [imageViewerOpen, setImageViewerOpen] = useState(false);
+  const [commentsCount, setCommentsCount] = useState(0);
+
+  useEffect(() => {
+    loadCommentsCount();
+  }, [post.id]);
+
+  const loadCommentsCount = async () => {
+    const { count } = await supabase
+      .from("comments")
+      .select("*", { count: "exact", head: true })
+      .eq("post_id", post.id);
+
+    setCommentsCount(count || 0);
+  };
   
   const isLiked = post.likes?.some((like: any) => like.user_id === currentUserId);
   const likesCount = post.likes?.length || 0;
@@ -126,24 +144,36 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
       </div>
 
       {/* Content */}
-      <div className="px-4 pb-3">
-        <p className="whitespace-pre-wrap">{post.content}</p>
-      </div>
+      {post.content && (
+        <div className="px-4 pb-3">
+          <p className="whitespace-pre-wrap">{post.content}</p>
+        </div>
+      )}
 
       {/* Image */}
       {post.image_url && (
-        <img 
-          src={post.image_url} 
-          alt="Post" 
-          className="w-full max-h-96 object-cover"
-        />
+        <div 
+          className="cursor-pointer"
+          onClick={() => setImageViewerOpen(true)}
+        >
+          <img 
+            src={post.image_url} 
+            alt="Post" 
+            className="w-full max-h-96 object-cover"
+          />
+        </div>
       )}
 
       {/* Stats */}
-      <div className="px-4 py-2 border-t border-border">
+      <div className="px-4 py-2 border-t border-border flex items-center gap-4">
         <p className="text-sm text-muted-foreground">
           {likesCount} {likesCount === 1 ? "like" : "likes"}
         </p>
+        {commentsCount > 0 && (
+          <p className="text-sm text-muted-foreground">
+            {commentsCount} {commentsCount === 1 ? "commento" : "commenti"}
+          </p>
+        )}
       </div>
 
       {/* Actions */}
@@ -164,7 +194,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
           variant="ghost"
           size="sm"
           className="gap-2"
-          disabled
+          onClick={() => setCommentsOpen(true)}
         >
           <MessageCircle className="w-5 h-5" />
           Commenta
@@ -179,6 +209,26 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
           Condividi
         </Button>
       </div>
+
+      {/* Comments Sheet */}
+      <CommentsSheet
+        open={commentsOpen}
+        onOpenChange={(open) => {
+          setCommentsOpen(open);
+          if (!open) loadCommentsCount();
+        }}
+        postId={post.id}
+        currentUserId={currentUserId}
+      />
+
+      {/* Image Viewer */}
+      {post.image_url && (
+        <ImageViewer
+          open={imageViewerOpen}
+          onOpenChange={setImageViewerOpen}
+          imageUrl={post.image_url}
+        />
+      )}
     </div>
   );
 };

@@ -28,8 +28,30 @@ const ClientDashboard = () => {
     checkAuth();
     if (activeTab === "social") {
       loadPosts();
+      subscribeToNewPosts();
     }
   }, [activeTab]);
+
+  const subscribeToNewPosts = () => {
+    const channel = supabase
+      .channel("posts-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "posts",
+        },
+        () => {
+          loadPosts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
 
   const checkAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser();
