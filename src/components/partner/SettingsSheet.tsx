@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Globe, Lock } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface SettingsSheetProps {
   open: boolean;
@@ -15,17 +16,32 @@ interface SettingsSheetProps {
 
 const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
   const { toast } = useToast();
-  const [language, setLanguage] = useState("it");
+  const { t, i18n } = useTranslation();
+  const [language, setLanguage] = useState(i18n.language);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
+  useEffect(() => {
+    setLanguage(i18n.language);
+  }, [i18n.language]);
+
+  const handleLanguageChange = (newLang: string) => {
+    setLanguage(newLang);
+    i18n.changeLanguage(newLang);
+    localStorage.setItem('appLanguage', newLang);
+    toast({
+      title: t('common.success'),
+      description: t('success.profileUpdated'),
+    });
+  };
+
   const handlePasswordChange = async () => {
     if (!newPassword || !confirmPassword) {
       toast({
-        title: "Errore",
-        description: "Compila tutti i campi",
+        title: t('common.error'),
+        description: t('errors.fillAllFields'),
         variant: "destructive",
       });
       return;
@@ -33,8 +49,8 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
 
     if (newPassword !== confirmPassword) {
       toast({
-        title: "Errore",
-        description: "Le password non corrispondono",
+        title: t('common.error'),
+        description: t('errors.passwordMismatch'),
         variant: "destructive",
       });
       return;
@@ -42,8 +58,8 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
 
     if (newPassword.length < 6) {
       toast({
-        title: "Errore",
-        description: "La password deve essere di almeno 6 caratteri",
+        title: t('common.error'),
+        description: t('errors.passwordTooShort'),
         variant: "destructive",
       });
       return;
@@ -59,16 +75,16 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
 
     if (error) {
       toast({
-        title: "Errore",
-        description: "Impossibile cambiare la password",
+        title: t('common.error'),
+        description: t('errors.changePasswordFailed'),
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: "Successo",
-      description: "Password cambiata con successo",
+      title: t('common.success'),
+      description: t('success.passwordChanged'),
     });
 
     setCurrentPassword("");
@@ -81,7 +97,7 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="h-[80vh] rounded-t-3xl">
         <SheetHeader>
-          <SheetTitle>Impostazioni</SheetTitle>
+          <SheetTitle>{t('settings.title')}</SheetTitle>
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
@@ -90,12 +106,12 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
             <div className="flex items-center gap-2">
               <Globe className="w-5 h-5 text-primary" />
               <Label htmlFor="language" className="text-base font-semibold">
-                Lingua
+                {t('settings.language')}
               </Label>
             </div>
-            <Select value={language} onValueChange={setLanguage}>
+            <Select value={language} onValueChange={handleLanguageChange}>
               <SelectTrigger id="language">
-                <SelectValue placeholder="Seleziona lingua" />
+                <SelectValue placeholder={t('settings.selectLanguage')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="it">Italiano</SelectItem>
@@ -111,18 +127,18 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Lock className="w-5 h-5 text-primary" />
-              <Label className="text-base font-semibold">Cambia Password</Label>
+              <Label className="text-base font-semibold">{t('settings.changePassword')}</Label>
             </div>
 
             <div className="space-y-3">
               <div className="space-y-2">
                 <Label htmlFor="new-password" className="text-sm">
-                  Nuova Password
+                  {t('settings.newPassword')}
                 </Label>
                 <Input
                   id="new-password"
                   type="password"
-                  placeholder="Inserisci nuova password"
+                  placeholder={t('settings.newPassword')}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                 />
@@ -130,12 +146,12 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
 
               <div className="space-y-2">
                 <Label htmlFor="confirm-password" className="text-sm">
-                  Conferma Password
+                  {t('settings.confirmPassword')}
                 </Label>
                 <Input
                   id="confirm-password"
                   type="password"
-                  placeholder="Conferma nuova password"
+                  placeholder={t('settings.confirmPassword')}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
@@ -146,7 +162,7 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
                 disabled={isChangingPassword}
                 className="w-full"
               >
-                {isChangingPassword ? "Salvataggio..." : "Cambia Password"}
+                {isChangingPassword ? t('settings.saving') : t('settings.changePasswordButton')}
               </Button>
             </div>
           </div>

@@ -1,0 +1,122 @@
+{
+  "navigation": {
+    "social": "Social",
+    "events": "Eventi",
+    "scanner": "Scanner",
+    "stats": "Stats",
+    "chat": "Chat",
+    "profile": "Profilo",
+    "partners": "Partner",
+    "home": "Home"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "language": "Lingua",
+    "changePassword": "Cambia Password",
+    "newPassword": "Nuova Password",
+    "confirmPassword": "Conferma Password",
+    "changePasswordButton": "Cambia Password",
+    "saving": "Salvataggio...",
+    "selectLanguage": "Seleziona lingua"
+  },
+  "auth": {
+    "login": "Accedi",
+    "signup": "Registrati",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Conferma Password",
+    "firstName": "Nome",
+    "lastName": "Cognome",
+    "logout": "Esci",
+    "forgotPassword": "Password dimenticata?",
+    "noAccount": "Non hai un account?",
+    "hasAccount": "Hai già un account?",
+    "resetPassword": "Reimposta Password"
+  },
+  "profile": {
+    "editProfile": "Modifica Profilo",
+    "businessProfile": "Profilo Aziendale",
+    "socialProfile": "Profilo Social",
+    "posts": "Post",
+    "likes": "Mi piace",
+    "views": "Visualizzazioni",
+    "savedPosts": "Post Salvati",
+    "bio": "Biografia",
+    "editBio": "Modifica Bio",
+    "saveBio": "Salva",
+    "cancel": "Annulla"
+  },
+  "post": {
+    "createPost": "Crea un post",
+    "whatsOnYourMind": "A cosa stai pensando?",
+    "publish": "Pubblica",
+    "delete": "Elimina",
+    "comment": "Commenta",
+    "like": "Mi piace",
+    "share": "Condividi",
+    "comments": "Commenti",
+    "writeComment": "Scrivi un commento...",
+    "noComments": "Nessun commento ancora",
+    "noPosts": "Nessun post ancora. Sii il primo a postare!"
+  },
+  "chat": {
+    "chats": "Chat",
+    "newMessage": "Nuovo Messaggio",
+    "typeMessage": "Scrivi un messaggio...",
+    "send": "Invia",
+    "noMessages": "Nessun messaggio ancora",
+    "online": "Online",
+    "offline": "Offline"
+  },
+  "partner": {
+    "gallery": "Galleria",
+    "events": "Eventi",
+    "reviews": "Recensioni",
+    "qrCode": "Codice QR",
+    "businessName": "Nome Attività",
+    "businessDescription": "Descrizione",
+    "address": "Indirizzo",
+    "phone": "Telefono",
+    "category": "Categoria"
+  },
+  "events": {
+    "title": "Eventi",
+    "createEvent": "Crea Evento",
+    "eventTitle": "Titolo Evento",
+    "description": "Descrizione",
+    "startDate": "Data Inizio",
+    "endDate": "Data Fine",
+    "discount": "Sconto",
+    "active": "Attivo",
+    "noEvents": "Nessun evento disponibile"
+  },
+  "common": {
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "loading": "Caricamento...",
+    "success": "Successo",
+    "error": "Errore",
+    "confirm": "Conferma",
+    "back": "Indietro",
+    "next": "Avanti",
+    "upload": "Carica",
+    "search": "Cerca"
+  },
+  "errors": {
+    "fillAllFields": "Compila tutti i campi",
+    "passwordMismatch": "Le password non corrispondono",
+    "passwordTooShort": "La password deve essere di almeno 6 caratteri",
+    "changePasswordFailed": "Impossibile cambiare la password",
+    "loginFailed": "Accesso fallito",
+    "signupFailed": "Registrazione fallita"
+  },
+  "success": {
+    "passwordChanged": "Password cambiata con successo",
+    "profileUpdated": "Profilo aggiornato con successo",
+    "postCreated": "Post creato con successo",
+    "postDeleted": "Post eliminato con successo",
+    "loggedOut": "Logout effettuato con successo"
+  }
+}

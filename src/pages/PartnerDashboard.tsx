@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Home, QrCode, BarChart3, UserCircle, Users, Plus, Calendar, Image as ImageIcon, MessageCircle, ArrowLeftRight, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import PartnerGalleryManager from "@/components/partner/PartnerGalleryManager";
 import PartnerEventsManager from "@/components/partner/PartnerEventsManager";
 import QRScanner from "@/components/partner/QRScanner";
@@ -21,6 +22,7 @@ import SettingsSheet from "@/components/partner/SettingsSheet";
 const PartnerDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<"social" | "events" | "gallery" | "scanner" | "stats" | "profile">("social");
@@ -134,8 +136,8 @@ const PartnerDashboard = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast({
-      title: "Disconnesso",
-      description: "Logout effettuato con successo",
+      title: t('auth.logout'),
+      description: t('success.loggedOut'),
     });
     navigate("/login");
   };
@@ -145,7 +147,7 @@ const PartnerDashboard = () => {
       <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Caricamento...</p>
+          <p className="text-muted-foreground">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -178,7 +180,7 @@ const PartnerDashboard = () => {
               </div>
             ) : posts.length === 0 ? (
               <div className="text-center py-12 ios-card">
-                <p className="text-muted-foreground">Nessun post ancora. Sii il primo a postare!</p>
+                <p className="text-muted-foreground">{t('post.noPosts')}</p>
               </div>
             ) : (
               posts.map((post) => (
@@ -261,7 +263,7 @@ const PartnerDashboard = () => {
             }`}
           >
             <Users className="w-5 h-5" />
-            <span className="text-xs font-medium">Social</span>
+            <span className="text-xs font-medium">{t('navigation.social')}</span>
           </button>
           
           <button
@@ -271,7 +273,7 @@ const PartnerDashboard = () => {
             }`}
           >
             <Calendar className="w-5 h-5" />
-            <span className="text-xs font-medium">Eventi</span>
+            <span className="text-xs font-medium">{t('navigation.events')}</span>
           </button>
 
           {/* Central Upload Button */}
@@ -289,7 +291,7 @@ const PartnerDashboard = () => {
             }`}
           >
             <BarChart3 className="w-5 h-5" />
-            <span className="text-xs font-medium">Stats</span>
+            <span className="text-xs font-medium">{t('navigation.stats')}</span>
           </button>
 
           <button
@@ -300,7 +302,7 @@ const PartnerDashboard = () => {
               <MessageCircle className="w-5 h-5" />
               <NotificationBadge count={totalUnread} />
             </div>
-            <span className="text-xs font-medium">Chat</span>
+            <span className="text-xs font-medium">{t('navigation.chat')}</span>
           </button>
           
           <button
@@ -310,7 +312,7 @@ const PartnerDashboard = () => {
             }`}
           >
             <UserCircle className="w-5 h-5" />
-            <span className="text-xs font-medium">Profilo</span>
+            <span className="text-xs font-medium">{t('navigation.profile')}</span>
           </button>
         </div>
       </div>

@@ -1,0 +1,122 @@
+{
+  "navigation": {
+    "social": "Sozial",
+    "events": "Veranstaltungen",
+    "scanner": "Scanner",
+    "stats": "Statistiken",
+    "chat": "Chat",
+    "profile": "Profil",
+    "partners": "Partner",
+    "home": "Startseite"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache",
+    "changePassword": "Passwort ändern",
+    "newPassword": "Neues Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "changePasswordButton": "Passwort ändern",
+    "saving": "Speichern...",
+    "selectLanguage": "Sprache auswählen"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "signup": "Registrieren",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "logout": "Abmelden",
+    "forgotPassword": "Passwort vergessen?",
+    "noAccount": "Noch kein Konto?",
+    "hasAccount": "Bereits ein Konto?",
+    "resetPassword": "Passwort zurücksetzen"
+  },
+  "profile": {
+    "editProfile": "Profil bearbeiten",
+    "businessProfile": "Geschäftsprofil",
+    "socialProfile": "Soziales Profil",
+    "posts": "Beiträge",
+    "likes": "Gefällt mir",
+    "views": "Aufrufe",
+    "savedPosts": "Gespeicherte Beiträge",
+    "bio": "Biografie",
+    "editBio": "Bio bearbeiten",
+    "saveBio": "Speichern",
+    "cancel": "Abbrechen"
+  },
+  "post": {
+    "createPost": "Beitrag erstellen",
+    "whatsOnYourMind": "Was denkst du gerade?",
+    "publish": "Veröffentlichen",
+    "delete": "Löschen",
+    "comment": "Kommentieren",
+    "like": "Gefällt mir",
+    "share": "Teilen",
+    "comments": "Kommentare",
+    "writeComment": "Schreibe einen Kommentar...",
+    "noComments": "Noch keine Kommentare",
+    "noPosts": "Noch keine Beiträge. Sei der Erste, der postet!"
+  },
+  "chat": {
+    "chats": "Chats",
+    "newMessage": "Neue Nachricht",
+    "typeMessage": "Schreibe eine Nachricht...",
+    "send": "Senden",
+    "noMessages": "Noch keine Nachrichten",
+    "online": "Online",
+    "offline": "Offline"
+  },
+  "partner": {
+    "gallery": "Galerie",
+    "events": "Veranstaltungen",
+    "reviews": "Bewertungen",
+    "qrCode": "QR-Code",
+    "businessName": "Geschäftsname",
+    "businessDescription": "Beschreibung",
+    "address": "Adresse",
+    "phone": "Telefon",
+    "category": "Kategorie"
+  },
+  "events": {
+    "title": "Veranstaltungen",
+    "createEvent": "Veranstaltung erstellen",
+    "eventTitle": "Veranstaltungstitel",
+    "description": "Beschreibung",
+    "startDate": "Startdatum",
+    "endDate": "Enddatum",
+    "discount": "Rabatt",
+    "active": "Aktiv",
+    "noEvents": "Keine Veranstaltungen verfügbar"
+  },
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "loading": "Laden...",
+    "success": "Erfolg",
+    "error": "Fehler",
+    "confirm": "Bestätigen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "upload": "Hochladen",
+    "search": "Suchen"
+  },
+  "errors": {
+    "fillAllFields": "Fülle alle Felder aus",
+    "passwordMismatch": "Passwörter stimmen nicht überein",
+    "passwordTooShort": "Passwort muss mindestens 6 Zeichen lang sein",
+    "changePasswordFailed": "Passwort konnte nicht geändert werden",
+    "loginFailed": "Anmeldung fehlgeschlagen",
+    "signupFailed": "Registrierung fehlgeschlagen"
+  },
+  "success": {
+    "passwordChanged": "Passwort erfolgreich geändert",
+    "profileUpdated": "Profil erfolgreich aktualisiert",
+    "postCreated": "Beitrag erfolgreich erstellt",
+    "postDeleted": "Beitrag erfolgreich gelöscht",
+    "loggedOut": "Erfolgreich abgemeldet"
+  }
+}
