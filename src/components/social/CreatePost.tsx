@@ -3,9 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send } from "lucide-react";
+import { Send, X, Image as ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import ImageUploader from "@/components/shared/ImageUploader";
+import ImageUpload from "@/components/shared/ImageUpload";
 
 interface CreatePostProps {
   userId: string;
@@ -18,6 +18,7 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showImageUpload, setShowImageUpload] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +39,7 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
         .from("posts")
         .insert({
           user_id: userId,
-          content: content.trim() || null,
+          content: content.trim(),
           image_url: imageUrl,
         });
 
@@ -51,6 +52,7 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
 
       setContent("");
       setImageUrl(null);
+      setShowImageUpload(false);
       onPostCreated();
     } catch (error: any) {
       toast({
@@ -81,13 +83,47 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
         />
       </div>
       
-      <ImageUploader
-        bucket="posts"
-        userId={userId}
-        onUploadComplete={setImageUrl}
-      />
+      {imageUrl && (
+        <div className="relative">
+          <img src={imageUrl} alt="Preview" className="w-full h-48 object-cover rounded-lg" />
+          <Button
+            type="button"
+            size="icon"
+            variant="destructive"
+            className="absolute top-2 right-2"
+            onClick={() => setImageUrl(null)}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
 
-      <div className="flex items-center justify-end">
+      {showImageUpload && !imageUrl && (
+        <ImageUpload
+          bucket="posts"
+          userId={userId}
+          onImageUploaded={(url) => {
+            setImageUrl(url);
+            setShowImageUpload(false);
+          }}
+          accept="image/*"
+          maxSizeMB={10}
+          showPreview={false}
+        />
+      )}
+      
+      <div className="flex items-center justify-between">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="gap-2"
+          onClick={() => setShowImageUpload(!showImageUpload)}
+          disabled={loading || !!imageUrl}
+        >
+          <ImageIcon className="w-4 h-4" />
+          {showImageUpload ? "Nascondi" : "Aggiungi foto"}
+        </Button>
         <Button
           type="submit"
           size="sm"
