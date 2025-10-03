@@ -22,11 +22,9 @@ const MostUsedPartners = ({ userId }: MostUsedPartnersProps) => {
       .from("profiles")
       .select(`
         *,
-        user_roles!inner(role),
         reviews(rating),
         gallery(image_url)
       `)
-      .eq("user_roles.role", "partner")
       .limit(10);
 
     if (data) {

@@ -23,12 +23,10 @@ const PartnersList = ({ category }: PartnersListProps) => {
       .from("profiles")
       .select(`
         *,
-        user_roles!inner(role),
         reviews(rating),
         gallery(image_url)
       `)
-      .eq("business_category", category)
-      .eq("user_roles.role", "partner");
+      .eq("business_category", category);
 
     console.log('Partners query result:', { data, error, category });
 
