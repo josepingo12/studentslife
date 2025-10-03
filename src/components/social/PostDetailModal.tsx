@@ -2,11 +2,15 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Eye, X } from "lucide-react";
+import { Heart, MessageCircle, Eye, X, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import CommentsSheet from "./CommentsSheet";
 import { toast } from "sonner";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+import { formatDistanceToNow } from "date-fns";
+import { it } from "date-fns/locale";
 
 interface PostDetailModalProps {
   open: boolean;
@@ -23,7 +27,9 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
   );
   const [commentsCount, setCommentsCount] = useState(0);
   const [viewsCount, setViewsCount] = useState(0);
-  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (open && post) {
@@ -35,13 +41,15 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
   const loadPostStats = async () => {
     if (!post?.id) return;
 
-    // Load comments count
-    const { count: commentsTotal } = await supabase
+    // Load comments with user info
+    const { data: commentsData } = await supabase
       .from("comments")
-      .select("*", { count: "exact", head: true })
-      .eq("post_id", post.id);
+      .select("*, profiles!comments_user_id_fkey(first_name, last_name, profile_image_url, business_name)")
+      .eq("post_id", post.id)
+      .order("created_at", { ascending: false });
 
-    setCommentsCount(commentsTotal || 0);
+    setComments(commentsData || []);
+    setCommentsCount(commentsData?.length || 0);
 
     // Load views count
     const { count: viewsTotal } = await supabase
@@ -106,12 +114,40 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
     }
   };
 
-  const getDisplayName = () => {
-    if (post?.public_profiles?.business_name) {
-      return post.public_profiles.business_name;
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim() || !post?.id) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from("comments")
+        .insert({
+          post_id: post.id,
+          user_id: currentUserId,
+          content: newComment.trim(),
+        });
+
+      if (error) throw error;
+
+      setNewComment("");
+      await loadPostStats();
+      toast.success("Commento pubblicato");
+    } catch (error) {
+      console.error("Error posting comment:", error);
+      toast.error("Errore durante la pubblicazione del commento");
+    } finally {
+      setLoading(false);
     }
-    if (post?.public_profiles?.first_name || post?.public_profiles?.last_name) {
-      return `${post.public_profiles.first_name || ""} ${post.public_profiles.last_name || ""}`.trim();
+  };
+
+  const getDisplayName = (profile?: any) => {
+    const prof = profile || post?.public_profiles;
+    if (prof?.business_name) {
+      return prof.business_name;
+    }
+    if (prof?.first_name || prof?.last_name) {
+      return `${prof.first_name || ""} ${prof.last_name || ""}`.trim();
     }
     return "Utente";
   };
@@ -119,102 +155,177 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
   if (!post) return null;
 
   return (
-    <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl h-[90vh] p-0 bg-background border-border flex flex-col md:flex-row">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 right-2 z-50 text-foreground hover:bg-muted rounded-full"
-            onClick={() => onOpenChange(false)}
-          >
-            <X className="w-6 h-6" />
-          </Button>
-
-          {/* Image Section */}
-          <div className="flex-1 flex items-center justify-center bg-black/5 p-4">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-6xl h-[95vh] p-0 gap-0 overflow-hidden animate-scale-in">
+        <div className="flex h-full w-full">
+          {/* Image Section - Left Side */}
+          <div className="flex-1 bg-black relative flex items-center justify-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4 z-50 text-white hover:bg-white/10 rounded-full backdrop-blur-sm transition-all hover:scale-110"
+              onClick={() => onOpenChange(false)}
+            >
+              <X className="w-5 h-5" />
+            </Button>
+            
             <img
               src={post.image_url}
               alt="Post"
-              className="max-w-full max-h-full object-contain rounded-lg"
+              className="max-w-full max-h-full object-contain animate-fade-in"
             />
           </div>
 
-          {/* Details Section */}
-          <div className="w-full md:w-96 flex flex-col border-l border-border">
-            {/* User Header */}
-            <div className="p-4 border-b border-border">
+          {/* Details Section - Right Side */}
+          <div className="w-full md:w-[420px] flex flex-col bg-background/95 backdrop-blur-xl border-l border-border/50">
+            {/* Header with User Info */}
+            <div className="p-4 border-b border-border/50 bg-gradient-to-b from-background to-transparent">
               <div 
-                className="flex items-center gap-3 cursor-pointer hover:opacity-80"
+                className="flex items-center gap-3 cursor-pointer group"
                 onClick={() => {
                   navigate(`/profile/${post.user_id}`);
                   onOpenChange(false);
                 }}
               >
-                <Avatar className="w-10 h-10">
+                <Avatar className="w-12 h-12 ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all">
                   <AvatarImage src={post.public_profiles?.profile_image_url} />
-                  <AvatarFallback>
+                  <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10">
                     {getDisplayName().charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <p className="font-semibold text-foreground">{getDisplayName()}</p>
+                  <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                    {getDisplayName()}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatDistanceToNow(new Date(post.created_at), {
+                      addSuffix: true,
+                      locale: it,
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              {post.content && (
+                <p className="mt-3 text-sm text-foreground/90 leading-relaxed">
+                  {post.content}
+                </p>
+              )}
+            </div>
+
+            {/* Stats Bar */}
+            <div className="px-4 py-3 border-b border-border/50 bg-muted/30">
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2 group cursor-pointer">
+                  <div className="p-2 rounded-full bg-red-500/10 group-hover:bg-red-500/20 transition-colors">
+                    <Heart className="w-4 h-4 text-red-500" />
+                  </div>
+                  <span className="text-sm font-medium">{likesCount}</span>
+                </div>
+                <div className="flex items-center gap-2 group cursor-pointer">
+                  <div className="p-2 rounded-full bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
+                    <MessageCircle className="w-4 h-4 text-blue-500" />
+                  </div>
+                  <span className="text-sm font-medium">{commentsCount}</span>
+                </div>
+                <div className="flex items-center gap-2 group cursor-pointer">
+                  <div className="p-2 rounded-full bg-green-500/10 group-hover:bg-green-500/20 transition-colors">
+                    <Eye className="w-4 h-4 text-green-500" />
+                  </div>
+                  <span className="text-sm font-medium">{viewsCount}</span>
                 </div>
               </div>
             </div>
 
-            {/* Content */}
-            {post.content && (
-              <div className="p-4 border-b border-border">
-                <p className="text-foreground whitespace-pre-wrap">{post.content}</p>
+            {/* Comments Section */}
+            <ScrollArea className="flex-1 p-4">
+              <div className="space-y-4">
+                {comments.length === 0 ? (
+                  <div className="text-center py-8">
+                    <MessageCircle className="w-12 h-12 text-muted-foreground/30 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">Nessun commento ancora</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">Sii il primo a commentare!</p>
+                  </div>
+                ) : (
+                  comments.map((comment) => (
+                    <div key={comment.id} className="flex gap-3 animate-fade-in group">
+                      <Avatar className="w-9 h-9 ring-2 ring-transparent group-hover:ring-primary/20 transition-all">
+                        <AvatarImage src={comment.profiles?.profile_image_url} />
+                        <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/5 text-xs">
+                          {getDisplayName(comment.profiles).charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="bg-muted/50 rounded-2xl px-4 py-2.5 group-hover:bg-muted/70 transition-colors">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-sm font-semibold text-foreground">
+                              {getDisplayName(comment.profiles)}
+                            </p>
+                            <span className="text-xs text-muted-foreground">·</span>
+                            <p className="text-xs text-muted-foreground">
+                              {formatDistanceToNow(new Date(comment.created_at), {
+                                addSuffix: true,
+                                locale: it,
+                              })}
+                            </p>
+                          </div>
+                          <p className="text-sm text-foreground/90 leading-relaxed break-words">
+                            {comment.content}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
-            )}
+            </ScrollArea>
 
-            {/* Stats */}
-            <div className="p-4 border-b border-border flex items-center gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <Heart className="w-4 h-4" />
-                <span>{likesCount}</span>
+            {/* Action Bar */}
+            <div className="p-4 border-t border-border/50 bg-gradient-to-t from-background to-transparent">
+              <div className="flex gap-2 mb-3">
+                <Button
+                  variant={isLiked ? "default" : "outline"}
+                  size="sm"
+                  onClick={handleLike}
+                  className={`flex-1 gap-2 transition-all ${
+                    isLiked 
+                      ? "bg-red-500 hover:bg-red-600 text-white" 
+                      : "hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/50"
+                  }`}
+                >
+                  <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
+                  {isLiked ? "Ti piace" : "Mi piace"}
+                </Button>
               </div>
-              <div className="flex items-center gap-1">
-                <MessageCircle className="w-4 h-4" />
-                <span>{commentsCount}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Eye className="w-4 h-4" />
-                <span>{viewsCount}</span>
-              </div>
-            </div>
 
-            {/* Actions */}
-            <div className="p-4 flex gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLike}
-                className={isLiked ? "text-red-500" : ""}
-              >
-                <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setCommentsOpen(true)}
-              >
-                <MessageCircle className="w-5 h-5" />
-              </Button>
+              {/* Comment Form */}
+              <form onSubmit={handleSubmitComment} className="flex gap-2">
+                <Textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Scrivi un commento..."
+                  className="min-h-[44px] max-h-[120px] resize-none rounded-2xl bg-muted/50 border-muted"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmitComment(e);
+                    }
+                  }}
+                />
+                <Button
+                  type="submit"
+                  disabled={loading || !newComment.trim()}
+                  size="icon"
+                  className="h-11 w-11 rounded-full bg-primary hover:scale-105 transition-transform"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </form>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      <CommentsSheet
-        open={commentsOpen}
-        onOpenChange={setCommentsOpen}
-        postId={post?.id || ""}
-        currentUserId={currentUserId}
-      />
-    </>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
