@@ -71,6 +71,9 @@ const RegisterPartner = () => {
     setLoading(true);
 
     try {
+      // Clear any existing session first to avoid refresh token errors
+      await supabase.auth.signOut();
+
       // Sign up the user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
@@ -80,7 +83,13 @@ const RegisterPartner = () => {
         },
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        // Handle specific error cases
+        if (authError.message.includes("already registered") || authError.status === 422) {
+          throw new Error("Questa email è già registrata. Vai al login o usa un'altra email.");
+        }
+        throw authError;
+      }
 
       if (authData.user) {
         console.log("User signed up:", authData.user.id);
