@@ -16,6 +16,7 @@ import PostCard from "@/components/social/PostCard";
 import UploadSheet from "@/components/shared/UploadSheet";
 import NotificationBadge from "@/components/chat/NotificationBadge";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import ChatsList from "@/components/chat/ChatsList";
 
 const ClientDashboard = () => {
   const navigate = useNavigate();
@@ -280,14 +281,8 @@ const ClientDashboard = () => {
           </div>
         </>
       ) : activeTab === "chats" ? (
-        <div className="text-center py-12 ios-card mx-4 mt-4">
-          <p className="text-muted-foreground mb-4">Le chat si aprono in una pagina dedicata</p>
-          <button
-            onClick={() => navigate("/chats")}
-            className="text-primary hover:underline"
-          >
-            Vai alle Chat
-          </button>
+        <div className="mt-4">
+          <ChatsList currentUserId={user.id} />
         </div>
       ) : (
         <>
