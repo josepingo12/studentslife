@@ -6,6 +6,7 @@ import { Camera, Pencil, Edit2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import PostDetailModal from "@/components/social/PostDetailModal";
+import CreatePost from "@/components/social/CreatePost";
 import { Textarea } from "@/components/ui/textarea";
 
 interface PartnerSocialProfileProps {
@@ -186,6 +187,15 @@ const PartnerSocialProfile = ({ profile, userId, onUpdate }: PartnerSocialProfil
 
   return (
     <div>
+      {/* Create Post Section */}
+      <div className="px-4 mb-4">
+        <CreatePost 
+          userId={userId} 
+          userProfile={profile}
+          onPostCreated={loadUserContent}
+        />
+      </div>
+
       {/* Profile Header */}
       <div className="relative">
         {/* Cover Image */}
