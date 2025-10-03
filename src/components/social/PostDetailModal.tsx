@@ -156,10 +156,10 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl h-[90vh] p-0 gap-0 overflow-hidden animate-scale-in">
-        <div className="flex h-full w-full">
-          {/* Image Section - Left Side */}
-          <div className="flex-1 bg-black relative flex items-center justify-center">
+      <DialogContent className="max-w-4xl h-[95vh] p-0 gap-0 overflow-hidden animate-scale-in">
+        <div className="flex flex-col h-full w-full">
+          {/* Image Section - Top */}
+          <div className="flex-1 bg-black relative flex items-center justify-center overflow-hidden">
             <Button
               variant="ghost"
               size="icon"
@@ -176,12 +176,17 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
             />
           </div>
 
-          {/* Details Section - Right Side */}
-          <div className="w-full md:w-[420px] flex flex-col bg-background border-l border-border/50">
-            {/* Header with User Info */}
-            <div className="p-4 border-b border-border">
+          {/* Bottom Sheet - Comments Section */}
+          <div className="bg-background border-t border-border rounded-t-3xl shadow-2xl max-h-[45vh] flex flex-col">
+            {/* Handle indicator */}
+            <div className="flex justify-center pt-3 pb-2">
+              <div className="w-12 h-1 bg-border rounded-full" />
+            </div>
+
+            {/* User Info and Stats */}
+            <div className="px-4 pb-3 border-b border-border">
               <div 
-                className="flex items-center gap-3 cursor-pointer group"
+                className="flex items-center gap-3 cursor-pointer mb-3"
                 onClick={() => {
                   navigate(`/profile/${post.user_id}`);
                   onOpenChange(false);
@@ -194,7 +199,7 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <p className="font-semibold text-foreground">
+                  <p className="font-semibold text-foreground text-sm">
                     {getDisplayName()}
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -207,42 +212,49 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
               </div>
 
               {post.content && (
-                <p className="mt-3 text-sm text-foreground leading-relaxed">
+                <p className="text-sm text-foreground leading-relaxed mb-3">
                   {post.content}
                 </p>
               )}
-            </div>
 
-            {/* Stats Bar */}
-            <div className="px-4 py-3 border-b border-border">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2">
+              {/* Stats */}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
                   <Heart className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium">{likesCount}</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <MessageCircle className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium">{commentsCount}</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <Eye className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium">{viewsCount}</span>
                 </div>
+                <Button
+                  variant={isLiked ? "default" : "outline"}
+                  size="sm"
+                  onClick={handleLike}
+                  className="ml-auto gap-1.5"
+                >
+                  <Heart className={`w-3.5 h-3.5 ${isLiked ? "fill-current" : ""}`} />
+                  {isLiked ? "Ti piace" : "Mi piace"}
+                </Button>
               </div>
             </div>
 
-            {/* Comments Section */}
-            <ScrollArea className="flex-1 p-4">
+            {/* Comments List */}
+            <ScrollArea className="flex-1 px-4 py-3">
               <div className="space-y-3">
                 {comments.length === 0 ? (
-                  <div className="text-center py-8">
-                    <MessageCircle className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">Nessun commento ancora</p>
+                  <div className="text-center py-6">
+                    <MessageCircle className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">Nessun commento</p>
                   </div>
                 ) : (
                   comments.map((comment) => (
                     <div key={comment.id} className="flex gap-2 animate-fade-in">
-                      <Avatar className="w-8 h-8">
+                      <Avatar className="w-7 h-7 flex-shrink-0">
                         <AvatarImage src={comment.profiles?.profile_image_url} />
                         <AvatarFallback className="bg-primary/10 text-xs">
                           {getDisplayName(comment.profiles).charAt(0).toUpperCase()}
@@ -250,7 +262,7 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <div className="bg-muted rounded-lg px-3 py-2">
-                          <p className="text-sm font-semibold text-foreground">
+                          <p className="text-xs font-semibold text-foreground">
                             {getDisplayName(comment.profiles)}
                           </p>
                           <p className="text-sm text-foreground leading-relaxed break-words">
@@ -270,27 +282,14 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
               </div>
             </ScrollArea>
 
-            {/* Action Bar */}
-            <div className="p-4 border-t border-border">
-              <div className="flex gap-2 mb-3">
-                <Button
-                  variant={isLiked ? "default" : "outline"}
-                  size="sm"
-                  onClick={handleLike}
-                  className="flex-1 gap-2"
-                >
-                  <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
-                  {isLiked ? "Ti piace" : "Mi piace"}
-                </Button>
-              </div>
-
-              {/* Comment Form */}
+            {/* Comment Input */}
+            <div className="p-3 border-t border-border bg-background">
               <form onSubmit={handleSubmitComment} className="flex gap-2">
                 <Textarea
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Scrivi un commento..."
-                  className="min-h-[40px] max-h-[120px] resize-none"
+                  placeholder="Aggiungi un commento..."
+                  className="min-h-[38px] max-h-[80px] resize-none text-sm"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -302,7 +301,7 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
                   type="submit"
                   disabled={loading || !newComment.trim()}
                   size="icon"
-                  className="h-10 w-10"
+                  className="h-[38px] w-[38px]"
                 >
                   <Send className="w-4 h-4" />
                 </Button>
