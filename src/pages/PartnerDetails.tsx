@@ -19,8 +19,22 @@ const PartnerDetails = () => {
   useEffect(() => {
     if (id) {
       fetchPartnerDetails();
+      trackPartnerView();
     }
   }, [id]);
+
+  const trackPartnerView = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || !id) return;
+
+    // Track this view
+    await supabase
+      .from("partner_views")
+      .insert({
+        client_id: user.id,
+        partner_id: id,
+      });
+  };
 
   const fetchPartnerDetails = async () => {
     const { data, error } = await supabase

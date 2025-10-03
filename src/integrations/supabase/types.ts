@@ -311,6 +311,45 @@ export type Database = {
           },
         ]
       }
+      partner_views: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          partner_id: string
+          viewed_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          partner_id: string
+          viewed_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          partner_id?: string
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_views_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_views_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           content: string | null

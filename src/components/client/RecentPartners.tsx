@@ -17,70 +17,50 @@ const RecentPartners = ({ userId }: RecentPartnersProps) => {
   const loadRecentPartners = async () => {
     setLoading(true);
 
-    // Get partners from reviews
-    const { data: reviewsData } = await supabase
-      .from("reviews")
-      .select("partner_id, created_at")
+    // Get most recently viewed partners
+    const { data: viewsData } = await supabase
+      .from("partner_views")
+      .select("partner_id, viewed_at")
       .eq("client_id", userId)
-      .order("created_at", { ascending: false });
+      .order("viewed_at", { ascending: false })
+      .limit(20); // Get more to filter duplicates
 
-    // Get partners from QR codes
-    const { data: qrData } = await supabase
-      .from("qr_codes")
+    if (!viewsData || viewsData.length === 0) {
+      setLoading(false);
+      return;
+    }
+
+    // Get unique partner IDs (most recent view for each)
+    const seenPartners = new Set<string>();
+    const uniquePartnerIds: string[] = [];
+
+    viewsData.forEach(view => {
+      if (!seenPartners.has(view.partner_id)) {
+        seenPartners.add(view.partner_id);
+        uniquePartnerIds.push(view.partner_id);
+      }
+    });
+
+    // Take only top 5
+    const recentPartnerIds = uniquePartnerIds.slice(0, 5);
+
+    // Fetch partner details with reviews and gallery
+    const { data: partnersData } = await supabase
+      .from("profiles")
       .select(`
-        event_id,
-        used_at,
-        events!inner(partner_id)
+        *,
+        reviews(rating),
+        gallery(image_url)
       `)
-      .eq("client_id", userId)
-      .eq("is_used", true)
-      .order("used_at", { ascending: false });
+      .in("id", recentPartnerIds);
 
-    // Combine and get unique partner IDs with their latest interaction
-    const partnerInteractions = new Map<string, Date>();
-
-    reviewsData?.forEach(review => {
-      const date = new Date(review.created_at);
-      if (!partnerInteractions.has(review.partner_id) || 
-          date > partnerInteractions.get(review.partner_id)!) {
-        partnerInteractions.set(review.partner_id, date);
-      }
-    });
-
-    qrData?.forEach(qr => {
-      const partnerId = qr.events.partner_id;
-      const date = new Date(qr.used_at);
-      if (!partnerInteractions.has(partnerId) || 
-          date > partnerInteractions.get(partnerId)!) {
-        partnerInteractions.set(partnerId, date);
-      }
-    });
-
-    // Sort by most recent interaction
-    const sortedPartnerIds = Array.from(partnerInteractions.entries())
-      .sort((a, b) => b[1].getTime() - a[1].getTime())
-      .slice(0, 5)
-      .map(entry => entry[0]);
-
-    if (sortedPartnerIds.length > 0) {
-      // Fetch partner details with reviews and gallery
-      const { data: partnersData } = await supabase
-        .from("profiles")
-        .select(`
-          *,
-          reviews(rating),
-          gallery(image_url)
-        `)
-        .in("id", sortedPartnerIds);
-
-      if (partnersData) {
-        // Sort partners by the order in sortedPartnerIds
-        const sortedPartners = sortedPartnerIds
-          .map(id => partnersData.find(p => p.id === id))
-          .filter(Boolean);
-        
-        setPartners(sortedPartners);
-      }
+    if (partnersData) {
+      // Sort partners by the order in recentPartnerIds
+      const sortedPartners = recentPartnerIds
+        .map(id => partnersData.find(p => p.id === id))
+        .filter(Boolean);
+      
+      setPartners(sortedPartners);
     }
 
     setLoading(false);
