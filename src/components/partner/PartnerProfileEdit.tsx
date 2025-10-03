@@ -23,6 +23,7 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
     business_city: profile.business_city || "",
     business_phone: profile.business_phone || "",
     profile_image_url: profile.profile_image_url || "",
+    cover_image_url: profile.cover_image_url || "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -119,6 +120,27 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
             bucket="avatars"
             userId={profile.id}
             onUploadComplete={(url) => setFormData({ ...formData, profile_image_url: url })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Foto Copertina</Label>
+          <p className="text-sm text-muted-foreground mb-2">
+            Questa immagine verrà mostrata sulla card del partner nella sezione clienti
+          </p>
+          {formData.cover_image_url && (
+            <div className="mb-3 rounded-lg overflow-hidden">
+              <img 
+                src={formData.cover_image_url} 
+                alt="Copertina" 
+                className="w-full h-48 object-cover"
+              />
+            </div>
+          )}
+          <ImageUploader
+            bucket="avatars"
+            userId={profile.id}
+            onUploadComplete={(url) => setFormData({ ...formData, cover_image_url: url })}
           />
         </div>
 

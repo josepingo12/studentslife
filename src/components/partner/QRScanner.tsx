@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2, XCircle, ScanLine } from "lucide-react";
+import { CheckCircle2, XCircle, ScanLine, Camera, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Html5Qrcode } from "html5-qrcode";
 
 interface QRScannerProps {
   partnerId: string;
@@ -15,6 +16,61 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
   const [code, setCode] = useState("");
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current.stop().catch(() => {});
+      }
+    };
+  }, []);
+
+  const startScanner = async () => {
+    try {
+      setScanning(true);
+      const html5QrCode = new Html5Qrcode("qr-reader");
+      scannerRef.current = html5QrCode;
+
+      await html5QrCode.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+        },
+        (decodedText) => {
+          setCode(decodedText.toUpperCase());
+          stopScanner();
+          toast({
+            title: "QR Code scansionato",
+            description: "Verifica in corso...",
+          });
+        },
+        () => {}
+      );
+    } catch (err) {
+      console.error("Errore avvio scanner:", err);
+      toast({
+        title: "Errore",
+        description: "Impossibile avviare la fotocamera",
+        variant: "destructive",
+      });
+      setScanning(false);
+    }
+  };
+
+  const stopScanner = async () => {
+    if (scannerRef.current) {
+      try {
+        await scannerRef.current.stop();
+        scannerRef.current = null;
+      } catch (err) {
+        console.error("Errore stop scanner:", err);
+      }
+    }
+    setScanning(false);
+  };
 
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,31 +164,64 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
           <ScanLine className="w-16 h-16 mx-auto mb-4 text-primary animate-pulse" />
           <h2 className="text-xl font-bold mb-2">Scanner QR Code</h2>
           <p className="text-muted-foreground text-sm">
-            Inserisci il codice QR mostrato dal cliente
+            Scansiona o inserisci il codice QR del cliente
           </p>
         </div>
 
-        <form onSubmit={handleScan} className="space-y-4">
-          <div className="space-y-2">
-            <Label>Codice QR</Label>
-            <Input
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="XXXXXXXXXXXX"
-              maxLength={12}
-              className="ios-input text-center text-2xl font-mono tracking-wider"
-              required
-            />
+        {/* Camera Scanner */}
+        {scanning ? (
+          <div className="space-y-4">
+            <div id="qr-reader" className="rounded-lg overflow-hidden" />
+            <Button
+              onClick={stopScanner}
+              variant="outline"
+              className="w-full"
+            >
+              <X className="w-4 h-4 mr-2" />
+              Chiudi Scanner
+            </Button>
           </div>
+        ) : (
+          <>
+            <Button
+              onClick={startScanner}
+              className="w-full mb-4 h-14 bg-gradient-to-br from-primary to-primary/80"
+            >
+              <Camera className="w-5 h-5 mr-2" />
+              Apri Fotocamera
+            </Button>
 
-          <Button
-            type="submit"
-            className="w-full ios-button h-14 text-lg"
-            disabled={loading || code.length !== 12}
-          >
-            {loading ? "Verifica..." : "Verifica QR Code"}
-          </Button>
-        </form>
+            <div className="relative mb-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">oppure</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleScan} className="space-y-4">
+              <div className="space-y-2">
+                <Label>Inserisci codice manualmente</Label>
+                <Input
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.toUpperCase())}
+                  placeholder="XXXXXXXXXXXX"
+                  maxLength={12}
+                  className="ios-input text-center text-2xl font-mono tracking-wider"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full ios-button h-14 text-lg"
+                disabled={loading || code.length !== 12}
+              >
+                {loading ? "Verifica..." : "Verifica QR Code"}
+              </Button>
+            </form>
+          </>
+        )}
       </div>
 
       {result && (
