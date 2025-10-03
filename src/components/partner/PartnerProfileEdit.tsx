@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import ImageUploader from "@/components/shared/ImageUploader";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import PartnerGalleryManager from "@/components/partner/PartnerGalleryManager";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface PartnerProfileEditProps {
   profile: any;
@@ -17,15 +18,32 @@ interface PartnerProfileEditProps {
 const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     business_name: profile.business_name || "",
     business_description: profile.business_description || "",
     business_address: profile.business_address || "",
     business_city: profile.business_city || "",
     business_phone: profile.business_phone || "",
+    business_category: profile.business_category || "",
     profile_image_url: profile.profile_image_url || "",
     cover_image_url: profile.cover_image_url || "",
   });
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    const { data } = await supabase
+      .from("categories")
+      .select("*")
+      .order("display_name");
+    
+    if (data) {
+      setCategories(data);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,6 +111,25 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
             value={formData.business_city}
             onChange={(e) => setFormData({ ...formData, business_city: e.target.value })}
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Categoria</Label>
+          <Select
+            value={formData.business_category}
+            onValueChange={(value) => setFormData({ ...formData, business_category: value })}
+          >
+            <SelectTrigger className="ios-input">
+              <SelectValue placeholder="Seleziona una categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((category) => (
+                <SelectItem key={category.id} value={category.name}>
+                  {category.display_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">
