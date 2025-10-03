@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_logs: {
+        Row: {
+          accessed_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          accessed_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          accessed_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          created_at: string | null
+          display_name: string
+          id: string
+          image_url: string | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_name: string
+          id?: string
+          image_url?: string | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string
+          id?: string
+          image_url?: string | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           content: string
@@ -394,6 +439,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: string | null
           business_address: string | null
           business_category: string | null
           business_city: string | null
@@ -413,6 +459,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          account_status?: string | null
           business_address?: string | null
           business_category?: string | null
           business_city?: string | null
@@ -432,6 +479,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          account_status?: string | null
           business_address?: string | null
           business_category?: string | null
           business_city?: string | null

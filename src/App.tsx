@@ -16,6 +16,8 @@ import Social from "./pages/Social";
 import Chats from "./pages/Chats";
 import ChatConversation from "./pages/ChatConversation";
 import UserProfile from "./pages/UserProfile";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +40,8 @@ const App = () => (
           <Route path="/chats" element={<Chats />} />
           <Route path="/chat/:conversationId" element={<ChatConversation />} />
           <Route path="/profile/:userId?" element={<UserProfile />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
