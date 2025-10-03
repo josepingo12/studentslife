@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 
 const UserProfile = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { userId } = useParams();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -40,7 +41,14 @@ const UserProfile = () => {
     checkAuth();
   }, [userId]);
 
-  // Refresh data when page becomes visible (e.g., returning from Social)
+  // Reload data when navigating to profile page (ensures likes/views are fresh)
+  useEffect(() => {
+    if (currentUser && location.pathname.startsWith('/profile')) {
+      loadUserContent(userId || currentUser.id);
+    }
+  }, [location.pathname, currentUser, userId]);
+
+  // Refresh data when page becomes visible
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && currentUser) {
