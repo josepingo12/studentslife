@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle, Grid, Bookmark, Camera, Pencil, Users, Home, UserCircle, Plus, Edit2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import ImageViewer from "@/components/social/ImageViewer";
+import PostDetailModal from "@/components/social/PostDetailModal";
 import UploadSheet from "@/components/shared/UploadSheet";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -21,9 +21,11 @@ const UserProfile = () => {
   const [stories, setStories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"posts" | "saved">("posts");
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [postDetailOpen, setPostDetailOpen] = useState(false);
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [totalLikes, setTotalLikes] = useState(0);
+  const [totalViews, setTotalViews] = useState(0);
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [bioText, setBioText] = useState("");
@@ -150,7 +152,8 @@ const UserProfile = () => {
       .from("posts")
       .select(`
         *,
-        likes(id, user_id)
+        likes(id, user_id),
+        public_profiles!posts_user_id_fkey(first_name, last_name, profile_image_url, business_name)
       `)
       .eq("user_id", id)
       .order("created_at", { ascending: false });
@@ -161,6 +164,16 @@ const UserProfile = () => {
     if (postsData) {
       const likes = postsData.reduce((acc, post) => acc + (post.likes?.length || 0), 0);
       setTotalLikes(likes);
+    }
+
+    // Count total views on user's posts
+    if (postsData && postsData.length > 0) {
+      const postIds = postsData.map(post => post.id);
+      const { count: viewsTotal } = await supabase
+        .from("post_views")
+        .select("*", { count: "exact", head: true })
+        .in("post_id", postIds);
+      setTotalViews(viewsTotal || 0);
     }
 
     // Load saved posts for own profile
@@ -373,7 +386,7 @@ const UserProfile = () => {
               <p className="text-xs text-muted-foreground">Mi piace</p>
             </div>
             <div className="text-center">
-              <p className="text-xl font-bold">0</p>
+              <p className="text-xl font-bold">{totalViews}</p>
               <p className="text-xs text-muted-foreground">Visualizzazioni</p>
             </div>
           </div>
@@ -417,7 +430,10 @@ const UserProfile = () => {
                   <div
                     key={post.id}
                     className="aspect-square bg-card rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={() => post.image_url && setSelectedImage(post.image_url)}
+                    onClick={() => {
+                      setSelectedPost(post);
+                      setPostDetailOpen(true);
+                    }}
                   >
                     {post.image_url ? (
                       <img
@@ -450,7 +466,10 @@ const UserProfile = () => {
                     <div
                       key={post.id}
                       className="aspect-square bg-card rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={() => post.image_url && setSelectedImage(post.image_url)}
+                      onClick={() => {
+                        setSelectedPost(post);
+                        setPostDetailOpen(true);
+                      }}
                     >
                       {post.image_url ? (
                         <img
@@ -474,14 +493,13 @@ const UserProfile = () => {
         </Tabs>
       </div>
 
-      {/* Image Viewer */}
-      {selectedImage && (
-        <ImageViewer
-          open={!!selectedImage}
-          onOpenChange={(open) => !open && setSelectedImage(null)}
-          imageUrl={selectedImage}
-        />
-      )}
+      {/* Post Detail Modal */}
+      <PostDetailModal
+        open={postDetailOpen}
+        onOpenChange={setPostDetailOpen}
+        post={selectedPost}
+        currentUserId={currentUser?.id || ""}
+      />
 
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
