@@ -17,6 +17,8 @@ const PartnersList = ({ category }: PartnersListProps) => {
   const fetchPartners = async () => {
     setLoading(true);
 
+    console.log('Fetching partners for category:', category);
+
     const { data, error } = await supabase
       .from("profiles")
       .select(`
@@ -27,6 +29,8 @@ const PartnersList = ({ category }: PartnersListProps) => {
       `)
       .eq("business_category", category)
       .eq("user_roles.role", "partner");
+
+    console.log('Partners query result:', { data, error, category });
 
     if (!error && data) {
       setPartners(data);
