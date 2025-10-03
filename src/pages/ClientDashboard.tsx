@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, User, Home, Users, MessageCircle, UserCircle } from "lucide-react";
+import { LogOut, Settings, User, Home, Users, MessageCircle, UserCircle, Plus } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import CategoryCarousel from "@/components/client/CategoryCarousel";
@@ -11,6 +11,7 @@ import PartnersList from "@/components/client/PartnersList";
 import StoriesCarousel from "@/components/social/StoriesCarousel";
 import CreatePost from "@/components/social/CreatePost";
 import PostCard from "@/components/social/PostCard";
+import UploadSheet from "@/components/shared/UploadSheet";
 
 const ClientDashboard = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const ClientDashboard = () => {
   const [activeTab, setActiveTab] = useState<"social" | "partners" | "chats" | "profile">("social");
   const [posts, setPosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
+  const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -225,14 +227,13 @@ const ClientDashboard = () => {
           </button>
         </div>
       ) : activeTab === "profile" ? (
-        <div className="text-center py-12 ios-card mx-4 mt-4">
-          <p className="text-muted-foreground mb-4">Il profilo si apre in una pagina dedicata</p>
-          <button
-            onClick={() => navigate("/profile")}
-            className="text-primary hover:underline"
-          >
-            Vai al Profilo
-          </button>
+        <div className="ios-card mx-4 mt-4">
+          {/* Profile content will be shown inline */}
+          <iframe 
+            src="/profile" 
+            className="w-full h-[calc(100vh-200px)] border-0"
+            title="Profilo"
+          />
         </div>
       ) : (
         <>
@@ -262,7 +263,7 @@ const ClientDashboard = () => {
 
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
-        <div className="flex items-center justify-around h-20 px-4 max-w-md mx-auto">
+        <div className="flex items-center justify-between h-20 px-4 max-w-md mx-auto">
           <button
             onClick={() => setActiveTab("social")}
             className={`flex flex-col items-center gap-1 transition-colors ${
@@ -272,15 +273,7 @@ const ClientDashboard = () => {
             <Users className="w-6 h-6" />
             <span className="text-xs font-medium">Social</span>
           </button>
-          <button
-            onClick={() => setActiveTab("chats")}
-            className={`flex flex-col items-center gap-1 transition-colors ${
-              activeTab === "chats" ? "text-primary" : "text-muted-foreground"
-            }`}
-          >
-            <MessageCircle className="w-6 h-6" />
-            <span className="text-xs font-medium">Chat</span>
-          </button>
+          
           <button
             onClick={() => setActiveTab("partners")}
             className={`flex flex-col items-center gap-1 transition-colors ${
@@ -290,6 +283,25 @@ const ClientDashboard = () => {
             <Home className="w-6 h-6" />
             <span className="text-xs font-medium">Partner</span>
           </button>
+
+          {/* Central Upload Button */}
+          <button
+            onClick={() => setUploadSheetOpen(true)}
+            className="relative -mt-6 bg-gradient-to-br from-primary to-primary/80 rounded-full p-4 shadow-lg hover:scale-105 transition-transform"
+          >
+            <Plus className="w-8 h-8 text-white" />
+          </button>
+
+          <button
+            onClick={() => setActiveTab("chats")}
+            className={`flex flex-col items-center gap-1 transition-colors ${
+              activeTab === "chats" ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            <MessageCircle className="w-6 h-6" />
+            <span className="text-xs font-medium">Chat</span>
+          </button>
+          
           <button
             onClick={() => setActiveTab("profile")}
             className={`flex flex-col items-center gap-1 transition-colors ${
@@ -301,6 +313,18 @@ const ClientDashboard = () => {
           </button>
         </div>
       </div>
+
+      {/* Upload Sheet */}
+      <UploadSheet
+        open={uploadSheetOpen}
+        onOpenChange={setUploadSheetOpen}
+        userId={user.id}
+        onUploadComplete={() => {
+          if (activeTab === "social") {
+            loadPosts();
+          }
+        }}
+      />
     </div>
   );
 };

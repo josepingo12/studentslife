@@ -159,7 +159,7 @@ const UserProfile = () => {
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <h1 className="text-xl font-bold">{getDisplayName()}</h1>
+        <h1 className="text-xl font-bold">Profilo</h1>
         <div className="w-10" />
       </div>
 
