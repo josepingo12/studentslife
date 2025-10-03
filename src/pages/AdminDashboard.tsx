@@ -21,7 +21,7 @@ const AdminDashboard = () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        navigate("/admin/login");
+        navigate("/");
         return;
       }
 
@@ -31,19 +31,19 @@ const AdminDashboard = () => {
       });
 
       if (!isAdmin) {
-        navigate("/admin/login");
+        navigate("/");
         return;
       }
 
       setLoading(false);
     } catch (error) {
-      navigate("/admin/login");
+      navigate("/");
     }
   };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate("/admin/login");
+    navigate("/");
   };
 
   if (loading) {
