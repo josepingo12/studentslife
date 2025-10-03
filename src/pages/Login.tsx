@@ -35,6 +35,23 @@ const Login = () => {
 
         console.log("Role check via RPC:", { role }, "Error:", roleError);
 
+        // Se l'utente non ha ancora un ruolo, assegniamo automaticamente "client"
+        let effectiveRole = role as string | null;
+        if (!roleError && !role) {
+          const { error: insertRoleError } = await supabase
+            .from("user_roles")
+            .insert({ user_id: data.user.id, role: "client" });
+
+          if (!insertRoleError) {
+            effectiveRole = "client";
+            toast({
+              title: "Profilo completato",
+              description: "Ruolo 'cliente' assegnato automaticamente.",
+            });
+          }
+        }
+
+
 
         toast({
           title: "Accesso effettuato!",
@@ -42,20 +59,19 @@ const Login = () => {
         });
 
         // Redirect based on role
-        if (role === "admin") {
+        if (effectiveRole === "admin") {
           navigate("/admin");
-        } else if (role === "partner") {
+        } else if (effectiveRole === "partner") {
           navigate("/partner-dashboard");
-        } else if (role === "client") {
+        } else if (effectiveRole === "client") {
           navigate("/client-dashboard");
         } else {
-
-          // No role found
+          // Nessun ruolo determinato: guida alla registrazione
           toast({
-            title: "Errore",
-            description: "Ruolo utente non trovato. Contatta il supporto.",
-            variant: "destructive",
+            title: "Completa la registrazione",
+            description: "Seleziona il tuo ruolo per continuare.",
           });
+          navigate("/register-client");
         }
       }
     } catch (error: any) {

@@ -62,15 +62,11 @@ const ClientDashboard = () => {
       return;
     }
 
-    const { data: roleData, error: roleError } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    const { data: role, error: roleError } = await supabase.rpc('get_user_role', { _user_id: user.id });
 
-    console.log("Client dashboard - Role check:", roleData, "Error:", roleError);
+    console.log("Client dashboard - Role check:", { role }, "Error:", roleError);
 
-    if (!roleData || roleData.role !== "client") {
+    if (role !== "client") {
       navigate("/login");
       return;
     }
