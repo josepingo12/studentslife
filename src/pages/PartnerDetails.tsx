@@ -27,7 +27,7 @@ const PartnerDetails = () => {
       .from("profiles")
       .select(`
         *,
-        reviews(rating, comment, created_at, profiles(first_name, last_name))
+        reviews!reviews_partner_id_fkey(rating, comment, created_at, profiles!reviews_client_id_fkey(first_name, last_name))
       `)
       .eq("id", id)
       .single();
