@@ -17,14 +17,6 @@ const MostUsedPartners = ({ userId }: MostUsedPartnersProps) => {
   const loadMostUsed = async () => {
     setLoading(true);
 
-    // First get partner user IDs
-    const { data: partnerRoles } = await supabase
-      .from("user_roles")
-      .select("user_id")
-      .eq("role", "partner");
-
-    const partnerIds = partnerRoles?.map(r => r.user_id) || [];
-
     // Get partners with reviews and gallery
     const { data } = await supabase
       .from("profiles")
@@ -33,7 +25,7 @@ const MostUsedPartners = ({ userId }: MostUsedPartnersProps) => {
         reviews(rating),
         gallery(image_url)
       `)
-      .in("id", partnerIds)
+      .not('business_category', 'is', null)
       .limit(10);
 
     if (data) {

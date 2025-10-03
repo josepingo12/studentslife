@@ -30,13 +30,11 @@ const Login = () => {
 
       if (data.user) {
         // Get user role to redirect appropriately
-        const { data: roleData, error: roleError } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", data.user.id)
-          .maybeSingle();
+        const { data: role, error: roleError } = await supabase
+          .rpc('get_user_role', { _user_id: data.user.id });
 
-        console.log("Role data:", roleData, "Error:", roleError);
+        console.log("Role check via RPC:", { role }, "Error:", roleError);
+
 
         toast({
           title: "Accesso effettuato!",
@@ -44,13 +42,14 @@ const Login = () => {
         });
 
         // Redirect based on role
-        if (roleData?.role === "admin") {
+        if (role === "admin") {
           navigate("/admin");
-        } else if (roleData?.role === "partner") {
+        } else if (role === "partner") {
           navigate("/partner-dashboard");
-        } else if (roleData?.role === "client") {
+        } else if (role === "client") {
           navigate("/client-dashboard");
         } else {
+
           // No role found
           toast({
             title: "Errore",
