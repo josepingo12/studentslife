@@ -20,18 +20,18 @@ const QRCodeModal = ({ event, open, onClose }: QRCodeModalProps) => {
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [downloading, setDownloading] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (open && event.qrCode && canvasRef.current) {
+    if (open && event.qrCode?.code) {
       generateQRCode();
     }
-  }, [open, event.qrCode]);
+  }, [open, event.qrCode?.code]);
 
   const generateQRCode = async () => {
-    if (!canvasRef.current || !event.qrCode) return;
-    
+    if (!event.qrCode?.code) return;
     try {
-      await QRCodeLib.toCanvas(canvasRef.current, event.qrCode.code, {
+      const url = await QRCodeLib.toDataURL(event.qrCode.code, {
         width: 300,
         margin: 2,
         color: {
@@ -39,25 +39,24 @@ const QRCodeModal = ({ event, open, onClose }: QRCodeModalProps) => {
           light: "#FFFFFF",
         },
       });
+      setQrDataUrl(url);
     } catch (err) {
       console.error("Errore generazione QR:", err);
     }
   };
 
   const downloadQRCode = async () => {
-    if (!canvasRef.current || !event.qrCode) return;
-    
+    if (!event.qrCode) return;
     setDownloading(true);
-    
     try {
-      const canvas = canvasRef.current;
-      const dataUrl = canvas.toDataURL("image/png");
+      const dataUrl = qrDataUrl ?? canvasRef.current?.toDataURL("image/png");
+      if (!dataUrl) throw new Error("QR not ready");
       const fileName = `qr-${event.qrCode.code}.png`;
 
       if (Capacitor.isNativePlatform()) {
         // Mobile: salva nel dispositivo usando Capacitor
         const base64Data = dataUrl.split(",")[1];
-        
+
         const savedFile = await Filesystem.writeFile({
           path: fileName,
           data: base64Data,
@@ -114,11 +113,19 @@ const QRCodeModal = ({ event, open, onClose }: QRCodeModalProps) => {
         <div className="space-y-6">
           {/* QR Code Display */}
           <div className="bg-white p-6 rounded-2xl flex flex-col items-center">
-            <canvas
-              ref={canvasRef}
-              className="w-full max-w-[300px] h-auto"
-              style={{ display: 'block' }}
-            />
+            {qrDataUrl ? (
+              <img
+                src={qrDataUrl}
+                alt="QR Code"
+                className="w-full max-w-[300px] h-auto"
+              />
+            ) : (
+              <canvas
+                ref={canvasRef}
+                className="w-full max-w-[300px] h-auto"
+                style={{ display: 'block' }}
+              />
+            )}
             <p className="text-center mt-4 text-lg font-bold font-mono tracking-wider">
               {event.qrCode.code}
             </p>
