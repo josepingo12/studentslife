@@ -267,20 +267,20 @@ const UserProfile = () => {
         />
         
         {/* Avatar and Info */}
-        <div className="px-4 -mt-12">
-          <div className="relative inline-block">
-            <Avatar className="h-24 w-24 border-4 border-background">
+        <div className="px-4 -mt-12 text-center">
+          <div className="relative inline-block mb-3">
+            <Avatar className="h-28 w-28 border-4 border-background">
               <AvatarImage src={profile?.profile_image_url} />
-              <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+              <AvatarFallback className="bg-primary text-primary-foreground text-3xl">
                 {getDisplayName()[0]}
               </AvatarFallback>
             </Avatar>
             {isOwnProfile && (
               <button
                 onClick={() => avatarInputRef.current?.click()}
-                className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 transition-colors"
+                className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-2.5 rounded-full hover:bg-primary/90 transition-colors shadow-lg"
               >
-                <Pencil className="w-3 h-3" />
+                <Pencil className="w-4 h-4" />
               </button>
             )}
           </div>
@@ -292,27 +292,31 @@ const UserProfile = () => {
             onChange={handleAvatarUpload}
           />
 
-          <div className="mt-3">
-            <h2 className="text-xl font-bold">{getDisplayName()}</h2>
-          </div>
+          <h2 className="text-2xl font-bold mb-1">{getDisplayName()}</h2>
+          
+          {profile?.university && (
+            <p className="text-sm text-muted-foreground mb-3">{profile.university}</p>
+          )}
 
           {/* Bio */}
           {profile?.business_description && (
-            <p className="text-sm text-muted-foreground mt-2 mb-3">{profile.business_description}</p>
+            <div className="max-w-sm mx-auto mb-4">
+              <p className="text-sm text-muted-foreground leading-relaxed">{profile.business_description}</p>
+            </div>
           )}
 
           {/* Stats */}
-          <div className="flex gap-6 mt-3 mb-4">
+          <div className="flex justify-center gap-8 py-4 border-y border-border/50 mb-4">
             <div className="text-center">
-              <p className="text-lg font-bold">{posts.length}</p>
+              <p className="text-xl font-bold">{posts.length}</p>
               <p className="text-xs text-muted-foreground">Post</p>
             </div>
             <div className="text-center">
-              <p className="text-lg font-bold">{totalLikes}</p>
+              <p className="text-xl font-bold">{totalLikes}</p>
               <p className="text-xs text-muted-foreground">Mi piace</p>
             </div>
             <div className="text-center">
-              <p className="text-lg font-bold">0</p>
+              <p className="text-xl font-bold">0</p>
               <p className="text-xs text-muted-foreground">Visualizzazioni</p>
             </div>
           </div>
@@ -320,7 +324,7 @@ const UserProfile = () => {
           {!isOwnProfile && (
             <Button
               onClick={handleStartChat}
-              className="w-full mt-2 gap-2"
+              className="w-full max-w-xs mx-auto gap-2"
             >
               <MessageCircle className="w-4 h-4" />
               Invia messaggio
