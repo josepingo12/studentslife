@@ -800,6 +800,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      set_admin_by_email: {
+        Args: { _email: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "client" | "partner" | "admin"
