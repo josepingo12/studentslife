@@ -159,9 +159,9 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
     }
   };
 
-  const displayName = post.profiles?.first_name 
-    ? `${post.profiles.first_name} ${post.profiles.last_name || ''}`
-    : post.profiles?.business_name || "Utente";
+  const displayName = post.public_profiles?.first_name 
+    ? `${post.public_profiles.first_name} ${post.public_profiles.last_name || ''}`.trim()
+    : post.public_profiles?.business_name || "Utente";
 
   return (
     <div className="ios-card overflow-hidden">
@@ -172,7 +172,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
           className="flex items-center gap-3 hover:opacity-80 transition-opacity"
         >
           <Avatar className="h-10 w-10">
-            <AvatarImage src={post.profiles?.profile_image_url} />
+            <AvatarImage src={post.public_profiles?.profile_image_url} />
             <AvatarFallback className="bg-primary text-primary-foreground">
               {displayName[0]}
             </AvatarFallback>
