@@ -144,60 +144,6 @@ const ClientDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary pb-24">
-      {/* Top Bar */}
-      <div className="ios-card mx-4 mt-4 p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Sheet>
-            <SheetTrigger asChild>
-              <button className="transition-transform hover:scale-110">
-                <Avatar className="h-12 w-12 border-2 border-primary">
-                  <AvatarImage src={profile.profile_image_url} />
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    {profile.first_name?.[0]}{profile.last_name?.[0]}
-                  </AvatarFallback>
-                </Avatar>
-              </button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="rounded-t-3xl">
-              <SheetHeader>
-                <SheetTitle>Impostazioni</SheetTitle>
-              </SheetHeader>
-              <div className="space-y-4 mt-6">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start gap-3 h-14 rounded-xl"
-                  onClick={() => navigate("/client-profile")}
-                >
-                  <User className="h-5 w-5" />
-                  Profilo
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start gap-3 h-14 rounded-xl"
-                  onClick={() => navigate("/client-settings")}
-                >
-                  <Settings className="h-5 w-5" />
-                  Cambio Password e Lingua
-                </Button>
-                <Button
-                  variant="destructive"
-                  className="w-full justify-start gap-3 h-14 rounded-xl"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="h-5 w-5" />
-                  Esci
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
-          <div>
-            <h2 className="font-bold text-lg">Ciao, {profile.first_name}!</h2>
-            <p className="text-sm text-muted-foreground">{profile.university}</p>
-          </div>
-        </div>
-        <h1 className="text-2xl font-bold text-primary">Students Life</h1>
-      </div>
-
       {/* Content based on active tab */}
       {activeTab === "social" ? (
         <>
