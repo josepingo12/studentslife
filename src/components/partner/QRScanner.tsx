@@ -29,65 +29,105 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
 
   const startScanner = async () => {
     try {
+      // Blocked contexts: insecure or embedded iframes often cannot request camera
+      if (!window.isSecureContext) {
+        toast({
+          title: "Permesso non disponibile",
+          description: "La fotocamera richiede HTTPS. Apri il sito con https://",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (window.self !== window.top) {
+        toast({
+          title: "Apri in nuova scheda",
+          description: "La fotocamera è bloccata nel preview. Apri la pagina in una nuova scheda.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!navigator.mediaDevices?.getUserMedia) {
+        toast({
+          title: "Non supportato",
+          description: "Il browser non supporta l'accesso alla fotocamera.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setScanning(true);
+
+      // Pre-chiedi permesso alla fotocamera per far apparire il prompt
+      try {
+        const stream = await navigator.mediaDevices
+          .getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false })
+          .catch(() => navigator.mediaDevices.getUserMedia({ video: true, audio: false }));
+        // Chiudi subito lo stream (serve solo per sbloccare permesso)
+        stream?.getTracks()?.forEach((t) => t.stop());
+      } catch (permErr: any) {
+        throw permErr; // Gestito più sotto con messaggio chiaro
+      }
+
       const html5QrCode = new Html5Qrcode("qr-reader");
       scannerRef.current = html5QrCode;
 
-      // Try with environment camera first, fallback to any camera
       const config = {
         fps: 10,
         qrbox: { width: 250, height: 250 },
         aspectRatio: 1.0,
-      };
+      } as const;
+
+      // Prova con deviceId esplicito (preferisci camera posteriore)
+      let constraints: any = { facingMode: "environment" };
+      try {
+        const cameras = await Html5Qrcode.getCameras();
+        if (cameras && cameras.length > 0) {
+          const back = cameras.find((c) => /back|rear|environment/i.test(c.label)) || cameras[0];
+          constraints = { deviceId: { exact: back.id } };
+        }
+      } catch {
+        // Ignora, useremo facingMode fallback
+      }
 
       try {
         await html5QrCode.start(
-          { facingMode: "environment" },
+          constraints,
           config,
           (decodedText) => {
             setCode(decodedText.toUpperCase());
             stopScanner();
-            toast({
-              title: "QR Code scansionato",
-              description: "Verifica in corso...",
-            });
+            toast({ title: "QR Code scansionato", description: "Verifica in corso..." });
           },
           () => {}
         );
       } catch (err) {
-        // Fallback: try with any available camera
-        console.log("Trying fallback camera...");
+        // Fallback ulteriore: prova la camera frontale
         await html5QrCode.start(
           { facingMode: "user" },
           config,
           (decodedText) => {
             setCode(decodedText.toUpperCase());
             stopScanner();
-            toast({
-              title: "QR Code scansionato",
-              description: "Verifica in corso...",
-            });
+            toast({ title: "QR Code scansionato", description: "Verifica in corso..." });
           },
           () => {}
         );
       }
     } catch (err: any) {
       console.error("Errore avvio scanner:", err);
-      
+
       let errorMessage = "Impossibile avviare la fotocamera";
-      if (err.name === 'NotAllowedError') {
+      if (err?.name === "NotAllowedError") {
         errorMessage = "Permesso fotocamera negato. Abilita i permessi nelle impostazioni del browser.";
-      } else if (err.name === 'NotFoundError') {
+      } else if (err?.name === "NotFoundError") {
         errorMessage = "Nessuna fotocamera trovata sul dispositivo.";
-      } else if (err.name === 'NotReadableError') {
+      } else if (err?.name === "NotReadableError") {
         errorMessage = "Fotocamera già in uso o non disponibile.";
+      } else if (err?.message) {
+        errorMessage = err.message;
       }
-      
-      toast({
-        title: "Errore",
-        description: errorMessage,
-        variant: "destructive",
-      });
+
+      toast({ title: "Errore", description: errorMessage, variant: "destructive" });
       setScanning(false);
     }
   };
