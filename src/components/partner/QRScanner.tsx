@@ -33,27 +33,59 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
       const html5QrCode = new Html5Qrcode("qr-reader");
       scannerRef.current = html5QrCode;
 
-      await html5QrCode.start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-        },
-        (decodedText) => {
-          setCode(decodedText.toUpperCase());
-          stopScanner();
-          toast({
-            title: "QR Code scansionato",
-            description: "Verifica in corso...",
-          });
-        },
-        () => {}
-      );
-    } catch (err) {
+      // Try with environment camera first, fallback to any camera
+      const config = {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.0,
+      };
+
+      try {
+        await html5QrCode.start(
+          { facingMode: "environment" },
+          config,
+          (decodedText) => {
+            setCode(decodedText.toUpperCase());
+            stopScanner();
+            toast({
+              title: "QR Code scansionato",
+              description: "Verifica in corso...",
+            });
+          },
+          () => {}
+        );
+      } catch (err) {
+        // Fallback: try with any available camera
+        console.log("Trying fallback camera...");
+        await html5QrCode.start(
+          { facingMode: "user" },
+          config,
+          (decodedText) => {
+            setCode(decodedText.toUpperCase());
+            stopScanner();
+            toast({
+              title: "QR Code scansionato",
+              description: "Verifica in corso...",
+            });
+          },
+          () => {}
+        );
+      }
+    } catch (err: any) {
       console.error("Errore avvio scanner:", err);
+      
+      let errorMessage = "Impossibile avviare la fotocamera";
+      if (err.name === 'NotAllowedError') {
+        errorMessage = "Permesso fotocamera negato. Abilita i permessi nelle impostazioni del browser.";
+      } else if (err.name === 'NotFoundError') {
+        errorMessage = "Nessuna fotocamera trovata sul dispositivo.";
+      } else if (err.name === 'NotReadableError') {
+        errorMessage = "Fotocamera già in uso o non disponibile.";
+      }
+      
       toast({
         title: "Errore",
-        description: "Impossibile avviare la fotocamera",
+        description: errorMessage,
         variant: "destructive",
       });
       setScanning(false);

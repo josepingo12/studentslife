@@ -27,14 +27,23 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
     setLanguage(i18n.language);
   }, [i18n.language]);
 
-  const handleLanguageChange = (newLang: string) => {
-    setLanguage(newLang);
-    i18n.changeLanguage(newLang);
-    localStorage.setItem('appLanguage', newLang);
-    toast({
-      title: t('common.success'),
-      description: t('success.profileUpdated'),
-    });
+  const handleLanguageChange = async (newLang: string) => {
+    try {
+      setLanguage(newLang);
+      await i18n.changeLanguage(newLang);
+      localStorage.setItem('appLanguage', newLang);
+      toast({
+        title: t('common.success'),
+        description: t('success.profileUpdated'),
+      });
+    } catch (error) {
+      console.error('Failed to change language:', error);
+      toast({
+        title: t('common.error'),
+        description: 'Errore nel cambio lingua',
+        variant: "destructive",
+      });
+    }
   };
 
   const handlePasswordChange = async () => {

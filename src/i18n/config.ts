@@ -15,8 +15,16 @@ const resources = {
   de: { translation: de },
 };
 
-// Get saved language from localStorage or default to 'it'
-const savedLanguage = localStorage.getItem('appLanguage') || 'it';
+// Get saved language from localStorage with error handling
+let savedLanguage = 'it';
+try {
+  const storedLang = localStorage.getItem('appLanguage');
+  if (storedLang) {
+    savedLanguage = storedLang;
+  }
+} catch (error) {
+  console.warn('Failed to read language from localStorage:', error);
+}
 
 i18n
   .use(initReactI18next)
@@ -27,6 +35,9 @@ i18n
     interpolation: {
       escapeValue: false,
     },
+  })
+  .catch((error) => {
+    console.error('Failed to initialize i18n:', error);
   });
 
 export default i18n;
