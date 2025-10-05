@@ -57,17 +57,6 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
 
       setScanning(true);
 
-      // Pre-chiedi permesso alla fotocamera per far apparire il prompt
-      try {
-        const stream = await navigator.mediaDevices
-          .getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false })
-          .catch(() => navigator.mediaDevices.getUserMedia({ video: true, audio: false }));
-        // Chiudi subito lo stream (serve solo per sbloccare permesso)
-        stream?.getTracks()?.forEach((t) => t.stop());
-      } catch (permErr: any) {
-        throw permErr; // Gestito più sotto con messaggio chiaro
-      }
-
       const html5QrCode = new Html5Qrcode("qr-reader");
       scannerRef.current = html5QrCode;
 
@@ -77,42 +66,36 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         aspectRatio: 1.0,
       } as const;
 
-      // Prova con deviceId esplicito (preferisci camera posteriore)
-      let constraints: any = { facingMode: "environment" };
+      // Cerca esplicitamente la camera posteriore
+      let cameraId: string | undefined;
       try {
         const cameras = await Html5Qrcode.getCameras();
         if (cameras && cameras.length > 0) {
-          const back = cameras.find((c) => /back|rear|environment/i.test(c.label)) || cameras[0];
-          constraints = { deviceId: { exact: back.id } };
+          // Cerca camera posteriore nel label
+          const backCamera = cameras.find((c) => 
+            /back|rear|posteriore|environment/i.test(c.label)
+          );
+          cameraId = backCamera?.id || cameras[cameras.length - 1]?.id;
         }
-      } catch {
-        // Ignora, useremo facingMode fallback
+      } catch (e) {
+        console.log("Impossibile elencare le camere, uso facingMode");
       }
 
-      try {
-        await html5QrCode.start(
-          constraints,
-          config,
-          (decodedText) => {
-            setCode(decodedText.toUpperCase());
-            stopScanner();
-            toast({ title: "QR Code scansionato", description: "Verifica in corso..." });
-          },
-          () => {}
-        );
-      } catch (err) {
-        // Fallback ulteriore: prova la camera frontale
-        await html5QrCode.start(
-          { facingMode: "user" },
-          config,
-          (decodedText) => {
-            setCode(decodedText.toUpperCase());
-            stopScanner();
-            toast({ title: "QR Code scansionato", description: "Verifica in corso..." });
-          },
-          () => {}
-        );
-      }
+      // Usa deviceId se trovato, altrimenti facingMode environment
+      const constraints = cameraId 
+        ? { deviceId: { exact: cameraId } }
+        : { facingMode: { exact: "environment" } };
+
+      await html5QrCode.start(
+        constraints,
+        config,
+        (decodedText) => {
+          setCode(decodedText.toUpperCase());
+          stopScanner();
+          toast({ title: "QR Code scansionato", description: "Verifica in corso..." });
+        },
+        () => {}
+      );
     } catch (err: any) {
       console.error("Errore avvio scanner:", err);
 
