@@ -12,9 +12,10 @@ interface StoryViewerProps {
   };
   currentUserId: string;
   onClose: () => void;
+  onNext?: () => void;
 }
 
-const StoryViewer = ({ storyGroup, currentUserId, onClose }: StoryViewerProps) => {
+const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewerProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [viewersOpen, setViewersOpen] = useState(false);
@@ -29,7 +30,12 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose }: StoryViewerProps) =
             setCurrentIndex(currentIndex + 1);
             return 0;
           } else {
-            onClose();
+            // Try to advance to next user's story, or close if none
+            if (onNext) {
+              onNext();
+            } else {
+              onClose();
+            }
             return prev;
           }
         }
@@ -38,7 +44,7 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose }: StoryViewerProps) =
     }, 100);
 
     return () => clearInterval(timer);
-  }, [currentIndex, storyGroup.stories.length, onClose]);
+  }, [currentIndex, storyGroup.stories.length, onClose, onNext]);
 
   useEffect(() => {
     const currentStory = storyGroup.stories[currentIndex];
@@ -77,7 +83,12 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose }: StoryViewerProps) =
       setCurrentIndex(currentIndex + 1);
       setProgress(0);
     } else {
-      onClose();
+      // Try to advance to next user's story, or close if none
+      if (onNext) {
+        onNext();
+      } else {
+        onClose();
+      }
     }
   };
 
@@ -139,23 +150,25 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose }: StoryViewerProps) =
         </div>
       </div>
 
-      {/* Story image */}
-      <div className="relative h-full flex items-center justify-center">
-        <img
-          src={currentStory.image_url}
-          alt="Story"
-          className="max-h-full max-w-full object-contain"
-        />
-        
-        {/* Navigation areas */}
-        <div
-          className="absolute left-0 top-0 bottom-0 w-1/3 cursor-pointer"
-          onClick={handlePrev}
-        />
-        <div
-          className="absolute right-0 top-0 bottom-0 w-1/3 cursor-pointer"
-          onClick={handleNext}
-        />
+      {/* Story image container - fixed size */}
+      <div className="absolute inset-0 top-20 bottom-0">
+        <div className="relative h-full w-full flex items-center justify-center">
+          <img
+            src={currentStory.image_url}
+            alt="Story"
+            className="h-full w-full object-contain"
+          />
+          
+          {/* Navigation areas */}
+          <div
+            className="absolute left-0 top-0 bottom-0 w-1/3 cursor-pointer z-10"
+            onClick={handlePrev}
+          />
+          <div
+            className="absolute right-0 top-0 bottom-0 w-1/3 cursor-pointer z-10"
+            onClick={handleNext}
+          />
+        </div>
       </div>
 
       {/* Story Viewers Sheet */}

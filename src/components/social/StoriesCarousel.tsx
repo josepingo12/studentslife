@@ -14,11 +14,14 @@ const StoriesCarousel = ({ currentUserId }: StoriesCarouselProps) => {
   const { toast } = useToast();
   const [stories, setStories] = useState<any[]>([]);
   const [selectedStory, setSelectedStory] = useState<any>(null);
+  const [selectedStoryIndex, setSelectedStoryIndex] = useState<number>(0);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [viewedStories, setViewedStories] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadStories();
-  }, []);
+    loadViewedStories();
+  }, [currentUserId]);
 
   const loadStories = async () => {
     const { data } = await supabase
@@ -46,9 +49,44 @@ const StoriesCarousel = ({ currentUserId }: StoriesCarouselProps) => {
     setStories(Object.values(groupedStories));
   };
 
+  const loadViewedStories = async () => {
+    const { data } = await supabase
+      .from("story_views")
+      .select("story_id")
+      .eq("viewer_id", currentUserId);
+    
+    if (data) {
+      setViewedStories(new Set(data.map(v => v.story_id)));
+    }
+  };
+
   const handleStoryCreated = () => {
     loadStories();
     setShowCreateDialog(false);
+  };
+
+  const handleStoryClick = (storyGroup: any, index: number) => {
+    setSelectedStory(storyGroup);
+    setSelectedStoryIndex(index);
+  };
+
+  const handleNextStory = () => {
+    if (selectedStoryIndex < stories.length - 1) {
+      const nextIndex = selectedStoryIndex + 1;
+      setSelectedStory(stories[nextIndex]);
+      setSelectedStoryIndex(nextIndex);
+    } else {
+      setSelectedStory(null);
+    }
+  };
+
+  const handleCloseStory = () => {
+    setSelectedStory(null);
+    loadViewedStories(); // Refresh viewed stories
+  };
+
+  const isStoryGroupViewed = (storyGroup: any) => {
+    return storyGroup.stories.every((story: any) => viewedStories.has(story.id));
   };
 
   const userHasStory = stories.some(s => s.user_id === currentUserId);
@@ -73,36 +111,44 @@ const StoriesCarousel = ({ currentUserId }: StoriesCarouselProps) => {
         </div>
 
         {/* Stories */}
-        {stories.map((storyGroup) => (
-          <div
-            key={storyGroup.user_id}
-            className="flex flex-col items-center gap-1 flex-shrink-0"
-          >
-            <button
-              onClick={() => setSelectedStory(storyGroup)}
-              className="relative"
+        {stories.map((storyGroup, index) => {
+          const isViewed = isStoryGroupViewed(storyGroup);
+          return (
+            <div
+              key={storyGroup.user_id}
+              className="flex flex-col items-center gap-1 flex-shrink-0"
             >
-              <div className="p-[3px] rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500">
-                <Avatar className="h-16 w-16 border-2 border-background">
-                  <AvatarImage src={storyGroup.profile?.profile_image_url} />
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    {storyGroup.profile?.first_name?.[0] || storyGroup.profile?.business_name?.[0]}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-            </button>
-            <span className="text-xs text-center max-w-[70px] truncate">
-              {storyGroup.profile?.first_name || storyGroup.profile?.business_name}
-            </span>
-          </div>
-        ))}
+              <button
+                onClick={() => handleStoryClick(storyGroup, index)}
+                className="relative"
+              >
+                <div className={`p-[3px] rounded-full ${
+                  isViewed 
+                    ? 'bg-gradient-to-tr from-muted to-muted-foreground/30' 
+                    : 'bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500'
+                }`}>
+                  <Avatar className="h-16 w-16 border-2 border-background">
+                    <AvatarImage src={storyGroup.profile?.profile_image_url} />
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {storyGroup.profile?.first_name?.[0] || storyGroup.profile?.business_name?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+              </button>
+              <span className="text-xs text-center max-w-[70px] truncate">
+                {storyGroup.profile?.first_name || storyGroup.profile?.business_name}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
       {selectedStory && (
         <StoryViewer
           storyGroup={selectedStory}
           currentUserId={currentUserId}
-          onClose={() => setSelectedStory(null)}
+          onClose={handleCloseStory}
+          onNext={handleNextStory}
         />
       )}
 
