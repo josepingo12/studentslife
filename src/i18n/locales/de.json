@@ -127,6 +127,24 @@
     "qrCodeDownloaded": "QR-Code heruntergeladen",
     "errorSaving": "QR-Code konnte nicht gespeichert werden"
   },
+  "story": {
+    "createStory": "Story Erstellen",
+    "viewStory": "Story Ansehen",
+    "yourStory": "Deine Story",
+    "addStory": "Story Hinzufügen",
+    "viewers": "Aufrufe",
+    "viewedBy": "Angesehen von"
+  },
+  "upload": {
+    "uploadContent": "Inhalt Hochladen",
+    "selectType": "Typ auswählen",
+    "uploadImage": "Bild Hochladen",
+    "uploadStory": "Story Hochladen",
+    "selectImage": "Wähle ein Bild",
+    "uploading": "Wird hochgeladen...",
+    "uploadSuccess": "Upload abgeschlossen",
+    "uploadError": "Upload-Fehler"
+  },
   "common": {
     "save": "Speichern",
     "cancel": "Abbrechen",
@@ -140,7 +158,11 @@
     "next": "Weiter",
     "upload": "Hochladen",
     "search": "Suchen",
-    "user": "Benutzer"
+    "user": "Benutzer",
+    "close": "Schließen",
+    "view": "Ansehen",
+    "send": "Senden",
+    "message": "Nachricht"
   },
   "errors": {
     "fillAllFields": "Fülle alle Felder aus",

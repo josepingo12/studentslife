@@ -3,7 +3,7 @@
     "social": "Social",
     "events": "Eventi",
     "scanner": "Scanner",
-    "stats": "Stats",
+    "stats": "Statistiche",
     "chat": "Chat",
     "profile": "Profilo",
     "partners": "Partner",
@@ -127,6 +127,24 @@
     "qrCodeDownloaded": "QR Code scaricato",
     "errorSaving": "Impossibile salvare il QR code"
   },
+  "story": {
+    "createStory": "Crea Storia",
+    "viewStory": "Visualizza Storia",
+    "yourStory": "La tua storia",
+    "addStory": "Aggiungi Storia",
+    "viewers": "Visualizzazioni",
+    "viewedBy": "Visto da"
+  },
+  "upload": {
+    "uploadContent": "Carica Contenuto",
+    "selectType": "Seleziona tipo",
+    "uploadImage": "Carica Immagine",
+    "uploadStory": "Carica Storia",
+    "selectImage": "Seleziona un'immagine",
+    "uploading": "Caricamento...",
+    "uploadSuccess": "Caricamento completato",
+    "uploadError": "Errore nel caricamento"
+  },
   "common": {
     "save": "Salva",
     "cancel": "Annulla",
@@ -140,7 +158,11 @@
     "next": "Avanti",
     "upload": "Carica",
     "search": "Cerca",
-    "user": "Utente"
+    "user": "Utente",
+    "close": "Chiudi",
+    "view": "Visualizza",
+    "send": "Invia",
+    "message": "Messaggio"
   },
   "errors": {
     "fillAllFields": "Compila tutti i campi",

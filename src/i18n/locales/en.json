@@ -127,6 +127,24 @@
     "qrCodeDownloaded": "QR Code downloaded",
     "errorSaving": "Unable to save QR code"
   },
+  "story": {
+    "createStory": "Create Story",
+    "viewStory": "View Story",
+    "yourStory": "Your story",
+    "addStory": "Add Story",
+    "viewers": "Views",
+    "viewedBy": "Viewed by"
+  },
+  "upload": {
+    "uploadContent": "Upload Content",
+    "selectType": "Select type",
+    "uploadImage": "Upload Image",
+    "uploadStory": "Upload Story",
+    "selectImage": "Select an image",
+    "uploading": "Uploading...",
+    "uploadSuccess": "Upload completed",
+    "uploadError": "Upload error"
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",
@@ -140,7 +158,11 @@
     "next": "Next",
     "upload": "Upload",
     "search": "Search",
-    "user": "User"
+    "user": "User",
+    "close": "Close",
+    "view": "View",
+    "send": "Send",
+    "message": "Message"
   },
   "errors": {
     "fillAllFields": "Fill in all fields",

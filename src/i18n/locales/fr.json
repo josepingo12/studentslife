@@ -127,6 +127,24 @@
     "qrCodeDownloaded": "Code QR téléchargé",
     "errorSaving": "Impossible d'enregistrer le code QR"
   },
+  "story": {
+    "createStory": "Créer une Story",
+    "viewStory": "Voir la Story",
+    "yourStory": "Votre story",
+    "addStory": "Ajouter une Story",
+    "viewers": "Vues",
+    "viewedBy": "Vu par"
+  },
+  "upload": {
+    "uploadContent": "Télécharger du Contenu",
+    "selectType": "Sélectionner le type",
+    "uploadImage": "Télécharger une Image",
+    "uploadStory": "Télécharger une Story",
+    "selectImage": "Sélectionnez une image",
+    "uploading": "Téléchargement...",
+    "uploadSuccess": "Téléchargement terminé",
+    "uploadError": "Erreur de téléchargement"
+  },
   "common": {
     "save": "Enregistrer",
     "cancel": "Annuler",
@@ -140,7 +158,11 @@
     "next": "Suivant",
     "upload": "Télécharger",
     "search": "Rechercher",
-    "user": "Utilisateur"
+    "user": "Utilisateur",
+    "close": "Fermer",
+    "view": "Voir",
+    "send": "Envoyer",
+    "message": "Message"
   },
   "errors": {
     "fillAllFields": "Remplissez tous les champs",

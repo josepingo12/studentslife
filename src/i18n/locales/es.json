@@ -127,6 +127,24 @@
     "qrCodeDownloaded": "Código QR descargado",
     "errorSaving": "No se pudo guardar el código QR"
   },
+  "story": {
+    "createStory": "Crear Historia",
+    "viewStory": "Ver Historia",
+    "yourStory": "Tu historia",
+    "addStory": "Añadir Historia",
+    "viewers": "Vistas",
+    "viewedBy": "Visto por"
+  },
+  "upload": {
+    "uploadContent": "Subir Contenido",
+    "selectType": "Seleccionar tipo",
+    "uploadImage": "Subir Imagen",
+    "uploadStory": "Subir Historia",
+    "selectImage": "Selecciona una imagen",
+    "uploading": "Subiendo...",
+    "uploadSuccess": "Subida completada",
+    "uploadError": "Error al subir"
+  },
   "common": {
     "save": "Guardar",
     "cancel": "Cancelar",
@@ -140,7 +158,11 @@
     "next": "Siguiente",
     "upload": "Subir",
     "search": "Buscar",
-    "user": "Usuario"
+    "user": "Usuario",
+    "close": "Cerrar",
+    "view": "Ver",
+    "send": "Enviar",
+    "message": "Mensaje"
   },
   "errors": {
     "fillAllFields": "Completa todos los campos",
