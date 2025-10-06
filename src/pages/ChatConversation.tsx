@@ -315,8 +315,8 @@ const ChatConversation = () => {
           </AvatarFallback>
         </Avatar>
         
-        <div className="flex-1">
-          <p className="font-semibold">{getDisplayName()}</p>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold truncate">{getDisplayName()}</p>
         </div>
       </div>
 
@@ -353,14 +353,14 @@ const ChatConversation = () => {
                     ) : message.media_type === 'video' ? (
                       <video src={message.media_url} controls className="rounded-lg max-w-full" />
                     ) : (
-                      <a href={message.media_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm underline">
-                        <File className="w-4 h-4" />
-                        File allegato
+                      <a href={message.media_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm underline break-all">
+                        <File className="w-4 h-4 flex-shrink-0" />
+                        <span className="break-all">File allegato</span>
                       </a>
                     )}
                   </div>
                 )}
-                {message.content && <p className="break-words">{message.content}</p>}
+                {message.content && <p className="break-words overflow-wrap-anywhere whitespace-pre-wrap">{message.content}</p>}
                 <div className="flex items-center justify-end gap-1 mt-1">
                   <span className={`text-xs ${isOwn ? "opacity-70" : "text-muted-foreground"}`}>
                     {formatDistanceToNow(new Date(message.created_at), {
