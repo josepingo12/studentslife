@@ -104,12 +104,12 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[80vh] rounded-t-3xl">
+      <SheetContent side="bottom" className="h-auto max-h-[85vh] rounded-t-3xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t('settings.title')}</SheetTitle>
         </SheetHeader>
 
-        <div className="mt-6 space-y-6">
+        <div className="mt-6 space-y-6 pb-6">
           {/* Language Selection */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -168,7 +168,7 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
 
               <Button
                 onClick={handlePasswordChange}
-                disabled={isChangingPassword}
+                disabled={isChangingPassword || !newPassword || !confirmPassword}
                 className="w-full"
               >
                 {isChangingPassword ? t('settings.saving') : t('settings.changePasswordButton')}
