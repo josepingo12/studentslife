@@ -12,6 +12,8 @@ interface Stats {
   usedQRCodes: number;
   recentAccesses: number;
   qrByPartner: { business_name: string; qr_count: number }[];
+  qrByClient: { first_name: string; last_name: string; qr_count: number }[];
+  usedQrByPartner: { business_name: string; used_count: number; total_count: number }[];
 }
 
 const Statistics = () => {
@@ -23,6 +25,8 @@ const Statistics = () => {
     usedQRCodes: 0,
     recentAccesses: 0,
     qrByPartner: [],
+    qrByClient: [],
+    usedQrByPartner: [],
   });
   const [loading, setLoading] = useState(true);
 
@@ -90,7 +94,73 @@ const Statistics = () => {
       const qrByPartner = Object.entries(partnerQRCount)
         .map(([business_name, qr_count]) => ({ business_name, qr_count }))
         .sort((a, b) => b.qr_count - a.qr_count)
-        .slice(0, 5);
+        .slice(0, 10);
+
+      // QR codes by client
+      const { data: qrByClientData } = await supabase
+        .from("qr_codes")
+        .select(`
+          client_id,
+          profiles!inner (
+            first_name,
+            last_name
+          )
+        `);
+
+      const clientQRCount: Record<string, { first_name: string; last_name: string; count: number }> = {};
+      qrByClientData?.forEach((qr: any) => {
+        const clientId = qr.client_id;
+        const firstName = qr.profiles.first_name || "";
+        const lastName = qr.profiles.last_name || "";
+        if (!clientQRCount[clientId]) {
+          clientQRCount[clientId] = { first_name: firstName, last_name: lastName, count: 0 };
+        }
+        clientQRCount[clientId].count += 1;
+      });
+
+      const qrByClient = Object.values(clientQRCount)
+        .map(({ first_name, last_name, count }) => ({ 
+          first_name, 
+          last_name, 
+          qr_count: count 
+        }))
+        .sort((a, b) => b.qr_count - a.qr_count)
+        .slice(0, 10);
+
+      // Used QR codes by partner (detailed)
+      const { data: usedQrByPartnerData } = await supabase
+        .from("qr_codes")
+        .select(`
+          is_used,
+          event_id,
+          events!inner (
+            partner_id,
+            profiles!inner (
+              business_name
+            )
+          )
+        `);
+
+      const partnerUsedQRCount: Record<string, { used: number; total: number }> = {};
+      usedQrByPartnerData?.forEach((qr: any) => {
+        const businessName = qr.events.profiles.business_name || "N/A";
+        if (!partnerUsedQRCount[businessName]) {
+          partnerUsedQRCount[businessName] = { used: 0, total: 0 };
+        }
+        partnerUsedQRCount[businessName].total += 1;
+        if (qr.is_used) {
+          partnerUsedQRCount[businessName].used += 1;
+        }
+      });
+
+      const usedQrByPartner = Object.entries(partnerUsedQRCount)
+        .map(([business_name, counts]) => ({ 
+          business_name, 
+          used_count: counts.used, 
+          total_count: counts.total 
+        }))
+        .sort((a, b) => b.used_count - a.used_count)
+        .slice(0, 10);
 
       setStats({
         totalUsers: totalUsers || 0,
@@ -100,6 +170,8 @@ const Statistics = () => {
         usedQRCodes: usedQRCodes || 0,
         recentAccesses: recentAccesses || 0,
         qrByPartner,
+        qrByClient,
+        usedQrByPartner,
       });
     } catch (error) {
       console.error("Error fetching statistics:", error);
@@ -183,19 +255,68 @@ const Statistics = () => {
         </Card>
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Top 10 Partner per QR Code Scaricati</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {stats.qrByPartner.map((partner, idx) => (
+                <div key={idx} className="flex justify-between items-center">
+                  <span className="font-medium">{partner.business_name}</span>
+                  <Badge className="bg-primary">{partner.qr_count} QR</Badge>
+                </div>
+              ))}
+              {stats.qrByPartner.length === 0 && (
+                <p className="text-sm text-muted-foreground">Nessun dato disponibile</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Top 10 Clienti per QR Code Generati</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {stats.qrByClient.map((client, idx) => (
+                <div key={idx} className="flex justify-between items-center">
+                  <span className="font-medium">{client.first_name} {client.last_name}</span>
+                  <Badge className="bg-primary">{client.qr_count} QR</Badge>
+                </div>
+              ))}
+              {stats.qrByClient.length === 0 && (
+                <p className="text-sm text-muted-foreground">Nessun dato disponibile</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card>
         <CardHeader>
-          <CardTitle>Top 5 Partner per QR Code Scaricati</CardTitle>
+          <CardTitle>QR Code Utilizzati per Partner (Dettaglio Scansioni)</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {stats.qrByPartner.map((partner, idx) => (
-              <div key={idx} className="flex justify-between items-center">
+            {stats.usedQrByPartner.map((partner, idx) => (
+              <div key={idx} className="flex justify-between items-center border-b pb-3 last:border-0">
                 <span className="font-medium">{partner.business_name}</span>
-                <Badge className="bg-primary">{partner.qr_count} QR</Badge>
+                <div className="flex items-center gap-4">
+                  <div className="text-sm text-muted-foreground">
+                    {partner.used_count} / {partner.total_count} utilizzati
+                  </div>
+                  <Badge className="bg-primary">
+                    {partner.total_count > 0
+                      ? `${((partner.used_count / partner.total_count) * 100).toFixed(1)}%`
+                      : "0%"}
+                  </Badge>
+                </div>
               </div>
             ))}
-            {stats.qrByPartner.length === 0 && (
+            {stats.usedQrByPartner.length === 0 && (
               <p className="text-sm text-muted-foreground">Nessun dato disponibile</p>
             )}
           </div>
