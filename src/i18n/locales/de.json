@@ -55,7 +55,7 @@
     "loginSuccess": "Anmeldung erfolgreich!",
     "welcome": "Willkommen bei Students Life",
     "pendingApproval": "Anfrage in Bearbeitung",
-    "pendingApprovalMessage": "Ihre Registrierungsanfrage wurde erhalten. Unser Team überprüft die Echtheit der bereitgestellten Informationen. Sie erhalten eine Bestätigungs-E-Mail, sobald Ihr Konto aktiviert ist.",
+    "pendingApprovalMessage": "Ihre Registrierungsanfrage wurde erhalten. Unser Team überprüft die Echtheit der bereitgestellten Informationen. Versuchen Sie es später erneut, das Team arbeitet hart für Ihre Zufriedenheit!",
     "accountNotApproved": "Konto noch nicht genehmigt",
     "accountNotApprovedMessage": "Ihr Konto wartet auf die Genehmigung durch unser Team. Sie erhalten eine E-Mail, wenn es aktiviert ist.",
     "accountRejected": "Konto abgelehnt",

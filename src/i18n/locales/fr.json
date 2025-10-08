@@ -55,7 +55,7 @@
     "loginSuccess": "Connexion réussie !",
     "welcome": "Bienvenue sur Students Life",
     "pendingApproval": "Demande en Cours de Traitement",
-    "pendingApprovalMessage": "Votre demande d'inscription a été reçue. Notre équipe vérifie l'authenticité des informations fournies. Vous recevrez un email de confirmation dès que votre compte sera activé.",
+    "pendingApprovalMessage": "Votre demande d'inscription a été reçue. Notre équipe vérifie l'authenticité des informations fournies. Réessayez plus tard, l'équipe travaille dur pour votre satisfaction !",
     "accountNotApproved": "Compte pas encore approuvé",
     "accountNotApprovedMessage": "Votre compte est en attente d'approbation par notre équipe. Vous recevrez un email lors de son activation.",
     "accountRejected": "Compte rejeté",

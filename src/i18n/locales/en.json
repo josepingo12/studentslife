@@ -55,7 +55,7 @@
     "loginSuccess": "Login successful!",
     "welcome": "Welcome to Students Life",
     "pendingApproval": "Request Under Review",
-    "pendingApprovalMessage": "Your registration request has been received. Our team is verifying the authenticity of the information provided. You will receive a confirmation email as soon as your account is activated.",
+    "pendingApprovalMessage": "Your registration request has been received. Our team is verifying the authenticity of the information provided. Try again later, the team is working hard for your satisfaction!",
     "accountNotApproved": "Account not yet approved",
     "accountNotApprovedMessage": "Your account is pending approval from our team. You will receive an email when it's activated.",
     "accountRejected": "Account rejected",
