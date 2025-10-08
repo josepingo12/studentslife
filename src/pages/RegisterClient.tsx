@@ -102,9 +102,13 @@ const RegisterClient = () => {
           throw roleError;
         }
 
+        // Sign out immediately after registration
+        await supabase.auth.signOut();
+
         toast({
-          title: t("auth.registrationComplete"),
-          description: t("auth.verifyEmail"),
+          title: t("auth.pendingApproval"),
+          description: t("auth.pendingApprovalMessage"),
+          duration: 10000,
         });
 
         navigate("/login");

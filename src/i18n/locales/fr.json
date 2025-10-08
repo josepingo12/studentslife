@@ -53,7 +53,15 @@
     "registrationComplete": "Inscription terminée !",
     "verifyEmail": "Vérifiez votre email pour confirmer votre compte",
     "loginSuccess": "Connexion réussie !",
-    "welcome": "Bienvenue sur Students Life"
+    "welcome": "Bienvenue sur Students Life",
+    "pendingApproval": "Demande en Cours de Traitement",
+    "pendingApprovalMessage": "Votre demande d'inscription a été reçue. Notre équipe vérifie l'authenticité des informations fournies. Vous recevrez un email de confirmation dès que votre compte sera activé.",
+    "accountNotApproved": "Compte pas encore approuvé",
+    "accountNotApprovedMessage": "Votre compte est en attente d'approbation par notre équipe. Vous recevrez un email lors de son activation.",
+    "accountRejected": "Compte rejeté",
+    "accountRejectedMessage": "Votre demande d'inscription a été rejetée. Veuillez contacter le support pour plus d'informations.",
+    "accountBlocked": "Compte bloqué",
+    "accountBlockedMessage": "Votre compte a été bloqué. Veuillez contacter le support pour plus d'informations."
   },
   "profile": {
     "editProfile": "Modifier le profil",

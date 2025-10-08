@@ -53,7 +53,15 @@
     "registrationComplete": "Registration complete!",
     "verifyEmail": "Verify your email to confirm your account",
     "loginSuccess": "Login successful!",
-    "welcome": "Welcome to Students Life"
+    "welcome": "Welcome to Students Life",
+    "pendingApproval": "Request Under Review",
+    "pendingApprovalMessage": "Your registration request has been received. Our team is verifying the authenticity of the information provided. You will receive a confirmation email as soon as your account is activated.",
+    "accountNotApproved": "Account not yet approved",
+    "accountNotApprovedMessage": "Your account is pending approval from our team. You will receive an email when it's activated.",
+    "accountRejected": "Account rejected",
+    "accountRejectedMessage": "Your registration request has been rejected. Please contact support for more information.",
+    "accountBlocked": "Account blocked",
+    "accountBlockedMessage": "Your account has been blocked. Please contact support for more information."
   },
   "profile": {
     "editProfile": "Edit Profile",

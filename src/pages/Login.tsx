@@ -35,6 +35,37 @@ const Login = () => {
       if (error) throw error;
 
       if (data.user) {
+        // Check account status first
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("account_status, business_category, business_name")
+          .eq("id", data.user.id)
+          .maybeSingle();
+
+        // Check if account is approved
+        if (profile?.account_status !== "approved") {
+          await supabase.auth.signOut();
+          
+          let errorTitle = t("auth.accountNotApproved");
+          let errorMessage = t("auth.accountNotApprovedMessage");
+          
+          if (profile?.account_status === "rejected") {
+            errorTitle = t("auth.accountRejected");
+            errorMessage = t("auth.accountRejectedMessage");
+          } else if (profile?.account_status === "blocked") {
+            errorTitle = t("auth.accountBlocked");
+            errorMessage = t("auth.accountBlockedMessage");
+          }
+          
+          toast({
+            title: errorTitle,
+            description: errorMessage,
+            variant: "destructive",
+            duration: 8000,
+          });
+          return;
+        }
+
         // Get user role to redirect appropriately
         const { data: role, error: roleError } = await supabase
           .rpc('get_user_role', { _user_id: data.user.id });
@@ -43,11 +74,6 @@ const Login = () => {
 
         // Deduci/aggiorna ruolo dal profilo se necessario
         let effectiveRole = role as string | null;
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("business_category, business_name")
-          .eq("id", data.user.id)
-          .maybeSingle();
 
         if (!roleError && !role) {
           const inferredRole = (profile?.business_category || profile?.business_name)
