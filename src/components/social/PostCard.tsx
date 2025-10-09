@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+<<<<<<< HEAD
 import { Heart, MessageCircle, Bookmark, Trash2, Play } from "lucide-react";
+=======
+import { Heart, MessageCircle, Bookmark, Trash2 } from "lucide-react";
+>>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { it, enUS, es, fr, de } from "date-fns/locale";
@@ -55,7 +59,11 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
 
     setCommentsCount(count || 0);
   };
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
   const isLiked = post.likes?.some((like: any) => like.user_id === currentUserId);
   const likesCount = post.likes?.length || 0;
   const isOwner = post.user_id === currentUserId;
@@ -163,7 +171,11 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
     }
   };
 
+<<<<<<< HEAD
   const displayName = post.public_profiles?.first_name
+=======
+  const displayName = post.public_profiles?.first_name 
+>>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
     ? `${post.public_profiles.first_name} ${post.public_profiles.last_name || ''}`.trim()
     : post.public_profiles?.business_name || t('common.user');
 
@@ -218,6 +230,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
         </div>
       )}
 
+<<<<<<< HEAD
       {/* Media Content - SUPPORTO VIDEO E IMMAGINI */}
       {post.media_type === 'video' && post.video_url ? (
         <div className="relative">
@@ -259,6 +272,25 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
       {/* Stats */}
       <div className="px-4 py-2 border-t border-border flex items-center gap-4">
         <button
+=======
+      {/* Image */}
+      {post.image_url && (
+        <div 
+          className="cursor-pointer"
+          onClick={() => setImageViewerOpen(true)}
+        >
+          <img 
+            src={post.image_url} 
+            alt="Post" 
+            className="w-full max-h-96 object-cover"
+          />
+        </div>
+      )}
+
+      {/* Stats */}
+      <div className="px-4 py-2 border-t border-border flex items-center gap-4">
+        <button 
+>>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
           onClick={() => setLikesSheetOpen(true)}
           className="text-sm font-semibold hover:text-primary transition-colors"
         >
@@ -280,7 +312,11 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
           onClick={handleLike}
           disabled={loading}
         >
+<<<<<<< HEAD
           <Heart
+=======
+          <Heart 
+>>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
             className={`w-5 h-5 ${isLiked ? "fill-red-500 text-red-500" : ""}`}
           />
           {t('post.like')}
@@ -317,8 +353,13 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
         currentUserId={currentUserId}
       />
 
+<<<<<<< HEAD
       {/* Image Viewer - Solo per immagini */}
       {(post.media_type === 'image' || !post.media_type) && post.image_url && (
+=======
+      {/* Image Viewer */}
+      {post.image_url && (
+>>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
         <ImageViewer
           open={imageViewerOpen}
           onOpenChange={setImageViewerOpen}
