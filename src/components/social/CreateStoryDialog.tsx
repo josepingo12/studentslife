@@ -1,14 +1,9 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-<<<<<<< HEAD
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Image as ImageIcon, Video as VideoIcon } from "lucide-react";
-=======
-import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
 import ImageUpload from "@/components/shared/ImageUpload";
 
 interface CreateStoryDialogProps {
@@ -20,7 +15,6 @@ interface CreateStoryDialogProps {
 
 const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: CreateStoryDialogProps) => {
   const { toast } = useToast();
-<<<<<<< HEAD
   const [mediaUrl, setMediaUrl] = useState("");
   const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
   const [loading, setLoading] = useState(false);
@@ -28,13 +22,6 @@ const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: Creat
 
   const handleMediaUploaded = async (url: string) => {
     setMediaUrl(url);
-=======
-  const [imageUrl, setImageUrl] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleImageUploaded = async (url: string) => {
-    setImageUrl(url);
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
     setLoading(true);
 
     try {
@@ -42,13 +29,9 @@ const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: Creat
         .from("stories")
         .insert({
           user_id: userId,
-<<<<<<< HEAD
           image_url: uploadType === 'image' ? url : null,
           video_url: uploadType === 'video' ? url : null, // Aggiungi questo campo al database
           media_type: uploadType,
-=======
-          image_url: url,
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
         });
 
       if (error) throw error;
@@ -58,13 +41,9 @@ const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: Creat
         description: "La tua storia sarà visibile per 24 ore",
       });
 
-<<<<<<< HEAD
       setMediaUrl("");
       setMediaType(null);
       setUploadType(null);
-=======
-      setImageUrl("");
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
       onStoryCreated();
       onOpenChange(false);
     } catch (error: any) {
@@ -78,7 +57,6 @@ const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: Creat
     }
   };
 
-<<<<<<< HEAD
   const resetDialog = () => {
     setMediaUrl("");
     setMediaType(null);
@@ -88,16 +66,11 @@ const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: Creat
 
   return (
     <Dialog open={open} onOpenChange={resetDialog}>
-=======
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Crea una Storia</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-<<<<<<< HEAD
           {!uploadType ? (
             /* Selezione tipo media */
             <div className="grid grid-cols-2 gap-4">
@@ -143,21 +116,6 @@ const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: Creat
             La tua storia sarà visibile per 24 ore
           </p>
 
-=======
-          <div className="space-y-2">
-            <ImageUpload
-              bucket="stories"
-              userId={userId}
-              onImageUploaded={handleImageUploaded}
-              accept="image/*,video/*"
-              maxSizeMB={20}
-              showPreview={true}
-            />
-            <p className="text-xs text-muted-foreground">
-              La tua storia sarà visibile per 24 ore
-            </p>
-          </div>
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
           {loading && (
             <div className="flex items-center justify-center py-4">
               <Loader2 className="w-6 h-6 animate-spin text-primary" />
@@ -170,8 +128,4 @@ const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: Creat
   );
 };
 
-<<<<<<< HEAD
 export default CreateStoryDialog;
-=======
-export default CreateStoryDialog;
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
