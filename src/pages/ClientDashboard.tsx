@@ -184,7 +184,7 @@ const ClientDashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary pb-24">
       {/* Content based on active tab */}
       {activeTab === "social" ? (
-        <>
+        <div className="max-w-[470px] mx-auto w-full">
           {/* Search Bar */}
           <div className="mx-4 mt-4">
             <div className="relative ios-card p-3">
@@ -281,7 +281,7 @@ const ClientDashboard = () => {
               ))
             )}
           </div>
-        </>
+        </div>
       ) : activeTab === "chats" ? (
         <div className="mt-4">
           <ChatsList currentUserId={user.id} />
