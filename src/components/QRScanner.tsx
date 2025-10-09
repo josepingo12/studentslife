@@ -30,7 +30,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
 
   const startScanner = async () => {
     try {
-      // Blocked contexts: insecure or embedded iframes often cannot request camera
+      // Verifica contesto sicuro
       if (!window.isSecureContext) {
         toast({
           title: "Permesso non disponibile",
@@ -39,6 +39,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         });
         return;
       }
+
       if (window.self !== window.top) {
         toast({
           title: "Apri in nuova scheda",
@@ -47,6 +48,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         });
         return;
       }
+
       if (!navigator.mediaDevices?.getUserMedia) {
         toast({
           title: "Non supportato",
@@ -56,14 +58,13 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         return;
       }
 
-      // RICHIEDI PERMESSI ESPLICITAMENTE PRIMA
+      // Richiedi permessi esplicitamente
       console.log("Richiedendo permessi fotocamera...");
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
           video: { facingMode: "user" } 
         });
         console.log("Permessi fotocamera ottenuti!");
-        // Ferma il stream temporaneo
         stream.getTracks().forEach(track => track.stop());
       } catch (permissionError: any) {
         console.error("Permessi fotocamera negati:", permissionError);
@@ -75,26 +76,53 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         return;
       }
 
+      // Prima imposta scanning a true
       setScanning(true);
 
-      // Aspetta il re-render
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Aspetta che React re-renderizzi il componente
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Crea l'elemento dinamicamente se non esiste
-      let qrReaderElement = document.getElementById("qr-reader");
-      if (!qrReaderElement && qrReaderRef.current) {
-        qrReaderElement = document.createElement("div");
-        qrReaderElement.id = "qr-reader";
-        qrReaderElement.className = "rounded-lg overflow-hidden min-h-[300px]";
-        qrReaderRef.current.appendChild(qrReaderElement);
+      // Verifica che il container esista
+      if (!qrReaderRef.current) {
+        console.error("Container qrReaderRef non trovato");
+        setScanning(false);
+        return;
       }
 
-      if (!qrReaderElement) {
-        throw new Error("Impossibile creare l'elemento qr-reader");
+      // Rimuovi eventuali elementi esistenti
+      const existingElement = document.getElementById("qr-reader");
+      if (existingElement) {
+        existingElement.remove();
       }
 
-      console.log("Elemento qr-reader creato/trovato:", qrReaderElement);
+      // Pulisci il container
+      qrReaderRef.current.innerHTML = '';
 
+      // Crea il nuovo elemento
+      const qrReaderElement = document.createElement("div");
+      qrReaderElement.id = "qr-reader";
+      qrReaderElement.style.width = "100%";
+      qrReaderElement.style.minHeight = "300px";
+      
+      // Aggiungi l'elemento al container
+      qrReaderRef.current.appendChild(qrReaderElement);
+
+      // Aspetta che l'elemento sia completamente nel DOM
+      await new Promise(resolve => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(resolve);
+        });
+      });
+
+      // Verifica finale che l'elemento esista
+      const finalCheck = document.getElementById("qr-reader");
+      if (!finalCheck) {
+        throw new Error("Impossibile creare l'elemento qr-reader nel DOM");
+      }
+
+      console.log("Elemento qr-reader creato con successo:", finalCheck);
+
+      // Inizializza Html5Qrcode
       const html5QrCode = new Html5Qrcode("qr-reader");
       scannerRef.current = html5QrCode;
 
@@ -102,41 +130,57 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         fps: 10,
         qrbox: { width: 250, height: 250 },
         aspectRatio: 1.0,
-      } as const;
+        showTorchButtonIfSupported: true,
+        showZoomSliderIfSupported: true,
+      };
 
-      // Cerca esplicitamente la camera FRONTALE
-      let cameraId: string | undefined;
+      // Cerca camera frontale
+      let cameraConstraints: any = { facingMode: "user" };
+      
       try {
         const cameras = await Html5Qrcode.getCameras();
         console.log("Camere disponibili:", cameras);
+        
         if (cameras && cameras.length > 0) {
-          // Cerca camera frontale nel label
-          const frontCamera = cameras.find((c) => 
-            /front|user|frontale|facetime/i.test(c.label)
+          // Cerca camera frontale
+          const frontCamera = cameras.find((camera) => 
+            camera.label.toLowerCase().includes("front") ||
+            camera.label.toLowerCase().includes("user") ||
+            camera.label.toLowerCase().includes("facetime")
           );
-          cameraId = frontCamera?.id || cameras[0]?.id;
-          console.log("Camera selezionata:", frontCamera || cameras[0]);
+          
+          if (frontCamera) {
+            cameraConstraints = { deviceId: { exact: frontCamera.id } };
+            console.log("Usando camera frontale:", frontCamera);
+          } else {
+            // Usa la prima camera disponibile
+            cameraConstraints = { deviceId: { exact: cameras[0].id } };
+            console.log("Usando prima camera disponibile:", cameras[0]);
+          }
         }
       } catch (e) {
-        console.log("Impossibile elencare le camere, uso facingMode");
+        console.log("Impossibile elencare le camere, uso facingMode user");
       }
 
-      // Usa deviceId se trovato, altrimenti facingMode user (frontale)
-      const constraints = cameraId 
-        ? { deviceId: { exact: cameraId } }
-        : { facingMode: { exact: "user" } };
+      console.log("Avvio scanner con constraints:", cameraConstraints);
 
-      console.log("Constraints camera:", constraints);
-
+      // Avvia lo scanner
       await html5QrCode.start(
-        constraints,
+        cameraConstraints,
         config,
-        (decodedText) => {
+        (decodedText, decodedResult) => {
+          console.log("QR Code scansionato:", decodedText);
           setCode(decodedText.toUpperCase());
           stopScanner();
-          toast({ title: "QR Code scansionato", description: "Verifica in corso..." });
+          toast({ 
+            title: "QR Code scansionato", 
+            description: "Verifica in corso..." 
+          });
         },
-        () => {}
+        (errorMessage) => {
+          // Errori di scansione (normali durante la scansione)
+          // Non loggarli per evitare spam in console
+        }
       );
 
       console.log("Scanner avviato con successo!");
@@ -145,116 +189,159 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
       console.error("Errore avvio scanner:", err);
 
       let errorMessage = "Impossibile avviare la fotocamera";
+      
       if (err?.name === "NotAllowedError") {
         errorMessage = "Permesso fotocamera negato. Abilita i permessi nelle impostazioni del browser.";
       } else if (err?.name === "NotFoundError") {
         errorMessage = "Nessuna fotocamera trovata sul dispositivo.";
       } else if (err?.name === "NotReadableError") {
         errorMessage = "Fotocamera già in uso o non disponibile.";
+      } else if (err?.name === "OverconstrainedError") {
+        errorMessage = "Le impostazioni della fotocamera non sono supportate.";
+      } else if (err?.message?.includes("qr-reader not found")) {
+        errorMessage = "Errore di inizializzazione dello scanner. Riprova.";
       } else if (err?.message) {
         errorMessage = err.message;
       }
 
-      toast({ title: "Errore", description: errorMessage, variant: "destructive" });
+      toast({ 
+        title: "Errore Scanner", 
+        description: errorMessage, 
+        variant: "destructive" 
+      });
+      
       setScanning(false);
     }
   };
 
   const stopScanner = async () => {
+    console.log("Fermando scanner...");
+    
     if (scannerRef.current) {
       try {
         await scannerRef.current.stop();
-        scannerRef.current = null;
+        console.log("Scanner fermato con successo");
       } catch (err) {
-        console.error("Errore stop scanner:", err);
+        console.error("Errore durante lo stop dello scanner:", err);
+      } finally {
+        scannerRef.current = null;
       }
     }
+    
+    // Pulisci il DOM
+    const existingElement = document.getElementById("qr-reader");
+    if (existingElement) {
+      existingElement.remove();
+    }
+    
+    if (qrReaderRef.current) {
+      qrReaderRef.current.innerHTML = '';
+    }
+    
     setScanning(false);
   };
 
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!code || code.length !== 12) {
+      toast({
+        title: "Codice non valido",
+        description: "Il codice QR deve essere di 12 caratteri",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     setResult(null);
 
-    // Get QR code details
-    const { data: qrData, error: qrError } = await supabase
-      .from("qr_codes")
-      .select(`
-        *,
-        events!inner(
+    try {
+      // Get QR code details
+      const { data: qrData, error: qrError } = await supabase
+        .from("qr_codes")
+        .select(`
           *,
-          profiles!inner(id)
-        )
-      `)
-      .eq("code", code.toUpperCase())
-      .single();
+          events!inner(
+            *,
+            profiles!inner(id)
+          )
+        `)
+        .eq("code", code.toUpperCase())
+        .single();
 
-    if (qrError || !qrData) {
-      setResult({ valid: false, message: "QR code non valido" });
-      setLoading(false);
-      return;
-    }
+      if (qrError || !qrData) {
+        setResult({ valid: false, message: "QR code non valido" });
+        setLoading(false);
+        return;
+      }
 
-    // Check if QR belongs to this partner's events
-    if (qrData.events.profiles.id !== partnerId) {
-      setResult({ valid: false, message: "QR code non appartiene a questo partner" });
-      setLoading(false);
-      return;
-    }
+      // Check if QR belongs to this partner's events
+      if (qrData.events.profiles.id !== partnerId) {
+        setResult({ valid: false, message: "QR code non appartiene a questo partner" });
+        setLoading(false);
+        return;
+      }
 
-    // Check if already used
-    if (qrData.is_used) {
+      // Check if already used
+      if (qrData.is_used) {
+        setResult({
+          valid: false,
+          message: "QR code già utilizzato",
+          details: `Utilizzato il ${new Date(qrData.used_at).toLocaleString("it-IT")}`,
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Check if event is still valid
+      const now = new Date();
+      const endDate = new Date(qrData.events.end_date);
+      
+      if (now > endDate) {
+        setResult({ valid: false, message: "Evento scaduto" });
+        setLoading(false);
+        return;
+      }
+
+      // Mark as used
+      const { error: updateError } = await supabase
+        .from("qr_codes")
+        .update({
+          is_used: true,
+          used_at: new Date().toISOString(),
+        })
+        .eq("id", qrData.id);
+
+      if (updateError) {
+        console.error("Errore aggiornamento QR:", updateError);
+        setResult({ valid: false, message: "Errore durante la validazione" });
+        setLoading(false);
+        return;
+      }
+
       setResult({
-        valid: false,
-        message: "QR code già utilizzato",
-        details: `Utilizzato il ${new Date(qrData.used_at).toLocaleString("it-IT")}`,
+        valid: true,
+        message: "QR code valido!",
+        details: {
+          event: qrData.events.title,
+          discount: qrData.events.discount_percentage,
+        },
       });
+
+      toast({
+        title: "QR code validato",
+        description: `Sconto del ${qrData.events.discount_percentage}% applicato`,
+      });
+
+      setCode("");
+
+    } catch (error) {
+      console.error("Errore durante la verifica:", error);
+      setResult({ valid: false, message: "Errore durante la verifica del QR code" });
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Check if event is still valid
-    const now = new Date();
-    const endDate = new Date(qrData.events.end_date);
-    
-    if (now > endDate) {
-      setResult({ valid: false, message: "Evento scaduto" });
-      setLoading(false);
-      return;
-    }
-
-    // Mark as used
-    const { error: updateError } = await supabase
-      .from("qr_codes")
-      .update({
-        is_used: true,
-        used_at: new Date().toISOString(),
-      })
-      .eq("id", qrData.id);
-
-    if (updateError) {
-      setResult({ valid: false, message: "Errore durante la validazione" });
-      setLoading(false);
-      return;
-    }
-
-    setResult({
-      valid: true,
-      message: "QR code valido!",
-      details: {
-        event: qrData.events.title,
-        discount: qrData.events.discount_percentage,
-      },
-    });
-
-    toast({
-      title: "QR code validato",
-      description: `Sconto del ${qrData.events.discount_percentage}% applicato`,
-    });
-
-    setLoading(false);
-    setCode("");
   };
 
   return (
@@ -273,7 +360,8 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
           <div className="space-y-4">
             <div 
               ref={qrReaderRef}
-              className="rounded-lg overflow-hidden min-h-[300px] bg-black"
+              className="rounded-lg overflow-hidden min-h-[300px] bg-black border-2 border-primary/20"
+              style={{ width: '100%' }}
             >
               {/* L'elemento qr-reader sarà creato dinamicamente qui */}
             </div>
@@ -281,6 +369,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
               onClick={stopScanner}
               variant="outline"
               className="w-full"
+              size="lg"
             >
               <X className="w-4 h-4 mr-2" />
               Chiudi Scanner
@@ -290,7 +379,8 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
           <>
             <Button
               onClick={startScanner}
-              className="w-full mb-4 h-14 bg-gradient-to-br from-primary to-primary/80"
+              className="w-full mb-4 h-14 bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+              size="lg"
             >
               <Camera className="w-5 h-5 mr-2" />
               Apri Fotocamera
@@ -307,8 +397,9 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
 
             <form onSubmit={handleScan} className="space-y-4">
               <div className="space-y-2">
-                <Label>Inserisci codice manualmente</Label>
+                <Label htmlFor="qr-code-input">Inserisci codice manualmente</Label>
                 <Input
+                  id="qr-code-input"
                   value={code}
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
                   placeholder="XXXXXXXXXXXX"
@@ -321,6 +412,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
                 type="submit"
                 className="w-full ios-button h-14 text-lg"
                 disabled={loading || code.length !== 12}
+                size="lg"
               >
                 {loading ? "Verifica..." : "Verifica QR Code"}
               </Button>
@@ -331,8 +423,10 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
 
       {result && (
         <div
-          className={`ios-card p-6 animate-fade-in ${
-            result.valid ? "bg-green-500/10" : "bg-destructive/10"
+          className={`ios-card p-6 animate-fade-in border-2 ${
+            result.valid 
+              ? "bg-green-500/10 border-green-500/20" 
+              : "bg-destructive/10 border-destructive/20"
           }`}
         >
           <div className="flex items-start gap-4">
