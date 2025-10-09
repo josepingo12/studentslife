@@ -12,7 +12,6 @@ import {
   VolumeX,
   Eye
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import StoryViewers from "./StoryViewers";
 
 interface StoryViewerProps {
@@ -27,7 +26,6 @@ interface StoryViewerProps {
 }
 
 const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewerProps) => {
-  const { toast } = useToast();
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -41,7 +39,7 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
   const storyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const currentStory = storyGroup.stories[currentStoryIndex];
-  const STORY_DURATION = 5000; // 5 seconds per story
+  const STORY_DURATION = 5000;
   const isOwnStory = storyGroup.user_id === currentUserId;
 
   // Detect if desktop
@@ -65,7 +63,7 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
     }
   }, [currentStory, currentUserId, isOwnStory]);
 
-  // Handle story progress and auto-advance
+  // Handle story progress and auto-advance - TIMER STOPS when viewers sheet is open
   useEffect(() => {
     if (isPaused || isViewersSheetOpen) {
       // Pause timers when paused or viewers sheet is open
