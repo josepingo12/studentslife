@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,89 +18,21 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
   const [scanning, setScanning] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const animationRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    return () => {
-      stopScanner();
-    };
-  }, []);
-
-  const stopScanner = () => {
-    // Ferma il video stream
+  const stopCamera = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
-
-    // Ferma l'animazione
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-      animationRef.current = null;
-    }
-
-    // Reset video element
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
-
     setScanning(false);
   };
 
-  const scanQRCode = async () => {
-    if (!videoRef.current || !canvasRef.current) return;
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-
-    if (!context || video.readyState !== video.HAVE_ENOUGH_DATA) {
-      animationRef.current = requestAnimationFrame(scanQRCode);
-      return;
-    }
-
-    // Imposta le dimensioni del canvas
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    // Disegna il frame del video sul canvas
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
+  const startCamera = async () => {
     try {
-      // Carica dinamicamente jsQR
-      const jsQR = await import('jsqr');
-      
-      // Ottieni i dati dell'immagine
-      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-      
-      // Scansiona per QR codes
-      const qrCode = jsQR.default(imageData.data, imageData.width, imageData.height, {
-        inversionAttempts: "dontInvert",
-      });
-
-      if (qrCode && qrCode.data) {
-        console.log("QR Code trovato:", qrCode.data);
-        setCode(qrCode.data.toUpperCase());
-        stopScanner();
-        toast({ 
-          title: "QR Code scansionato", 
-          description: "Verifica in corso..." 
-        });
-        return;
-      }
-    } catch (error) {
-      console.error("Errore durante la scansione:", error);
-    }
-
-    // Continua la scansione
-    animationRef.current = requestAnimationFrame(scanQRCode);
-  };
-
-  const startScanner = async () => {
-    try {
-      // Verifica supporto browser
       if (!navigator.mediaDevices?.getUserMedia) {
         toast({
           title: "Non supportato",
@@ -110,67 +42,41 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         return;
       }
 
-      // Verifica contesto sicuro
-      if (!window.isSecureContext) {
-        toast({
-          title: "Permesso non disponibile",
-          description: "La fotocamera richiede HTTPS. Apri il sito con https://",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      console.log("Richiedendo accesso alla fotocamera...");
-
-      // Richiedi accesso alla camera
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { 
-          facingMode: "environment", // Camera posteriore per QR codes
+          facingMode: "environment",
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
       });
 
       streamRef.current = stream;
-
+      
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play().then(() => {
-            console.log("Video avviato, inizio scansione...");
-            scanQRCode();
-          }).catch(err => {
-            console.error("Errore avvio video:", err);
-          });
-        };
+        videoRef.current.play();
       }
 
       setScanning(true);
       toast({
-        title: "Scanner attivo",
-        description: "Inquadra il QR code con la fotocamera",
+        title: "Fotocamera attiva",
+        description: "Inquadra il QR Code per scansionarlo",
       });
 
-    } catch (err: any) {
-      console.error("Errore avvio scanner:", err);
-
-      let errorMessage = "Impossibile avviare la fotocamera";
+    } catch (error: any) {
+      console.error("Errore fotocamera:", error);
       
-      if (err?.name === "NotAllowedError") {
-        errorMessage = "Permesso fotocamera negato. Abilita i permessi nelle impostazioni del browser.";
-      } else if (err?.name === "NotFoundError") {
-        errorMessage = "Nessuna fotocamera trovata sul dispositivo.";
-      } else if (err?.name === "NotReadableError") {
-        errorMessage = "Fotocamera già in uso o non disponibile.";
-      } else if (err?.name === "OverconstrainedError") {
-        errorMessage = "Le impostazioni della fotocamera non sono supportate.";
+      let message = "Impossibile accedere alla fotocamera";
+      if (error.name === "NotAllowedError") {
+        message = "Permesso fotocamera negato";
+      } else if (error.name === "NotFoundError") {
+        message = "Nessuna fotocamera trovata";
       }
 
-      toast({ 
-        title: "Errore Scanner", 
-        description: errorMessage, 
-        variant: "destructive" 
+      toast({
+        title: "Errore",
+        description: message,
+        variant: "destructive",
       });
     }
   };
@@ -191,7 +97,6 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
     setResult(null);
 
     try {
-      // Get QR code details
       const { data: qrData, error: qrError } = await supabase
         .from("qr_codes")
         .select(`
@@ -206,39 +111,31 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
 
       if (qrError || !qrData) {
         setResult({ valid: false, message: "QR code non valido" });
-        setLoading(false);
         return;
       }
 
-      // Check if QR belongs to this partner's events
       if (qrData.events.profiles.id !== partnerId) {
         setResult({ valid: false, message: "QR code non appartiene a questo partner" });
-        setLoading(false);
         return;
       }
 
-      // Check if already used
       if (qrData.is_used) {
         setResult({
           valid: false,
           message: "QR code già utilizzato",
           details: `Utilizzato il ${new Date(qrData.used_at).toLocaleString("it-IT")}`,
         });
-        setLoading(false);
         return;
       }
 
-      // Check if event is still valid
       const now = new Date();
       const endDate = new Date(qrData.events.end_date);
       
       if (now > endDate) {
         setResult({ valid: false, message: "Evento scaduto" });
-        setLoading(false);
         return;
       }
 
-      // Mark as used
       const { error: updateError } = await supabase
         .from("qr_codes")
         .update({
@@ -248,9 +145,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         .eq("id", qrData.id);
 
       if (updateError) {
-        console.error("Errore aggiornamento QR:", updateError);
         setResult({ valid: false, message: "Errore durante la validazione" });
-        setLoading(false);
         return;
       }
 
@@ -271,7 +166,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
       setCode("");
 
     } catch (error) {
-      console.error("Errore durante la verifica:", error);
+      console.error("Errore verifica:", error);
       setResult({ valid: false, message: "Errore durante la verifica del QR code" });
     } finally {
       setLoading(false);
@@ -289,7 +184,6 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
           </p>
         </div>
 
-        {/* Camera Scanner */}
         {scanning ? (
           <div className="space-y-4">
             <div className="relative rounded-lg overflow-hidden bg-black">
@@ -301,77 +195,70 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
                 autoPlay
               />
               
-              {/* Canvas nascosto per la scansione */}
-              <canvas
-                ref={canvasRef}
-                className="hidden"
-              />
-              
-              {/* Overlay con guida visiva */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="border-2 border-primary border-dashed w-64 h-64 rounded-lg flex items-center justify-center">
+                <div className="border-2 border-white border-dashed w-64 h-64 rounded-lg flex items-center justify-center">
                   <div className="text-white text-sm bg-black/70 px-3 py-2 rounded-lg text-center">
                     <div className="font-semibold">Inquadra il QR Code</div>
-                    <div className="text-xs mt-1">Mantieni fermo il dispositivo</div>
+                    <div className="text-xs mt-1">Inserisci manualmente il codice sotto</div>
                   </div>
                 </div>
               </div>
             </div>
             
             <Button
-              onClick={stopScanner}
+              onClick={stopCamera}
               variant="outline"
               className="w-full"
               size="lg"
             >
               <X className="w-4 h-4 mr-2" />
-              Chiudi Scanner
+              Chiudi Fotocamera
             </Button>
           </div>
         ) : (
-          <>
-            <Button
-              onClick={startScanner}
-              className="w-full mb-4 h-14 bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-              size="lg"
-            >
-              <Camera className="w-5 h-5 mr-2" />
-              Apri Fotocamera
-            </Button>
-
-            <div className="relative mb-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">oppure</span>
-              </div>
-            </div>
-
-            <form onSubmit={handleScan} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="qr-code-input">Inserisci codice manualmente</Label>
-                <Input
-                  id="qr-code-input"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.toUpperCase())}
-                  placeholder="XXXXXXXXXXXX"
-                  maxLength={12}
-                  className="ios-input text-center text-2xl font-mono tracking-wider"
-                />
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full ios-button h-14 text-lg"
-                disabled={loading || code.length !== 12}
-                size="lg"
-              >
-                {loading ? "Verifica..." : "Verifica QR Code"}
-              </Button>
-            </form>
-          </>
+          <Button
+            onClick={startCamera}
+            className="w-full mb-4 h-14 bg-gradient-to-br from-primary to-primary/80"
+            size="lg"
+          >
+            <Camera className="w-5 h-5 mr-2" />
+            Apri Fotocamera
+          </Button>
         )}
+
+        <div className="relative mb-4">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">
+              {scanning ? "o inserisci manualmente" : "oppure"}
+            </span>
+          </div>
+        </div>
+
+        <form onSubmit={handleScan} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="qr-code-input">Inserisci codice manualmente</Label>
+            <Input
+              id="qr-code-input"
+              value={code}
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              placeholder="XXXXXXXXXXXX"
+              maxLength={12}
+              className="ios-input text-center text-2xl font-mono tracking-wider"
+            />
+          </div>
+
+          <Button
+            type="submit"
+            className="w-full ios-button h-14 text-lg"
+            disabled={loading || code.length !== 12}
+            size="lg"
+          >
+            {loading ? "Verifica..." : "Verifica QR Code"}
+          </Button>
+        </form>
       </div>
 
       {result && (
