@@ -66,25 +66,25 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         aspectRatio: 1.0,
       } as const;
 
-      // Cerca esplicitamente la camera posteriore
+      // Cerca esplicitamente la camera FRONTALE
       let cameraId: string | undefined;
       try {
         const cameras = await Html5Qrcode.getCameras();
         if (cameras && cameras.length > 0) {
-          // Cerca camera posteriore nel label
-          const backCamera = cameras.find((c) => 
-            /back|rear|posteriore|environment/i.test(c.label)
+          // Cerca camera frontale nel label
+          const frontCamera = cameras.find((c) => 
+            /front|user|frontale|facetime/i.test(c.label)
           );
-          cameraId = backCamera?.id || cameras[cameras.length - 1]?.id;
+          cameraId = frontCamera?.id || cameras[0]?.id; // Prima camera se non trova frontale
         }
       } catch (e) {
         console.log("Impossibile elencare le camere, uso facingMode");
       }
 
-      // Usa deviceId se trovato, altrimenti facingMode environment
+      // Usa deviceId se trovato, altrimenti facingMode user (frontale)
       const constraints = cameraId 
         ? { deviceId: { exact: cameraId } }
-        : { facingMode: { exact: "environment" } };
+        : { facingMode: { exact: "user" } };
 
       await html5QrCode.start(
         constraints,
