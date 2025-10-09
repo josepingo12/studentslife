@@ -1,18 +1,10 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-<<<<<<< HEAD
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Image, Video, CheckCircle2, Camera, FileText } from "lucide-react";
-=======
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
-import { Image, Video, CheckCircle2, Sparkles } from "lucide-react";
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
 import { useToast } from "@/hooks/use-toast";
 
 interface UploadSheetProps {
@@ -29,10 +21,7 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete }: UploadShe
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [success, setSuccess] = useState(false);
-<<<<<<< HEAD
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
-=======
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>, type: "image" | "video") => {
     const file = event.target.files?.[0];
@@ -127,7 +116,6 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete }: UploadShe
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-<<<<<<< HEAD
       <SheetContent
         side="bottom"
         className={`rounded-t-[24px] bg-white border-t border-border/30 p-0 shadow-2xl ${
@@ -196,73 +184,25 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete }: UploadShe
               <CheckCircle2 className="w-24 h-24 text-green-500 animate-pulse" />
               <h3 className="text-2xl font-bold text-green-500">Pubblicato!</h3>
               <p className="text-gray-600 text-center">
-=======
-      <SheetContent side="bottom" className="rounded-t-3xl h-[85vh]">
-        <SheetHeader>
-          <SheetTitle className="text-center text-2xl">
-            {uploadType ? (uploadType === "story" ? "Nuova Storia" : "Nuovo Post") : "Cosa vuoi pubblicare?"}
-          </SheetTitle>
-        </SheetHeader>
-
-        <div className="mt-8 space-y-4">
-          {!uploadType ? (
-            // Selection screen
-            <div className="grid grid-cols-2 gap-4">
-              <Button
-                onClick={() => setUploadType("post")}
-                className="h-32 flex-col gap-3 bg-gradient-to-br from-primary to-primary/80"
-              >
-                <Sparkles className="w-12 h-12" />
-                <span className="text-lg font-semibold">Post</span>
-              </Button>
-              <Button
-                onClick={() => setUploadType("story")}
-                className="h-32 flex-col gap-3 bg-gradient-to-br from-secondary to-secondary/80"
-              >
-                <Sparkles className="w-12 h-12" />
-                <span className="text-lg font-semibold">Storia</span>
-              </Button>
-            </div>
-          ) : success ? (
-            // Success screen
-            <div className="flex flex-col items-center justify-center py-12 space-y-4">
-              <CheckCircle2 className="w-24 h-24 text-green-500 animate-scale-in" />
-              <h3 className="text-2xl font-bold text-green-500">Pubblicato!</h3>
-              <p className="text-muted-foreground">
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
                 Il tuo {uploadType === "story" ? "storia" : "post"} è stato caricato con successo
               </p>
             </div>
           ) : uploading ? (
-<<<<<<< HEAD
             /* Upload progress screen */
             <div className="space-y-6 py-8">
               <div className="flex items-center justify-center">
                 <div className="relative">
                   <div className="w-32 h-32 rounded-full border-8 border-blue-100 flex items-center justify-center">
                     <span className="text-3xl font-bold text-blue-600">{uploadProgress}%</span>
-=======
-            // Upload progress screen
-            <div className="space-y-6 py-8">
-              <div className="flex items-center justify-center">
-                <div className="relative">
-                  <div className="w-32 h-32 rounded-full border-8 border-primary/20 flex items-center justify-center">
-                    <span className="text-3xl font-bold text-primary">{uploadProgress}%</span>
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
                   </div>
                 </div>
               </div>
               <Progress value={uploadProgress} className="h-3" />
-<<<<<<< HEAD
               <p className="text-center text-gray-600">
-=======
-              <p className="text-center text-muted-foreground">
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
                 Caricamento in corso...
               </p>
             </div>
           ) : (
-<<<<<<< HEAD
             /* Upload form */
             <div className="space-y-6">
               {uploadType === "post" && (
@@ -323,81 +263,15 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete }: UploadShe
                       </Button>
                     </label>
                   </div>
-=======
-            // Upload form
-            <div className="space-y-6">
-              {uploadType === "post" && (
-                <Textarea
-                  placeholder="Scrivi qualcosa..."
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="min-h-[120px] resize-none"
-                />
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileSelect(e, "image")}
-                    className="hidden"
-                    id="image-upload"
-                  />
-                  <label htmlFor="image-upload">
-                    <Button
-                      type="button"
-                      className="w-full h-24 flex-col gap-3"
-                      variant="outline"
-                      asChild
-                    >
-                      <div>
-                        <Image className="w-8 h-8" />
-                        <span>Foto</span>
-                      </div>
-                    </Button>
-                  </label>
-                </div>
-
-                <div>
-                  <input
-                    type="file"
-                    accept="video/*"
-                    onChange={(e) => handleFileSelect(e, "video")}
-                    className="hidden"
-                    id="video-upload"
-                  />
-                  <label htmlFor="video-upload">
-                    <Button
-                      type="button"
-                      className="w-full h-24 flex-col gap-3"
-                      variant="outline"
-                      asChild
-                    >
-                      <div>
-                        <Video className="w-8 h-8" />
-                        <span>Video</span>
-                      </div>
-                    </Button>
-                  </label>
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
                 </div>
               </div>
 
               <Button
-<<<<<<< HEAD
                 onClick={() => setUploadType(null)}
                 variant="ghost"
                 className="w-full rounded-2xl text-gray-600 hover:bg-gray-100"
               >
                 ← Indietro
-=======
-                onClick={handleClose}
-                variant="ghost"
-                className="w-full"
-              >
-                Annulla
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
               </Button>
             </div>
           )}

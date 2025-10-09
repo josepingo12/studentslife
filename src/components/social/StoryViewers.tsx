@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-<<<<<<< HEAD
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-=======
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
 import { Eye } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
@@ -31,7 +27,6 @@ interface Viewer {
 const StoryViewers = ({ storyId, open, onOpenChange }: StoryViewersProps) => {
   const [viewers, setViewers] = useState<Viewer[]>([]);
   const [loading, setLoading] = useState(true);
-<<<<<<< HEAD
   const [isDesktop, setIsDesktop] = useState(false);
 
   // Detect if desktop
@@ -41,8 +36,6 @@ const StoryViewers = ({ storyId, open, onOpenChange }: StoryViewersProps) => {
     window.addEventListener('resize', checkIsDesktop);
     return () => window.removeEventListener('resize', checkIsDesktop);
   }, []);
-=======
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
 
   useEffect(() => {
     if (open && storyId) {
@@ -56,7 +49,6 @@ const StoryViewers = ({ storyId, open, onOpenChange }: StoryViewersProps) => {
     const { data } = await supabase
       .from("story_views")
       .select(`
-<<<<<<< HEAD
         id,
         viewer_id,
         viewed_at,
@@ -64,15 +56,6 @@ const StoryViewers = ({ storyId, open, onOpenChange }: StoryViewersProps) => {
           first_name,
           last_name,
           business_name,
-=======
-        id, 
-        viewer_id, 
-        viewed_at,
-        profiles!inner(
-          first_name, 
-          last_name, 
-          business_name, 
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
           profile_image_url
         )
       `)
@@ -117,7 +100,6 @@ const StoryViewers = ({ storyId, open, onOpenChange }: StoryViewersProps) => {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-<<<<<<< HEAD
       <SheetContent
         side="bottom"
         className={`rounded-t-[20px] bg-background/95 backdrop-blur-xl border-t border-border/50 p-0 shadow-2xl ${
@@ -127,13 +109,6 @@ const StoryViewers = ({ storyId, open, onOpenChange }: StoryViewersProps) => {
         }`}
       >
         {/* Header */}
-=======
-      <SheetContent 
-        side="bottom" 
-        className="rounded-t-[20px] h-[70vh] bg-background/95 backdrop-blur-xl border-t border-border/50 p-0 shadow-2xl"
-      >
-        {/* Header with view count */}
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
         <div className="sticky top-0 bg-background/80 backdrop-blur-md border-b border-border/30 px-5 py-4 z-10">
           <div className="w-10 h-1 bg-muted-foreground/30 rounded-full mx-auto mb-3" />
           <div className="flex items-center justify-center gap-2.5">
@@ -146,15 +121,10 @@ const StoryViewers = ({ storyId, open, onOpenChange }: StoryViewersProps) => {
           </div>
         </div>
 
-<<<<<<< HEAD
         {/* Content */}
         <div className={`overflow-y-auto overscroll-contain ${
           isDesktop ? 'h-[calc(400px-75px)]' : 'h-[calc(70vh-75px)]'
         }`}>
-=======
-        {/* Scrollable viewers list */}
-        <div className="overflow-y-auto h-[calc(70vh-75px)] overscroll-contain">
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="relative">
@@ -181,13 +151,8 @@ const StoryViewers = ({ storyId, open, onOpenChange }: StoryViewersProps) => {
                 >
                   <div className="relative">
                     <Avatar className="h-12 w-12 border-2 border-background shadow-sm ring-1 ring-border/20">
-<<<<<<< HEAD
                       <AvatarImage
                         src={viewer.profiles?.profile_image_url}
-=======
-                      <AvatarImage 
-                        src={viewer.profiles?.profile_image_url} 
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
                         className="object-cover"
                       />
                       <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/5 text-primary font-semibold text-base">
@@ -217,8 +182,4 @@ const StoryViewers = ({ storyId, open, onOpenChange }: StoryViewersProps) => {
   );
 };
 
-<<<<<<< HEAD
 export default StoryViewers;
-=======
-export default StoryViewers;
->>>>>>> 8ae9404e1d1ba9f5b7080d53f58bbecd30f09517
