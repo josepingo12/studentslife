@@ -112,12 +112,12 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
             Crea Nuovo Evento
           </Button>
         </DialogTrigger>
-        <DialogContent className="ios-card max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="ios-card max-w-md h-[90vh] overflow-y-auto sm:max-h-[90vh] sm:h-auto flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>Nuovo Evento</DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4 pb-4">
+          <form onSubmit={handleSubmit} className="space-y-4 pb-4 overflow-y-auto flex-1">
             <div className="space-y-2">
               <Label>Titolo *</Label>
               <Input
