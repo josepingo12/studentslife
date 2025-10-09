@@ -6,8 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import logo from "@/assets/logo.png";
 
 interface Category {
@@ -19,7 +25,7 @@ interface Category {
 const RegisterPartner = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [formData, setFormData] = useState({
@@ -31,6 +37,20 @@ const RegisterPartner = () => {
     businessCity: "",
     businessCategory: "",
   });
+
+  const languages = [
+    { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+    { code: 'es', name: 'Español', flag: '🇪🇸' },
+    { code: 'en', name: 'English', flag: '🇬🇧' },
+    { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+    { code: 'fr', name: 'Français', flag: '🇫🇷' }
+  ];
+
+  const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
+
+  const changeLanguage = (languageCode: string) => {
+    i18n.changeLanguage(languageCode);
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -163,6 +183,31 @@ const RegisterPartner = () => {
         <div className="text-center">
           <img src={logo} alt="Students Life" className="w-32 h-32 mx-auto mb-2" />
           <p className="text-muted-foreground mt-2">{t("auth.registerPartner")}</p>
+        </div>
+
+        {/* Language Selector */}
+        <div className="flex justify-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Globe className="h-4 w-4" />
+                <span>{currentLanguage.flag}</span>
+                <span>{currentLanguage.name}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center">
+              {languages.map((language) => (
+                <DropdownMenuItem
+                  key={language.code}
+                  onClick={() => changeLanguage(language.code)}
+                  className="gap-2"
+                >
+                  <span>{language.flag}</span>
+                  <span>{language.name}</span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
