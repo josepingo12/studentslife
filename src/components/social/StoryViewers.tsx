@@ -39,28 +39,22 @@ const StoryViewers = ({ storyId, open, onOpenChange }: StoryViewersProps) => {
     setLoading(true);
     const { data } = await supabase
       .from("story_views")
-      .select("id, viewer_id, viewed_at")
+      .select(`
+        id, 
+        viewer_id, 
+        viewed_at,
+        profiles!inner(
+          first_name, 
+          last_name, 
+          business_name, 
+          profile_image_url
+        )
+      `)
       .eq("story_id", storyId)
       .order("viewed_at", { ascending: false });
 
     if (data) {
-      // Load profiles separately
-      const viewersWithProfiles = await Promise.all(
-        data.map(async (view) => {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("first_name, last_name, business_name, profile_image_url")
-            .eq("id", view.viewer_id)
-            .single();
-
-          return {
-            ...view,
-            profiles: profile || {}
-          };
-        })
-      );
-      
-      setViewers(viewersWithProfiles);
+      setViewers(data);
     }
     setLoading(false);
   };
@@ -97,7 +91,10 @@ const StoryViewers = ({ storyId, open, onOpenChange }: StoryViewersProps) => {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-[20px] h-[70vh] bg-background/95 backdrop-blur-xl border-t border-border/50 p-0 shadow-2xl">
+      <SheetContent 
+        side="bottom" 
+        className="rounded-t-[20px] h-[70vh] bg-background/95 backdrop-blur-xl border-t border-border/50 p-0 shadow-2xl"
+      >
         {/* Header with view count */}
         <div className="sticky top-0 bg-background/80 backdrop-blur-md border-b border-border/30 px-5 py-4 z-10">
           <div className="w-10 h-1 bg-muted-foreground/30 rounded-full mx-auto mb-3" />
