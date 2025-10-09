@@ -27,93 +27,104 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
     };
   }, []);
 
-  const startScanner = async () => {
-    try {
-      // Blocked contexts: insecure or embedded iframes often cannot request camera
-      if (!window.isSecureContext) {
-        toast({
-          title: "Permesso non disponibile",
-          description: "La fotocamera richiede HTTPS. Apri il sito con https://",
-          variant: "destructive",
-        });
-        return;
-      }
-      if (window.self !== window.top) {
-        toast({
-          title: "Apri in nuova scheda",
-          description: "La fotocamera è bloccata nel preview. Apri la pagina in una nuova scheda.",
-          variant: "destructive",
-        });
-        return;
-      }
-      if (!navigator.mediaDevices?.getUserMedia) {
-        toast({
-          title: "Non supportato",
-          description: "Il browser non supporta l'accesso alla fotocamera.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setScanning(true);
-
-      const html5QrCode = new Html5Qrcode("qr-reader");
-      scannerRef.current = html5QrCode;
-
-      const config = {
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0,
-      } as const;
-
-      // Cerca esplicitamente la camera FRONTALE
-      let cameraId: string | undefined;
-      try {
-        const cameras = await Html5Qrcode.getCameras();
-        if (cameras && cameras.length > 0) {
-          // Cerca camera frontale nel label
-          const frontCamera = cameras.find((c) => 
-            /front|user|frontale|facetime/i.test(c.label)
-          );
-          cameraId = frontCamera?.id || cameras[0]?.id; // Prima camera se non trova frontale
-        }
-      } catch (e) {
-        console.log("Impossibile elencare le camere, uso facingMode");
-      }
-
-      // Usa deviceId se trovato, altrimenti facingMode user (frontale)
-      const constraints = cameraId 
-        ? { deviceId: { exact: cameraId } }
-        : { facingMode: { exact: "user" } };
-
-      await html5QrCode.start(
-        constraints,
-        config,
-        (decodedText) => {
-          setCode(decodedText.toUpperCase());
-          stopScanner();
-          toast({ title: "QR Code scansionato", description: "Verifica in corso..." });
-        },
-        () => {}
-      );
-    } catch (err: any) {
-      console.error("Errore avvio scanner:", err);
-
-      let errorMessage = "Impossibile avviare la fotocamera";
-      if (err?.name === "NotAllowedError") {
-        errorMessage = "Permesso fotocamera negato. Abilita i permessi nelle impostazioni del browser.";
-      } else if (err?.name === "NotFoundError") {
-        errorMessage = "Nessuna fotocamera trovata sul dispositivo.";
-      } else if (err?.name === "NotReadableError") {
-        errorMessage = "Fotocamera già in uso o non disponibile.";
-      } else if (err?.message) {
-        errorMessage = err.message;
-      }
-
-      toast({ title: "Errore", description: errorMessage, variant: "destructive" });
-      setScanning(false);
+const startScanner = async () => {
+  try {
+    // Blocked contexts: insecure or embedded iframes often cannot request camera
+    if (!window.isSecureContext) {
+      toast({
+        title: "Permesso non disponibile",
+        description: "La fotocamera richiede HTTPS. Apri il sito con https://",
+        variant: "destructive",
+      });
+      return;
     }
-  };
+    if (window.self !== window.top) {
+      toast({
+        title: "Apri in nuova scheda",
+        description: "La fotocamera è bloccata nel preview. Apri la pagina in una nuova scheda.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!navigator.mediaDevices?.getUserMedia) {
+      toast({
+        title: "Non supportato",
+        description: "Il browser non supporta l'accesso alla fotocamera.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setScanning(true);
+
+    // Aspetta che l'elemento sia nel DOM
+    setTimeout(async () => {
+      try {
+        const element = document.getElementById("qr-reader");
+        if (!element) {
+          throw new Error("Elemento qr-reader non trovato nel DOM");
+        }
+
+        const html5QrCode = new Html5Qrcode("qr-reader");
+        scannerRef.current = html5QrCode;
+
+        const config = {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0,
+        } as const;
+
+        // Cerca esplicitamente la camera FRONTALE
+        let cameraId: string | undefined;
+        try {
+          const cameras = await Html5Qrcode.getCameras();
+          if (cameras && cameras.length > 0) {
+            // Cerca camera frontale nel label
+            const frontCamera = cameras.find((c) => 
+              /front|user|frontale|facetime/i.test(c.label)
+            );
+            cameraId = frontCamera?.id || cameras[0]?.id;
+          }
+        } catch (e) {
+          console.log("Impossibile elencare le camere, uso facingMode");
+        }
+
+        // Usa deviceId se trovato, altrimenti facingMode user (frontale)
+        const constraints = cameraId 
+          ? { deviceId: { exact: cameraId } }
+          : { facingMode: { exact: "user" } };
+
+        await html5QrCode.start(
+          constraints,
+          config,
+          (decodedText) => {
+            setCode(decodedText.toUpperCase());
+            stopScanner();
+            toast({ title: "QR Code scansionato", description: "Verifica in corso..." });
+          },
+          () => {}
+        );
+      } catch (err: any) {
+        console.error("Errore avvio scanner:", err);
+        let errorMessage = "Impossibile avviare la fotocamera";
+        if (err?.name === "NotAllowedError") {
+          errorMessage = "Permesso fotocamera negato. Abilita i permessi nelle impostazioni del browser.";
+        } else if (err?.name === "NotFoundError") {
+          errorMessage = "Nessuna fotocamera trovata sul dispositivo.";
+        } else if (err?.name === "NotReadableError") {
+          errorMessage = "Fotocamera già in uso o non disponibile.";
+        } else if (err?.message) {
+          errorMessage = err.message;
+        }
+        toast({ title: "Errore", description: errorMessage, variant: "destructive" });
+        setScanning(false);
+      }
+    }, 100); // Aspetta 100ms per il rendering
+  } catch (err: any) {
+    console.error("Errore generale:", err);
+    setScanning(false);
+  }
+};
 
   const stopScanner = async () => {
     if (scannerRef.current) {
