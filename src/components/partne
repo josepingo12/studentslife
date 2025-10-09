@@ -56,14 +56,44 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         return;
       }
 
+      // RICHIEDI PERMESSI ESPLICITAMENTE PRIMA
+      console.log("Richiedendo permessi fotocamera...");
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: "user" } 
+        });
+        console.log("Permessi fotocamera ottenuti!");
+        // Ferma il stream temporaneo
+        stream.getTracks().forEach(track => track.stop());
+      } catch (permissionError: any) {
+        console.error("Permessi fotocamera negati:", permissionError);
+        toast({
+          title: "Permessi richiesti",
+          description: "Abilita l'accesso alla fotocamera per continuare",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setScanning(true);
 
-      // Aspetta che l'elemento sia disponibile
+      // Aspetta il re-render
       await new Promise(resolve => setTimeout(resolve, 200));
 
-      if (!qrReaderRef.current) {
-        throw new Error("Elemento qr-reader non disponibile");
+      // Crea l'elemento dinamicamente se non esiste
+      let qrReaderElement = document.getElementById("qr-reader");
+      if (!qrReaderElement && qrReaderRef.current) {
+        qrReaderElement = document.createElement("div");
+        qrReaderElement.id = "qr-reader";
+        qrReaderElement.className = "rounded-lg overflow-hidden min-h-[300px]";
+        qrReaderRef.current.appendChild(qrReaderElement);
       }
+
+      if (!qrReaderElement) {
+        throw new Error("Impossibile creare l'elemento qr-reader");
+      }
+
+      console.log("Elemento qr-reader creato/trovato:", qrReaderElement);
 
       const html5QrCode = new Html5Qrcode("qr-reader");
       scannerRef.current = html5QrCode;
@@ -78,12 +108,14 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
       let cameraId: string | undefined;
       try {
         const cameras = await Html5Qrcode.getCameras();
+        console.log("Camere disponibili:", cameras);
         if (cameras && cameras.length > 0) {
           // Cerca camera frontale nel label
           const frontCamera = cameras.find((c) => 
             /front|user|frontale|facetime/i.test(c.label)
           );
           cameraId = frontCamera?.id || cameras[0]?.id;
+          console.log("Camera selezionata:", frontCamera || cameras[0]);
         }
       } catch (e) {
         console.log("Impossibile elencare le camere, uso facingMode");
@@ -93,6 +125,8 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
       const constraints = cameraId 
         ? { deviceId: { exact: cameraId } }
         : { facingMode: { exact: "user" } };
+
+      console.log("Constraints camera:", constraints);
 
       await html5QrCode.start(
         constraints,
@@ -104,6 +138,9 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         },
         () => {}
       );
+
+      console.log("Scanner avviato con successo!");
+
     } catch (err: any) {
       console.error("Errore avvio scanner:", err);
 
@@ -235,10 +272,11 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         {scanning ? (
           <div className="space-y-4">
             <div 
-              id="qr-reader" 
               ref={qrReaderRef}
-              className="rounded-lg overflow-hidden min-h-[300px]" 
-            />
+              className="rounded-lg overflow-hidden min-h-[300px] bg-black"
+            >
+              {/* L'elemento qr-reader sarà creato dinamicamente qui */}
+            </div>
             <Button
               onClick={stopScanner}
               variant="outline"
