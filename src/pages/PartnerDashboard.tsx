@@ -157,7 +157,7 @@ const PartnerDashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary pb-24">
       {/* Content based on active tab */}
       {activeTab === "social" ? (
-        <>
+        <div className="max-w-xl mx-auto w-full">
           {/* Stories */}
           <div className="mt-4">
             <StoriesCarousel currentUserId={user.id} />
@@ -194,7 +194,7 @@ const PartnerDashboard = () => {
               ))
             )}
           </div>
-        </>
+        </div>
       ) : activeTab === "events" ? (
         <div className="px-4 mt-4">
           <PartnerEventsManager partnerId={user.id} />

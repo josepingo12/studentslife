@@ -120,8 +120,9 @@ const Social = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary pb-20">
-      {/* Header */}
-      <div className="ios-card mx-4 mt-4 p-4">
+      <div className="max-w-xl mx-auto w-full">
+        {/* Header */}
+        <div className="ios-card mx-4 mt-4 p-4">
         <div className="flex items-center justify-between mb-4">
           <Button
             variant="ghost"
@@ -227,6 +228,7 @@ const Social = () => {
             />
           ))
         )}
+      </div>
       </div>
     </div>
   );
