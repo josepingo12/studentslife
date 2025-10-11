@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import logo from '@/assets/logo.png';
 import screen1 from '@/assets/screen1.jpeg';
 import screen2 from '@/assets/screen2.jpeg';
+import headerImage from '@/assets/header.png';
 
 const StudentsLifeLanding: React.FC = () => {
   const { t } = useTranslation();
@@ -100,45 +101,14 @@ const StudentsLifeLanding: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-white">
-      {/* Hero Section iOS Style */}
+      {/* Hero Section - Solo Immagine */}
       <header className="relative h-screen flex items-center justify-center overflow-hidden" ref={heroRef}>
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-blue-400/5 to-transparent"></div>
-        <div className="hero-bg absolute inset-0 opacity-30">
+        <div className="hero-bg absolute inset-0 w-full h-full">
           <img 
-            src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" 
-            alt="Valladolid Universidad" 
+            src={headerImage}
+            alt="StudentsLife Header" 
             className="w-full h-full object-cover"
           />
-        </div>
-
-        <div className="relative z-10 text-center px-6 max-w-4xl">
-          <div className="floating-element mb-12">
-            <div className="relative">
-              <img 
-                src={logo} 
-                alt="Students Life" 
-                className="w-32 h-32 mx-auto mb-8 rounded-3xl shadow-2xl bg-white/90 backdrop-blur-xl p-4 hover:scale-105 transition-all duration-500" 
-              />
-              <div className="absolute -inset-2 bg-blue-400/20 rounded-3xl blur-xl animate-pulse"></div>
-            </div>
-          </div>
-          
-          <h1 className="text-6xl md:text-7xl font-black mb-6 text-gray-900 tracking-tight">
-            StudentsLife
-          </h1>
-          <p className="text-xl md:text-2xl font-medium mb-4 text-blue-600">
-            Tu experiencia Erasmus en Valladolid
-          </p>
-          <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
-            La plataforma que conecta estudiantes con los mejores comercios y descuentos de la ciudad
-          </p>
-          
-          <Button 
-            onClick={handleRegisterClick}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-12 py-4 rounded-full text-lg font-semibold shadow-xl hover:shadow-blue-500/25 transform hover:scale-105 transition-all duration-300 border-0"
-          >
-            Comenzar Aventura
-          </Button>
         </div>
       </header>
 
@@ -356,7 +326,7 @@ const StudentsLifeLanding: React.FC = () => {
   );
 };
 
-// Resto dei dati (features, categories, appFeatures) rimangono uguali...
+// Resto dei dati rimangono uguali...
 const features = [
   {
     icon: "💰",
@@ -422,7 +392,7 @@ const appFeatures = [
   }
 ];
 
-// Componenti helper (FeatureCard, CategoryCard, AppFeatureItem) rimangono uguali...
+// Componenti helper rimangono uguali...
 const FeatureCard: React.FC<{
   icon: string;
   title: string;
