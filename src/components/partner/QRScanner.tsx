@@ -42,19 +42,64 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         return;
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { 
-          facingMode: "environment",
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+      // Stop any existing camera stream first
+      stopCamera();
+
+      // Request fotocamera posteriore con fallback
+      let stream: MediaStream | null = null;
+      
+      try {
+        // Prova prima con facingMode: { exact: "environment" }
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { 
+            facingMode: { exact: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+      } catch (exactError) {
+        console.log("Exact environment mode failed, trying ideal mode");
+        
+        // Fallback a facingMode: "environment" (non exact)
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { 
+              facingMode: "environment",
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
+            audio: false
+          });
+        } catch (idealError) {
+          console.log("Ideal environment mode failed, trying any camera");
+          
+          // Ultimo fallback: qualsiasi fotocamera
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { 
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
+            audio: false
+          });
         }
-      });
+      }
+
+      if (!stream) {
+        throw new Error("Impossibile ottenere lo stream della fotocamera");
+      }
 
       streamRef.current = stream;
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play();
+        
+        // Assicurati che il video si avvii
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current?.play().catch(err => {
+            console.error("Errore play video:", err);
+          });
+        };
       }
 
       setScanning(true);
@@ -68,15 +113,20 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
       
       let message = "Impossibile accedere alla fotocamera";
       if (error.name === "NotAllowedError") {
-        message = "Permesso fotocamera negato";
+        message = "Permesso fotocamera negato. Abilita i permessi nelle impostazioni del browser.";
       } else if (error.name === "NotFoundError") {
-        message = "Nessuna fotocamera trovata";
+        message = "Nessuna fotocamera trovata sul dispositivo";
+      } else if (error.name === "NotReadableError") {
+        message = "Fotocamera già in uso da un'altra applicazione";
+      } else if (error.name === "OverconstrainedError") {
+        message = "Le impostazioni richieste non sono supportate dalla fotocamera";
       }
 
       toast({
-        title: "Errore",
+        title: "Errore Fotocamera",
         description: message,
         variant: "destructive",
+        duration: 5000,
       });
     }
   };
@@ -195,14 +245,20 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
                 autoPlay
               />
               
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="border-2 border-white border-dashed w-64 h-64 rounded-lg flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="border-4 border-white border-dashed w-64 h-64 rounded-lg flex items-center justify-center animate-pulse">
                   <div className="text-white text-sm bg-black/70 px-3 py-2 rounded-lg text-center">
-                    <div className="font-semibold">Inquadra il QR Code</div>
-                    <div className="text-xs mt-1">Inserisci manualmente il codice sotto</div>
+                    <div className="font-semibold">📷 Inquadra il QR Code</div>
+                    <div className="text-xs mt-1">Fotocamera posteriore attiva</div>
                   </div>
                 </div>
               </div>
+            </div>
+            
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-sm">
+              <p className="text-center text-blue-600 dark:text-blue-400">
+                💡 <strong>Suggerimento:</strong> Mantieni il QR code ben illuminato e stabile
+              </p>
             </div>
             
             <Button
@@ -218,11 +274,11 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         ) : (
           <Button
             onClick={startCamera}
-            className="w-full mb-4 h-14 bg-gradient-to-br from-primary to-primary/80"
+            className="w-full mb-4 h-14 bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
             size="lg"
           >
             <Camera className="w-5 h-5 mr-2" />
-            Apri Fotocamera
+            Apri Fotocamera Posteriore
           </Button>
         )}
 
