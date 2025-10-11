@@ -95,7 +95,7 @@ const StudentsLifeLanding: React.FC = () => {
             StudentsLife
           </h1>
           <p className="text-xl md:text-2xl font-medium mb-4 text-blue-600">
-            Tu experiencia Erasmus en Valladolid
+            Tu experiencia de estudiante en Valladolid
           </p>
           <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
             La plataforma que conecta estudiantes con los mejores comercios y descuentos de la ciudad
@@ -118,7 +118,7 @@ const StudentsLifeLanding: React.FC = () => {
               Todo lo que necesitas
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Una plataforma completa que revoluciona la experiencia de los estudiantes Erasmus en Valladolid
+              Una plataforma completa que revoluciona la experiencia de los estudiantes en Valladolid
             </p>
           </div>
 
@@ -177,7 +177,7 @@ const StudentsLifeLanding: React.FC = () => {
               Partners con Descuentos
             </h3>
             <p className="text-xl text-gray-600 mb-16 max-w-3xl mx-auto">
-              Comercios locales que ofrecen descuentos exclusivos a estudiantes Erasmus
+              Comercios locales que ofrecen descuentos exclusivos a estudiantes.
             </p>
             
             <div className="bg-white rounded-3xl shadow-xl p-12 border border-gray-100 floating-element">
@@ -260,7 +260,7 @@ const features = [
   {
     icon: "📱",
     title: "Social Network",
-    description: "Comparte fotos, historias y conecta con otros estudiantes Erasmus"
+    description: "Comparte fotos, historias y conecta con otros estudiantes"
   },
   {
     icon: "💬",
@@ -280,7 +280,7 @@ const features = [
   {
     icon: "📍",
     title: "Enfoque Local",
-    description: "Especializado en Valladolid para estudiantes Erasmus"
+    description: "Especializado en Valladolid para estudiantes"
   }
 ];
 
