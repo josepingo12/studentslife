@@ -1,15 +1,39 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import logo from '@/assets/logo.png';
+import screen1 from '@/assets/screen1.jpeg';
+import screen2 from '@/assets/screen2.jpeg';
 
 const StudentsLifeLanding: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const heroRef = useRef<HTMLElement>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Array delle screenshot
+  const screenshots = [
+    {
+      src: screen1,
+      alt: "StudentsLife App - Pantalla Principal",
+      title: "Descubre Partners",
+      description: "Explora categorías y encuentra los mejores descuentos"
+    },
+    {
+      src: screen2,
+      alt: "StudentsLife App - Chat y Social",
+      title: "Conecta y Chatea",
+      description: "Red social integrada con chat para partners y amigos"
+    }
+  ];
 
   useEffect(() => {
+    // Auto-slide del carousel
+    const slideInterval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % screenshots.length);
+    }, 4000);
+
     // Animazioni iOS-style fluide
     const observerOptions: IntersectionObserverInit = {
       threshold: 0.2,
@@ -36,7 +60,6 @@ const StudentsLifeLanding: React.FC = () => {
         heroImage.style.transform = `translateY(${scrolled * 0.2}px)`;
       }
 
-      // Floating cards suave
       const cards = document.querySelectorAll('.floating-element');
       cards.forEach((card, index) => {
         const element = card as HTMLElement;
@@ -59,12 +82,21 @@ const StudentsLifeLanding: React.FC = () => {
     return () => {
       window.removeEventListener('scroll', handleScroll);
       observer.disconnect();
+      clearInterval(slideInterval);
     };
-  }, []);
+  }, [screenshots.length]);
 
   const handleRegisterClick = () => navigate('/register-client');
   const handlePartnerClick = () => navigate('/register-partner');
   const handleLoginClick = () => navigate('/login');
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % screenshots.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + screenshots.length) % screenshots.length);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-white">
@@ -95,7 +127,7 @@ const StudentsLifeLanding: React.FC = () => {
             StudentsLife
           </h1>
           <p className="text-xl md:text-2xl font-medium mb-4 text-blue-600">
-            Tu experiencia de estudiante en Valladolid
+            Tu experiencia Erasmus en Valladolid
           </p>
           <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
             La plataforma que conecta estudiantes con los mejores comercios y descuentos de la ciudad
@@ -110,6 +142,107 @@ const StudentsLifeLanding: React.FC = () => {
         </div>
       </header>
 
+      {/* App Preview Carousel Section */}
+      <section className="py-24 bg-gradient-to-br from-gray-50 to-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16 animate-fade-in">
+            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+              Anteprima dell'App
+            </h2>
+            <p className="text-xl text-gray-600">
+              Scopri l'interfaccia moderna e intuitiva di StudentsLife
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-16 items-center animate-fade-in">
+            {/* Carousel */}
+            <div className="relative floating-element">
+              <div className="bg-white rounded-3xl shadow-2xl p-6 border border-gray-100">
+                {/* Phone Frame */}
+                <div className="relative">
+                  <div className="aspect-[9/16] bg-black rounded-3xl p-2 shadow-inner">
+                    <div className="relative w-full h-full bg-white rounded-2xl overflow-hidden">
+                      {/* Status Bar */}
+                      <div className="absolute top-0 left-0 right-0 h-8 bg-black rounded-t-2xl flex items-center justify-center">
+                        <div className="w-20 h-1 bg-white rounded-full"></div>
+                      </div>
+                      
+                      {/* Screenshot Carousel */}
+                      <div className="relative w-full h-full pt-8 overflow-hidden">
+                        <div 
+                          className="flex transition-transform duration-500 ease-in-out h-full"
+                          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                        >
+                          {screenshots.map((screenshot, index) => (
+                            <div key={index} className="w-full h-full flex-shrink-0">
+                              <img 
+                                src={screenshot.src}
+                                alt={screenshot.alt}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Navigation Arrows */}
+                  <button 
+                    onClick={prevSlide}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white transition-all duration-300 hover:scale-110"
+                  >
+                    <span className="text-gray-600 text-lg">‹</span>
+                  </button>
+                  <button 
+                    onClick={nextSlide}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white transition-all duration-300 hover:scale-110"
+                  >
+                    <span className="text-gray-600 text-lg">›</span>
+                  </button>
+                </div>
+                
+                {/* Dots Indicator */}
+                <div className="flex justify-center mt-6 space-x-2">
+                  {screenshots.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentSlide(index)}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        index === currentSlide 
+                          ? 'bg-blue-500 w-6' 
+                          : 'bg-gray-300 hover:bg-gray-400'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+              
+              {/* Glow Effect */}
+              <div className="absolute -inset-4 bg-blue-400/20 rounded-3xl blur-xl opacity-50"></div>
+            </div>
+
+            {/* Content */}
+            <div className="space-y-8">
+              <div className="animate-fade-in">
+                <h3 className="text-4xl font-bold text-gray-900 mb-6">
+                  {screenshots[currentSlide].title}
+                </h3>
+                <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                  {screenshots[currentSlide].description}
+                </p>
+              </div>
+
+              <div className="space-y-6 animate-fade-in">
+                {appFeatures.map((feature, index) => (
+                  <AppFeatureItem key={index} {...feature} index={index} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-24 px-6">
         <div className="max-w-6xl mx-auto">
@@ -118,7 +251,7 @@ const StudentsLifeLanding: React.FC = () => {
               Todo lo que necesitas
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Una plataforma completa que revoluciona la experiencia de los estudiantes en Valladolid
+              Una plataforma completa que revoluciona la experiencia de los estudiantes Erasmus en Valladolid
             </p>
           </div>
 
@@ -139,33 +272,6 @@ const StudentsLifeLanding: React.FC = () => {
               ))}
             </div>
           </div>
-
-          {/* App Features */}
-          <div className="grid lg:grid-cols-2 gap-16 items-center animate-fade-in">
-            <div className="space-y-8">
-              <h3 className="text-4xl font-bold text-gray-900">
-                Funcionalidades Tech
-              </h3>
-              <div className="space-y-6">
-                {appFeatures.map((feature, index) => (
-                  <AppFeatureItem key={index} {...feature} index={index} />
-                ))}
-              </div>
-            </div>
-            
-            <div className="relative floating-element">
-              <div className="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
-                <div className="aspect-[9/16] bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-blue-500 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-                      <span className="text-2xl">📱</span>
-                    </div>
-                    <p className="text-gray-600 font-medium">App Preview</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -177,7 +283,7 @@ const StudentsLifeLanding: React.FC = () => {
               Partners con Descuentos
             </h3>
             <p className="text-xl text-gray-600 mb-16 max-w-3xl mx-auto">
-              Comercios locales que ofrecen descuentos exclusivos a estudiantes.
+              Comercios locales que ofrecen descuentos exclusivos a estudiantes Erasmus
             </p>
             
             <div className="bg-white rounded-3xl shadow-xl p-12 border border-gray-100 floating-element">
@@ -250,7 +356,7 @@ const StudentsLifeLanding: React.FC = () => {
   );
 };
 
-// Datos de características principales
+// Resto dei dati (features, categories, appFeatures) rimangono uguali...
 const features = [
   {
     icon: "💰",
@@ -260,7 +366,7 @@ const features = [
   {
     icon: "📱",
     title: "Social Network",
-    description: "Comparte fotos, historias y conecta con otros estudiantes"
+    description: "Comparte fotos, historias y conecta con otros estudiantes Erasmus"
   },
   {
     icon: "💬",
@@ -280,11 +386,10 @@ const features = [
   {
     icon: "📍",
     title: "Enfoque Local",
-    description: "Especializado en Valladolid para estudiantes"
+    description: "Especializado en Valladolid para estudiantes Erasmus"
   }
 ];
 
-// Categorías disponibles
 const categories = [
   { icon: "💄", name: "Belleza", color: "from-pink-400 to-rose-400" },
   { icon: "🎮", name: "Entretenimiento", color: "from-purple-400 to-indigo-400" },
@@ -294,7 +399,6 @@ const categories = [
   { icon: "🛍️", name: "Shopping", color: "from-yellow-400 to-orange-400" }
 ];
 
-// Características de la app
 const appFeatures = [
   {
     icon: "📱",
@@ -318,7 +422,7 @@ const appFeatures = [
   }
 ];
 
-// Componentes
+// Componenti helper (FeatureCard, CategoryCard, AppFeatureItem) rimangono uguali...
 const FeatureCard: React.FC<{
   icon: string;
   title: string;
