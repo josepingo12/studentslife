@@ -45,7 +45,7 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
           user_id: userId,
           content: content.trim(),
           image_url: mediaType === 'image' ? mediaUrl : null,
-          video_url: mediaType === 'video' ? mediaUrl : null, // Aggiungi questo campo al database
+          video_url: mediaType === 'video' ? mediaUrl : null,
           media_type: mediaType,
         });
 

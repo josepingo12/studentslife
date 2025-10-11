@@ -24,6 +24,7 @@ const ImageUpload = ({
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [previewType, setPreviewType] = useState<'image' | 'video' | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -62,13 +63,14 @@ const ImageUpload = ({
 
       toast({
         title: "Upload completato!",
-        description: "Immagine caricata con successo",
+        description: file.type.startsWith('video/') ? "Video caricato con successo" : "Immagine caricata con successo",
       });
 
       onImageUploaded(publicUrl);
       
       if (showPreview) {
         setPreview(publicUrl);
+        setPreviewType(file.type.startsWith('video/') ? 'video' : 'image');
       }
     } catch (error: any) {
       console.error("Upload error:", error);
@@ -91,17 +93,27 @@ const ImageUpload = ({
 
   const clearPreview = () => {
     setPreview(null);
+    setPreviewType(null);
   };
 
   return (
     <div className="space-y-3">
       {showPreview && preview && (
         <div className="relative">
-          <img 
-            src={preview} 
-            alt="Preview" 
-            className="w-full h-48 object-cover rounded-lg"
-          />
+          {previewType === 'video' ? (
+            <video 
+              src={preview} 
+              className="w-full h-48 object-cover rounded-lg"
+              controls
+              preload="metadata"
+            />
+          ) : (
+            <img 
+              src={preview} 
+              alt="Preview" 
+              className="w-full h-48 object-cover rounded-lg"
+            />
+          )}
           <Button
             size="icon"
             variant="destructive"

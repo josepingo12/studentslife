@@ -34,10 +34,23 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const storyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
+  const [videoDuration, setVideoDuration] = useState(0);
 
   const currentStory = storyGroup.stories[currentStoryIndex];
   const STORY_DURATION = 5000;
+  const MAX_VIDEO_DURATION = 25000; // 25 secondi massimo
   const isOwnStory = storyGroup.user_id === currentUserId;
+  const isVideo = currentStory?.media_type === 'video' || currentStory?.video_url;
+  
+  // Calcola la durata effettiva da usare
+  const getStoryDuration = () => {
+    if (!isVideo) return STORY_DURATION;
+    // Per video: usa min(durata video, 25 secondi)
+    if (videoDuration > 0) {
+      return Math.min(videoDuration * 1000, MAX_VIDEO_DURATION);
+    }
+    return MAX_VIDEO_DURATION;
+  };
 
   useEffect(() => {
     const checkIsDesktop = () => setIsDesktop(window.innerWidth >= 768);
@@ -54,8 +67,21 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
     }
   }, [currentStory, currentUserId, isOwnStory]);
 
+  // Gestione pausa/play video
+  useEffect(() => {
+    if (!videoRef.current) return;
+    
+    if (isPaused || isViewersSheetOpen) {
+      videoRef.current.pause();
+    } else {
+      videoRef.current.play();
+    }
+  }, [isPaused, isViewersSheetOpen]);
+
   // TIMER LOGIC MIGLIORATO - Riprende da dove era rimasto
   useEffect(() => {
+    const duration = getStoryDuration();
+
     if (isPaused || isViewersSheetOpen) {
       // SALVA il progresso attuale quando viene messo in pausa
       if (progressIntervalRef.current) {
@@ -72,7 +98,7 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
 
       // Calcola il tempo rimanente
       const elapsed = Date.now() - startTimeRef.current;
-      const remaining = Math.max(0, STORY_DURATION - elapsed);
+      const remaining = Math.max(0, duration - elapsed);
       setRemainingTime(remaining);
 
       return;
@@ -80,16 +106,16 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
 
     // RIPRENDE da dove era rimasto
     let startProgress = progress;
-    let duration = STORY_DURATION;
+    let effectiveDuration = duration;
 
     // Se c'è un progresso salvato, riprendi da lì
     if (savedProgress > 0 && remainingTime > 0) {
       startProgress = savedProgress;
-      duration = remainingTime;
+      effectiveDuration = remainingTime;
     } else {
       // Nuova storia, inizia da capo
       startProgress = 0;
-      duration = STORY_DURATION;
+      effectiveDuration = duration;
       setProgress(0);
     }
 
@@ -100,15 +126,15 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
     progressIntervalRef.current = setInterval(() => {
       setProgress(prev => {
         const elapsed = Date.now() - startTimeRef.current;
-        const totalProgress = startProgress + (elapsed / duration) * (100 - startProgress);
+        const totalProgress = startProgress + (elapsed / effectiveDuration) * (100 - startProgress);
         return totalProgress >= 100 ? 100 : totalProgress;
       });
-    }, 50); // Più fluido con 50ms
+    }, 50);
 
     // Auto advance to next story
     storyTimeoutRef.current = setTimeout(() => {
       handleNextStory();
-    }, duration);
+    }, effectiveDuration);
 
     return () => {
       if (progressIntervalRef.current) {
@@ -120,7 +146,7 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
         storyTimeoutRef.current = null;
       }
     };
-  }, [currentStoryIndex, isPaused, isViewersSheetOpen, savedProgress, remainingTime]);
+  }, [currentStoryIndex, isPaused, isViewersSheetOpen, savedProgress, remainingTime, videoDuration]);
 
   // Reset del progresso quando cambia storia
   useEffect(() => {
@@ -273,16 +299,43 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
 
           {/* Story Content */}
           <div className="relative w-full h-full">
-            <img
-              src={currentStory.image_url || currentStory.media_url}
-              alt="Story"
-              className="w-full h-full object-cover"
-            />
+            {isVideo ? (
+              <video
+                ref={videoRef}
+                src={currentStory.video_url}
+                className="w-full h-full object-cover"
+                autoPlay
+                muted={isMuted}
+                playsInline
+                onLoadedMetadata={(e) => {
+                  const video = e.target as HTMLVideoElement;
+                  setVideoDuration(video.duration);
+                }}
+              />
+            ) : (
+              <img
+                src={currentStory.image_url}
+                alt="Story"
+                className="w-full h-full object-cover"
+              />
+            )}
 
             <div className="absolute inset-0 flex">
               <div className="flex-1 cursor-pointer" onClick={() => handleMouseDown('left')} />
               <div className="flex-1 cursor-pointer" onClick={() => handleMouseDown('right')} />
             </div>
+
+            {/* Controllo volume per video */}
+            {isVideo && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsMuted(!isMuted)}
+                className="absolute bottom-4 right-4 text-white hover:bg-white/20 p-2 z-10"
+              >
+                {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+              </Button>
+            )}
           </div>
 
           {/* Navigation arrows */}
@@ -378,16 +431,43 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
           </div>
 
           <div className="relative w-full h-full">
-            <img
-              src={currentStory.image_url || currentStory.media_url}
-              alt="Story"
-              className="w-full h-full object-cover"
-            />
+            {isVideo ? (
+              <video
+                ref={videoRef}
+                src={currentStory.video_url}
+                className="w-full h-full object-cover"
+                autoPlay
+                muted={isMuted}
+                playsInline
+                onLoadedMetadata={(e) => {
+                  const video = e.target as HTMLVideoElement;
+                  setVideoDuration(video.duration);
+                }}
+              />
+            ) : (
+              <img
+                src={currentStory.image_url}
+                alt="Story"
+                className="w-full h-full object-cover"
+              />
+            )}
 
             <div className="absolute inset-0 flex">
               <div className="flex-1" onTouchStart={() => handleMouseDown('left')} />
               <div className="flex-1" onTouchStart={() => handleMouseDown('right')} />
             </div>
+
+            {/* Controllo volume per video */}
+            {isVideo && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsMuted(!isMuted)}
+                className="absolute bottom-20 right-4 text-white hover:bg-white/20 p-2 z-10 rounded-full bg-black/20 backdrop-blur-sm"
+              >
+                {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+              </Button>
+            )}
           </div>
 
           {/* Bottom viewers for mobile - INSTAGRAM STYLE */}

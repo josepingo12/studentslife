@@ -30,7 +30,7 @@ const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: Creat
         .insert({
           user_id: userId,
           image_url: uploadType === 'image' ? url : null,
-          video_url: uploadType === 'video' ? url : null, // Aggiungi questo campo al database
+          video_url: uploadType === 'video' ? url : null,
           media_type: uploadType,
         });
 
@@ -38,7 +38,9 @@ const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: Creat
 
       toast({
         title: "Storia pubblicata!",
-        description: "La tua storia sarà visibile per 24 ore",
+        description: uploadType === 'video' 
+          ? "Video caricato! Durata massima: 25 secondi"
+          : "La tua storia sarà visibile per 24 ore",
       });
 
       setMediaUrl("");
