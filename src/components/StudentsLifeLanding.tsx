@@ -281,88 +281,99 @@ const StudentsLifeLanding: React.FC = () => {
         </div>
       )}
 
-      {/* App Installation Tutorial Section */}
-      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12 sm:mb-16 animate-fade-in">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
-              Añade StudentsLife a tu móvil
-            </h2>
-            <p className="text-lg sm:text-xl text-gray-600 px-4">
-              Acceso rápido desde tu pantalla de inicio como una app nativa
-            </p>
-          </div>
+   {/* App Installation Tutorial Section */}
+<section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-indigo-50">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6">
+    <div className="text-center mb-12 sm:mb-16 animate-fade-in">
+      <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
+        Añade StudentsLife a tu móvil
+      </h2>
+      <p className="text-lg sm:text-xl text-gray-600 px-4">
+        Acceso rápido desde tu pantalla de inicio como una app nativa
+      </p>
+    </div>
 
-          <div className="grid md:grid-cols-2 gap-8 sm:gap-12 animate-fade-in">
-            {/* iOS Tutorial Card */}
-            <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-gray-100 hover:shadow-2xl transform hover:scale-105 transition-all duration-300 floating-element">
-              <div className="text-center">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl mx-auto mb-6 flex items-center justify-center">
-                  <span className="text-2xl sm:text-3xl">🍎</span>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-                  iPhone / iPad
-                </h3>
-                <p className="text-gray-600 mb-6 text-sm sm:text-base">
-                  Instrucciones paso a paso para dispositivos iOS
-                </p>
-                <Button
-                  onClick={() => openTutorial('ios')}
-                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full py-3 font-semibold transform hover:scale-105 transition-all duration-300"
-                >
-                  Ver Tutorial iOS
-                </Button>
+    <div className="grid md:grid-cols-2 gap-8 sm:gap-12 animate-fade-in">
+      {/* iOS Tutorial Card */}
+      <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-gray-100 hover:shadow-2xl transform hover:scale-105 transition-all duration-300 floating-element">
+        <div className="text-center">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl mx-auto mb-6 flex items-center justify-center relative overflow-hidden shadow-lg">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="w-8 h-8 bg-white rounded-lg mb-1 flex items-center justify-center">
+                <div className="w-4 h-4 bg-blue-500 rounded"></div>
               </div>
-            </div>
-
-            {/* Android Tutorial Card */}
-            <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-gray-100 hover:shadow-2xl transform hover:scale-105 transition-all duration-300 floating-element">
-              <div className="text-center">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl mx-auto mb-6 flex items-center justify-center">
-                  <span className="text-2xl sm:text-3xl">🤖</span>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-                  Android
-                </h3>
-                <p className="text-gray-600 mb-6 text-sm sm:text-base">
-                  Guía completa para dispositivos Android
-                </p>
-                <Button
-                  onClick={() => openTutorial('android')}
-                  className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full py-3 font-semibold transform hover:scale-105 transition-all duration-300"
-                >
-                  Ver Tutorial Android
-                </Button>
-              </div>
+              <div className="text-xs text-white font-medium">Safari</div>
             </div>
           </div>
-
-          {/* Benefits Section */}
-          <div className="mt-12 sm:mt-16 text-center animate-fade-in">
-            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">
-              Ventajas de la App Web
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
-              <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                <div className="text-3xl mb-4">⚡</div>
-                <h4 className="font-bold text-gray-900 mb-2">Acceso Instantáneo</h4>
-                <p className="text-gray-600 text-sm">Un toque y ya estás dentro</p>
-              </div>
-              <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                <div className="text-3xl mb-4">📱</div>
-                <h4 className="font-bold text-gray-900 mb-2">Como App Nativa</h4>
-                <p className="text-gray-600 text-sm">Experiencia completa sin descargas</p>
-              </div>
-              <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                <div className="text-3xl mb-4">🔄</div>
-                <h4 className="font-bold text-gray-900 mb-2">Siempre Actualizada</h4>
-                <p className="text-gray-600 text-sm">Últimas funciones automáticamente</p>
-              </div>
-            </div>
-          </div>
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
+            iPhone / iPad
+          </h3>
+          <p className="text-gray-600 mb-6 text-sm sm:text-base">
+            Instrucciones paso a paso para dispositivos iOS con Safari
+          </p>
+          <Button
+            onClick={() => openTutorial('ios')}
+            className="w-full bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 text-white rounded-full py-3 font-semibold transform hover:scale-105 transition-all duration-300"
+          >
+            Ver Tutorial Safari
+          </Button>
         </div>
-      </section>
+      </div>
 
+      {/* Android Tutorial Card */}
+      <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-gray-100 hover:shadow-2xl transform hover:scale-105 transition-all duration-300 floating-element">
+        <div className="text-center">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-2xl mx-auto mb-6 flex items-center justify-center relative overflow-hidden shadow-lg border border-gray-200">
+            <div className="flex space-x-1">
+              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+            </div>
+            <div className="absolute bottom-1 text-xs font-bold text-gray-600">Chrome</div>
+          </div>
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
+            Android
+          </h3>
+          <p className="text-gray-600 mb-6 text-sm sm:text-base">
+            Guía completa para dispositivos Android con Chrome
+          </p>
+          <Button
+            onClick={() => openTutorial('android')}
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full py-3 font-semibold transform hover:scale-105 transition-all duration-300"
+          >
+            Ver Tutorial Chrome
+          </Button>
+        </div>
+      </div>
+    </div>
+
+    {/* Benefits Section */}
+    <div className="mt-12 sm:mt-16 text-center animate-fade-in">
+      <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">
+        Ventajas de la App Web
+      </h3>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
+        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+          <div className="text-3xl mb-4">⚡</div>
+          <h4 className="font-bold text-gray-900 mb-2">Acceso Instantáneo</h4>
+          <p className="text-gray-600 text-sm">Un toque y ya estás dentro</p>
+        </div>
+        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+          <div className="text-3xl mb-4">📱</div>
+          <h4 className="font-bold text-gray-900 mb-2">Como App Nativa</h4>
+          <p className="text-gray-600 text-sm">Experiencia completa sin descargas</p>
+        </div>
+        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+          <div className="text-3xl mb-4">🔄</div>
+          <h4 className="font-bold text-gray-900 mb-2">Siempre Actualizada</h4>
+          <p className="text-gray-600 text-sm">Últimas funciones automáticamente</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
       {/* App Preview Carousel Section */}
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
