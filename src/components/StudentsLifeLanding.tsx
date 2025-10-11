@@ -6,12 +6,16 @@ import logo from '@/assets/logo.png';
 import screen1 from '@/assets/screen1.jpeg';
 import screen2 from '@/assets/screen2.jpeg';
 import headerImage from '@/assets/header.png';
+import headerMobile from '@/assets/header-mobile.png';
 
 const StudentsLifeLanding: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const heroRef = useRef<HTMLElement>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [tutorialStep, setTutorialStep] = useState(0);
+  const [deviceType, setDeviceType] = useState<'ios' | 'android'>('ios');
 
   // Array delle screenshot
   const screenshots = [
@@ -29,16 +33,83 @@ const StudentsLifeLanding: React.FC = () => {
     }
   ];
 
+  // Tutorial steps para iOS
+  const iosSteps = [
+    {
+      title: "Paso 1: Abre Safari",
+      description: "Visita studentslife.es en Safari",
+      icon: "🌐",
+      animation: "bounce"
+    },
+    {
+      title: "Paso 2: Toca el botón Compartir",
+      description: "Presiona el icono de compartir en la parte inferior",
+      icon: "📤",
+      animation: "pulse"
+    },
+    {
+      title: "Paso 3: Añadir a Inicio",
+      description: "Selecciona 'Añadir a pantalla de inicio'",
+      icon: "📱",
+      animation: "bounce"
+    },
+    {
+      title: "¡Listo!",
+      description: "Ya tienes StudentsLife en tu pantalla de inicio",
+      icon: "✅",
+      animation: "tada"
+    }
+  ];
+
+  // Tutorial steps para Android
+  const androidSteps = [
+    {
+      title: "Paso 1: Abre Chrome",
+      description: "Visita studentslife.es en Google Chrome",
+      icon: "🌐",
+      animation: "bounce"
+    },
+    {
+      title: "Paso 2: Menú de opciones",
+      description: "Toca los tres puntos en la esquina superior derecha",
+      icon: "⋮",
+      animation: "pulse"
+    },
+    {
+      title: "Paso 3: Añadir a Inicio",
+      description: "Selecciona 'Añadir a pantalla de inicio'",
+      icon: "📱",
+      animation: "bounce"
+    },
+    {
+      title: "¡Perfecto!",
+      description: "StudentsLife está ahora en tu pantalla de inicio",
+      icon: "✅",
+      animation: "tada"
+    }
+  ];
+
   useEffect(() => {
     // Auto-slide del carousel
     const slideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % screenshots.length);
     }, 4000);
 
+    // Tutorial auto-advance
+    let tutorialInterval: NodeJS.Timeout;
+    if (showTutorial) {
+      tutorialInterval = setInterval(() => {
+        setTutorialStep((prev) => {
+          const steps = deviceType === 'ios' ? iosSteps : androidSteps;
+          return (prev + 1) % steps.length;
+        });
+      }, 3000);
+    }
+
     // Animazioni iOS-style fluide
     const observerOptions: IntersectionObserverInit = {
-      threshold: 0.2,
-      rootMargin: '0px 0px -50px 0px'
+      threshold: 0.1,
+      rootMargin: '0px 0px -30px 0px'
     };
 
     const observer = new IntersectionObserver((entries) => {
@@ -48,33 +119,37 @@ const StudentsLifeLanding: React.FC = () => {
           setTimeout(() => {
             target.style.opacity = '1';
             target.style.transform = 'translateY(0) scale(1)';
-          }, index * 150);
+          }, index * 100);
         }
       });
     }, observerOptions);
 
-    // Parallax suave iOS-style
+    // Parallax ottimizzato per mobile
     const handleScroll = () => {
       const scrolled = window.pageYOffset;
       const heroImage = document.querySelector('.hero-bg') as HTMLElement;
-      if (heroImage) {
+      const isMobile = window.innerWidth < 768;
+      
+      if (heroImage && !isMobile) {
         heroImage.style.transform = `translateY(${scrolled * 0.2}px)`;
       }
 
-      const cards = document.querySelectorAll('.floating-element');
-      cards.forEach((card, index) => {
-        const element = card as HTMLElement;
-        const speed = 0.3 + (index * 0.1);
-        element.style.transform = `translateY(${Math.sin(scrolled * 0.005 + index) * speed}px)`;
-      });
+      if (!isMobile) {
+        const cards = document.querySelectorAll('.floating-element');
+        cards.forEach((card, index) => {
+          const element = card as HTMLElement;
+          const speed = 0.3 + (index * 0.1);
+          element.style.transform = `translateY(${Math.sin(scrolled * 0.005 + index) * speed}px)`;
+        });
+      }
     };
 
     const animatedElements = document.querySelectorAll('.animate-fade-in');
     animatedElements.forEach(el => {
       const element = el as HTMLElement;
       element.style.opacity = '0';
-      element.style.transform = 'translateY(30px) scale(0.95)';
-      element.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+      element.style.transform = 'translateY(20px) scale(0.95)';
+      element.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
       observer.observe(element);
     });
 
@@ -84,8 +159,9 @@ const StudentsLifeLanding: React.FC = () => {
       window.removeEventListener('scroll', handleScroll);
       observer.disconnect();
       clearInterval(slideInterval);
+      if (tutorialInterval) clearInterval(tutorialInterval);
     };
-  }, [screenshots.length]);
+  }, [screenshots.length, showTutorial, deviceType]);
 
   const handleRegisterClick = () => navigate('/register-client');
   const handlePartnerClick = () => navigate('/register-partner');
@@ -99,46 +175,218 @@ const StudentsLifeLanding: React.FC = () => {
     setCurrentSlide((prev) => (prev - 1 + screenshots.length) % screenshots.length);
   };
 
+  const openTutorial = (type: 'ios' | 'android') => {
+    setDeviceType(type);
+    setTutorialStep(0);
+    setShowTutorial(true);
+  };
+
+  const closeTutorial = () => {
+    setShowTutorial(false);
+    setTutorialStep(0);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-white">
-      {/* Hero Section - Solo Immagine */}
+      {/* Hero Section - Responsive Images */}
       <header className="relative h-screen flex items-center justify-center overflow-hidden" ref={heroRef}>
         <div className="hero-bg absolute inset-0 w-full h-full">
+          {/* Desktop Image */}
           <img 
             src={headerImage}
-            alt="StudentsLife Header" 
-            className="w-full h-full object-cover"
+            alt="StudentsLife Header Desktop" 
+            className="hidden sm:block w-full h-full object-cover object-center"
+          />
+          {/* Mobile Image */}
+          <img 
+            src={headerMobile}
+            alt="StudentsLife Header Mobile" 
+            className="block sm:hidden w-full h-full object-cover object-center"
           />
         </div>
       </header>
 
+      {/* Tutorial Modal */}
+      {showTutorial && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white text-center">
+              <h3 className="text-2xl font-bold mb-2">
+                Añadir a Pantalla de Inicio
+              </h3>
+              <p className="opacity-90">
+                {deviceType === 'ios' ? 'Para iPhone/iPad' : 'Para Android'}
+              </p>
+            </div>
+            
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <div className={`text-6xl mb-4 animate-${(deviceType === 'ios' ? iosSteps : androidSteps)[tutorialStep].animation}`}>
+                  {(deviceType === 'ios' ? iosSteps : androidSteps)[tutorialStep].icon}
+                </div>
+                <h4 className="text-xl font-bold text-gray-900 mb-2">
+                  {(deviceType === 'ios' ? iosSteps : androidSteps)[tutorialStep].title}
+                </h4>
+                <p className="text-gray-600">
+                  {(deviceType === 'ios' ? iosSteps : androidSteps)[tutorialStep].description}
+                </p>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="mb-6">
+                <div className="flex justify-between text-xs text-gray-500 mb-2">
+                  <span>Progreso</span>
+                  <span>{tutorialStep + 1}/{(deviceType === 'ios' ? iosSteps : androidSteps).length}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-500 h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${((tutorialStep + 1) / (deviceType === 'ios' ? iosSteps : androidSteps).length) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              {/* Navigation Dots */}
+              <div className="flex justify-center space-x-2 mb-6">
+                {(deviceType === 'ios' ? iosSteps : androidSteps).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setTutorialStep(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 \${
+                      index === tutorialStep 
+                        ? 'bg-blue-500 w-6' 
+                        : 'bg-gray-300 hover:bg-gray-400'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  onClick={closeTutorial}
+                  variant="outline"
+                  className="flex-1 rounded-full"
+                >
+                  Cerrar
+                </Button>
+                <Button
+                  onClick={() => setTutorialStep((prev) => (prev + 1) % (deviceType === 'ios' ? iosSteps : androidSteps).length)}
+                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white rounded-full"
+                >
+                  {tutorialStep === (deviceType === 'ios' ? iosSteps : androidSteps).length - 1 ? 'Reiniciar' : 'Siguiente'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* App Installation Tutorial Section */}
+      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12 sm:mb-16 animate-fade-in">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
+              Añade StudentsLife a tu móvil
+            </h2>
+            <p className="text-lg sm:text-xl text-gray-600 px-4">
+              Acceso rápido desde tu pantalla de inicio como una app nativa
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 sm:gap-12 animate-fade-in">
+            {/* iOS Tutorial Card */}
+            <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-gray-100 hover:shadow-2xl transform hover:scale-105 transition-all duration-300 floating-element">
+              <div className="text-center">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl mx-auto mb-6 flex items-center justify-center">
+                  <span className="text-2xl sm:text-3xl">🍎</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
+                  iPhone / iPad
+                </h3>
+                <p className="text-gray-600 mb-6 text-sm sm:text-base">
+                  Instrucciones paso a paso para dispositivos iOS
+                </p>
+                <Button
+                  onClick={() => openTutorial('ios')}
+                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full py-3 font-semibold transform hover:scale-105 transition-all duration-300"
+                >
+                  Ver Tutorial iOS
+                </Button>
+              </div>
+            </div>
+
+            {/* Android Tutorial Card */}
+            <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-gray-100 hover:shadow-2xl transform hover:scale-105 transition-all duration-300 floating-element">
+              <div className="text-center">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl mx-auto mb-6 flex items-center justify-center">
+                  <span className="text-2xl sm:text-3xl">🤖</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
+                  Android
+                </h3>
+                <p className="text-gray-600 mb-6 text-sm sm:text-base">
+                  Guía completa para dispositivos Android
+                </p>
+                <Button
+                  onClick={() => openTutorial('android')}
+                  className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full py-3 font-semibold transform hover:scale-105 transition-all duration-300"
+                >
+                  Ver Tutorial Android
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Benefits Section */}
+          <div className="mt-12 sm:mt-16 text-center animate-fade-in">
+            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">
+              Ventajas de la App Web
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
+              <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                <div className="text-3xl mb-4">⚡</div>
+                <h4 className="font-bold text-gray-900 mb-2">Acceso Instantáneo</h4>
+                <p className="text-gray-600 text-sm">Un toque y ya estás dentro</p>
+              </div>
+              <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                <div className="text-3xl mb-4">📱</div>
+                <h4 className="font-bold text-gray-900 mb-2">Como App Nativa</h4>
+                <p className="text-gray-600 text-sm">Experiencia completa sin descargas</p>
+              </div>
+              <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                <div className="text-3xl mb-4">🔄</div>
+                <h4 className="font-bold text-gray-900 mb-2">Siempre Actualizada</h4>
+                <p className="text-gray-600 text-sm">Últimas funciones automáticamente</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* App Preview Carousel Section */}
-      <section className="py-24 bg-gradient-to-br from-gray-50 to-white">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16 animate-fade-in">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12 sm:mb-16 animate-fade-in">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
               Anteprima dell'App
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-lg sm:text-xl text-gray-600 px-4">
               Scopri l'interfaccia moderna e intuitiva di StudentsLife
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-16 items-center animate-fade-in">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center animate-fade-in">
             {/* Carousel */}
-            <div className="relative floating-element">
-              <div className="bg-white rounded-3xl shadow-2xl p-6 border border-gray-100">
-                {/* Phone Frame */}
+            <div className="relative floating-element order-2 lg:order-1">
+              <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-4 sm:p-6 border border-gray-100 mx-auto max-w-sm sm:max-w-none">
                 <div className="relative">
-                  <div className="aspect-[9/16] bg-black rounded-3xl p-2 shadow-inner">
-                    <div className="relative w-full h-full bg-white rounded-2xl overflow-hidden">
-                      {/* Status Bar */}
-                      <div className="absolute top-0 left-0 right-0 h-8 bg-black rounded-t-2xl flex items-center justify-center">
-                        <div className="w-20 h-1 bg-white rounded-full"></div>
+                  <div className="aspect-[9/16] bg-black rounded-2xl sm:rounded-3xl p-1 sm:p-2 shadow-inner">
+                    <div className="relative w-full h-full bg-white rounded-xl sm:rounded-2xl overflow-hidden">
+                      <div className="absolute top-0 left-0 right-0 h-6 sm:h-8 bg-black rounded-t-xl sm:rounded-t-2xl flex items-center justify-center">
+                        <div className="w-16 sm:w-20 h-0.5 sm:h-1 bg-white rounded-full"></div>
                       </div>
                       
-                      {/* Screenshot Carousel */}
-                      <div className="relative w-full h-full pt-8 overflow-hidden">
+                      <div className="relative w-full h-full pt-6 sm:pt-8 overflow-hidden">
                         <div 
                           className="flex transition-transform duration-500 ease-in-out h-full"
                           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
@@ -157,30 +405,28 @@ const StudentsLifeLanding: React.FC = () => {
                     </div>
                   </div>
                   
-                  {/* Navigation Arrows */}
                   <button 
                     onClick={prevSlide}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white transition-all duration-300 hover:scale-110"
+                    className="hidden sm:flex absolute left-1 lg:left-2 top-1/2 -translate-y-1/2 w-8 h-8 lg:w-10 lg:h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg items-center justify-center hover:bg-white transition-all duration-300 hover:scale-110"
                   >
-                    <span className="text-gray-600 text-lg">‹</span>
+                    <span className="text-gray-600 text-sm lg:text-lg">‹</span>
                   </button>
                   <button 
                     onClick={nextSlide}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white transition-all duration-300 hover:scale-110"
+                    className="hidden sm:flex absolute right-1 lg:right-2 top-1/2 -translate-y-1/2 w-8 h-8 lg:w-10 lg:h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg items-center justify-center hover:bg-white transition-all duration-300 hover:scale-110"
                   >
-                    <span className="text-gray-600 text-lg">›</span>
+                    <span className="text-gray-600 text-sm lg:text-lg">›</span>
                   </button>
                 </div>
                 
-                {/* Dots Indicator */}
-                <div className="flex justify-center mt-6 space-x-2">
+                <div className="flex justify-center mt-4 sm:mt-6 space-x-2">
                   {screenshots.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentSlide(index)}
                       className={`w-2 h-2 rounded-full transition-all duration-300 ${
                         index === currentSlide 
-                          ? 'bg-blue-500 w-6' 
+                          ? 'bg-blue-500 w-4 sm:w-6' 
                           : 'bg-gray-300 hover:bg-gray-400'
                       }`}
                     />
@@ -188,22 +434,20 @@ const StudentsLifeLanding: React.FC = () => {
                 </div>
               </div>
               
-              {/* Glow Effect */}
-              <div className="absolute -inset-4 bg-blue-400/20 rounded-3xl blur-xl opacity-50"></div>
+              <div className="absolute -inset-2 sm:-inset-4 bg-blue-400/10 sm:bg-blue-400/20 rounded-2xl sm:rounded-3xl blur-lg sm:blur-xl opacity-50"></div>
             </div>
 
-            {/* Content */}
-            <div className="space-y-8">
-              <div className="animate-fade-in">
-                <h3 className="text-4xl font-bold text-gray-900 mb-6">
+            <div className="space-y-6 sm:space-y-8 order-1 lg:order-2 px-4 sm:px-0">
+              <div className="animate-fade-in text-center lg:text-left">
+                <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
                   {screenshots[currentSlide].title}
                 </h3>
-                <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                <p className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8 leading-relaxed">
                   {screenshots[currentSlide].description}
                 </p>
               </div>
 
-              <div className="space-y-6 animate-fade-in">
+              <div className="space-y-4 sm:space-y-6 animate-fade-in">
                 {appFeatures.map((feature, index) => (
                   <AppFeatureItem key={index} {...feature} index={index} />
                 ))}
@@ -214,29 +458,28 @@ const StudentsLifeLanding: React.FC = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 px-6">
+      <section className="py-12 sm:py-16 lg:py-24 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-20 animate-fade-in">
-            <h2 className="text-5xl font-black text-gray-900 mb-6">
+          <div className="text-center mb-12 sm:mb-16 lg:mb-20 animate-fade-in">
+            <h2 className="text-4xl sm:text-5xl font-black text-gray-900 mb-4 sm:mb-6">
               Todo lo que necesitas
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
               Una plataforma completa que revoluciona la experiencia de los estudiantes Erasmus en Valladolid
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-16 sm:mb-20 lg:mb-24">
             {features.map((feature, index) => (
               <FeatureCard key={index} {...feature} index={index} />
             ))}
           </div>
 
-          {/* Categories Preview */}
-          <div className="animate-fade-in mb-24">
-            <h3 className="text-3xl font-bold text-gray-900 text-center mb-16">
+          <div className="animate-fade-in mb-16 sm:mb-20 lg:mb-24">
+            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-12 sm:mb-16">
               Categorías Disponibles
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
               {categories.map((category, index) => (
                 <CategoryCard key={index} {...category} index={index} />
               ))}
@@ -246,29 +489,29 @@ const StudentsLifeLanding: React.FC = () => {
       </section>
 
       {/* Partners Section */}
-      <section className="py-24 bg-gradient-to-br from-blue-50 to-white">
-        <div className="max-w-6xl mx-auto px-6 text-center">
+      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
           <div className="animate-fade-in">
-            <h3 className="text-4xl font-bold text-gray-900 mb-6">
+            <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
               Partners con Descuentos
             </h3>
-            <p className="text-xl text-gray-600 mb-16 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 mb-12 sm:mb-16 max-w-3xl mx-auto px-4">
               Comercios locales que ofrecen descuentos exclusivos a estudiantes Erasmus
             </p>
             
-            <div className="bg-white rounded-3xl shadow-xl p-12 border border-gray-100 floating-element">
-              <div className="text-6xl mb-8">🎯</div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-4">
+            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-8 sm:p-12 border border-gray-100 floating-element mx-4 sm:mx-0">
+              <div className="text-4xl sm:text-6xl mb-6 sm:mb-8">🎯</div>
+              <h4 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
                 ¡Próximamente!
               </h4>
-              <p className="text-gray-600 text-lg mb-8">
+              <p className="text-gray-600 text-base sm:text-lg mb-6 sm:mb-8">
                 Estamos cerrando acuerdos con los mejores comercios de Valladolid para ofrecerte descuentos exclusivos
               </p>
-              <div className="flex justify-center space-x-4">
+              <div className="flex justify-center space-x-3 sm:space-x-4">
                 {[...Array(4)].map((_, i) => (
                   <div 
                     key={i}
-                    className="w-12 h-12 bg-blue-100 rounded-2xl animate-pulse"
+                    className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl sm:rounded-2xl animate-pulse"
                     style={{ animationDelay: `${i * 0.2}s` }}
                   ></div>
                 ))}
@@ -279,25 +522,25 @@ const StudentsLifeLanding: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-r from-blue-500 to-blue-600">
-        <div className="max-w-4xl mx-auto text-center px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-r from-blue-500 to-blue-600">
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
             ¡Únete a StudentsLife!
           </h2>
-          <p className="text-xl text-blue-100 mb-12">
+          <p className="text-lg sm:text-xl text-blue-100 mb-8 sm:mb-12 px-4">
             Descubre Valladolid, ahorra dinero y conecta con otros estudiantes
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-12">
+          <div className="flex flex-col gap-4 sm:gap-6 justify-center mb-8 sm:mb-12 px-4">
             <Button 
               onClick={handleRegisterClick}
-              className="bg-white text-blue-600 hover:bg-gray-50 px-10 py-4 rounded-full text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300"
+              className="bg-white text-blue-600 hover:bg-gray-50 px-8 sm:px-10 py-3 sm:py-4 rounded-full text-base sm:text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 w-full sm:w-auto"
             >
               📱 Registrarse como Estudiante
             </Button>
             <Button 
               onClick={handlePartnerClick}
-              className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-600 px-10 py-4 rounded-full text-lg font-semibold transform hover:scale-105 transition-all duration-300"
+              className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 sm:px-10 py-3 sm:py-4 rounded-full text-base sm:text-lg font-semibold transform hover:scale-105 transition-all duration-300 w-full sm:w-auto"
             >
               🏪 Registrarse como Partner
             </Button>
@@ -305,7 +548,7 @@ const StudentsLifeLanding: React.FC = () => {
 
           <button 
             onClick={handleLoginClick}
-            className="text-blue-100 hover:text-white text-lg underline underline-offset-4 transition-all duration-300"
+            className="text-blue-100 hover:text-white text-base sm:text-lg underline underline-offset-4 transition-all duration-300 px-4"
           >
             ¿Ya tienes cuenta? <span className="font-semibold">Inicia Sesión</span>
           </button>
@@ -313,20 +556,76 @@ const StudentsLifeLanding: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-white py-16 border-t border-gray-100">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">StudentsLife</h3>
-          <p className="text-gray-600 mb-8">
+      <footer className="bg-white py-12 sm:py-16 border-t border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">StudentsLife</h3>
+          <p className="text-gray-600 mb-6 sm:mb-8 px-4">
             Conectando estudiantes en Valladolid con los mejores descuentos y experiencias
           </p>
-          <p className="text-gray-400">&copy; 2024 StudentsLife. Todos los derechos reservados.</p>
+          <p className="text-gray-400 text-sm sm:text-base">&copy; 2024 StudentsLife. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>
   );
 };
 
-// Resto dei dati rimangono uguali...
+// Componenti ottimizzati per mobile
+const FeatureCard: React.FC<{
+  icon: string;
+  title: string;
+  description: string;
+  index: number;
+}> = ({ icon, title, description, index }) => (
+  <div 
+    className="animate-fade-in bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-lg sm:shadow-xl border border-gray-100 hover:shadow-xl sm:hover:shadow-2xl transform hover:scale-105 transition-all duration-300 floating-element"
+    style={{ animationDelay: `${index * 100}ms` }}
+  >
+    <div className="text-3xl sm:text-4xl mb-4 sm:mb-6">{icon}</div>
+    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">{title}</h3>
+    <p className="text-gray-600 leading-relaxed text-sm sm:text-base">{description}</p>
+  </div>
+);
+
+const CategoryCard: React.FC<{
+  icon: string;
+  name: string;
+  color: string;
+  index: number;
+}> = ({ icon, name, color, index }) => (
+  <div 
+    className="animate-fade-in group cursor-pointer"
+    style={{ animationDelay: `${index * 50}ms` }}
+  >
+    <div className={`bg-gradient-to-br ${color} rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center transform group-hover:scale-105 transition-all duration-300 shadow-lg group-hover:shadow-xl`}>
+      <div className="text-2xl sm:text-3xl mb-2 sm:mb-3">{icon}</div>
+      <p className="text-white font-semibold text-xs sm:text-sm">{name}</p>
+    </div>
+  </div>
+);
+
+const AppFeatureItem: React.FC<{
+  icon: string;
+  title: string;
+  description: string;
+  index: number;
+}> = ({ icon, title, description, index }) => (
+  <div 
+    className="flex items-start space-x-3 sm:space-x-4 group"
+    style={{ animationDelay: `${index * 100}ms` }}
+  >
+    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 text-lg sm:text-xl group-hover:scale-110 group-hover:bg-blue-200 transition-all duration-300">
+      {icon}
+    </div>
+    <div>
+      <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-1 sm:mb-2 group-hover:text-blue-600 transition-colors duration-300">
+        {title}
+      </h4>
+      <p className="text-gray-600 leading-relaxed text-sm sm:text-base">{description}</p>
+    </div>
+  </div>
+);
+
+// Dati delle features
 const features = [
   {
     icon: "💰",
@@ -360,6 +659,7 @@ const features = [
   }
 ];
 
+// Categorías disponibles
 const categories = [
   { icon: "💄", name: "Belleza", color: "from-pink-400 to-rose-400" },
   { icon: "🎮", name: "Entretenimiento", color: "from-purple-400 to-indigo-400" },
@@ -369,6 +669,7 @@ const categories = [
   { icon: "🛍️", name: "Shopping", color: "from-yellow-400 to-orange-400" }
 ];
 
+// Features dell'app
 const appFeatures = [
   {
     icon: "📱",
@@ -391,61 +692,5 @@ const appFeatures = [
     description: "Encuentra exactamente lo que buscas por categoría y ubicación"
   }
 ];
-
-// Componenti helper rimangono uguali...
-const FeatureCard: React.FC<{
-  icon: string;
-  title: string;
-  description: string;
-  index: number;
-}> = ({ icon, title, description, index }) => (
-  <div 
-    className="animate-fade-in bg-white rounded-3xl p-8 shadow-xl border border-gray-100 hover:shadow-2xl transform hover:scale-105 transition-all duration-300 floating-element"
-    style={{ animationDelay: `${index * 100}ms` }}
-  >
-    <div className="text-4xl mb-6">{icon}</div>
-    <h3 className="text-xl font-bold text-gray-900 mb-4">{title}</h3>
-    <p className="text-gray-600 leading-relaxed">{description}</p>
-  </div>
-);
-
-const CategoryCard: React.FC<{
-  icon: string;
-  name: string;
-  color: string;
-  index: number;
-}> = ({ icon, name, color, index }) => (
-  <div 
-    className="animate-fade-in group cursor-pointer"
-    style={{ animationDelay: `${index * 50}ms` }}
-  >
-    <div className={`bg-gradient-to-br ${color} rounded-2xl p-6 text-center transform group-hover:scale-105 transition-all duration-300 shadow-lg group-hover:shadow-xl`}>
-      <div className="text-3xl mb-3">{icon}</div>
-      <p className="text-white font-semibold text-sm">{name}</p>
-    </div>
-  </div>
-);
-
-const AppFeatureItem: React.FC<{
-  icon: string;
-  title: string;
-  description: string;
-  index: number;
-}> = ({ icon, title, description, index }) => (
-  <div 
-    className="flex items-start space-x-4 group"
-    style={{ animationDelay: `${index * 100}ms` }}
-  >
-    <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl group-hover:scale-110 group-hover:bg-blue-200 transition-all duration-300">
-      {icon}
-    </div>
-    <div>
-      <h4 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-300">
-        {title}
-      </h4>
-      <p className="text-gray-600 leading-relaxed">{description}</p>
-    </div>
-  </div>
-);
 
 export default StudentsLifeLanding;
