@@ -19,6 +19,7 @@ import UserProfile from "./pages/UserProfile";
 
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminSetup from "./pages/AdminSetup";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -34,15 +35,72 @@ const App = () => (
           <Route path="/register-partner" element={<RegisterPartner />} />
           <Route path="/login" element={<Login />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/client-dashboard" element={<ClientDashboard />} />
-          <Route path="/partner/:id" element={<PartnerDetails />} />
-          <Route path="/partner-dashboard" element={<PartnerDashboard />} />
-          <Route path="/social" element={<Social />} />
-          <Route path="/chats" element={<Chats />} />
-          <Route path="/chat/:conversationId" element={<ChatConversation />} />
-          <Route path="/profile/:userId?" element={<UserProfile />} />
           
-          <Route path="/admin" element={<AdminDashboard />} />
+          {/* Protected Routes */}
+          <Route 
+            path="/client-dashboard" 
+            element={
+              <ProtectedRoute requireRole="client">
+                <ClientDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/partner/:id" 
+            element={
+              <ProtectedRoute>
+                <PartnerDetails />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/partner-dashboard" 
+            element={
+              <ProtectedRoute requireRole="partner">
+                <PartnerDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/social" 
+            element={
+              <ProtectedRoute>
+                <Social />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/chats" 
+            element={
+              <ProtectedRoute>
+                <Chats />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/chat/:conversationId" 
+            element={
+              <ProtectedRoute>
+                <ChatConversation />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/profile/:userId?" 
+            element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute requireRole="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/admin-setup" element={<AdminSetup />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
