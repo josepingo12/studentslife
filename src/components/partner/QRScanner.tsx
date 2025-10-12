@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CheckCircle2, XCircle, ScanLine, Camera, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import QrScanner from 'qr-scanner';
 
 interface QRScannerProps {
   partnerId: string;
@@ -19,6 +20,8 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const qrScannerRef = useRef<QrScanner | null>(null);
+
 
   const stopCamera = () => {
     if (streamRef.current) {
@@ -61,16 +64,50 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
      setScanning(true);
 
      // Aspetta che React renderizzi il video element
-     setTimeout(() => {
-       if (videoRef.current) {
-         console.log("📺 DEBUG: Assegnando stream al video element");
-         const video = videoRef.current;
+  setTimeout(() => {
+    if (videoRef.current) {
+      console.log("📺 DEBUG: Assegnando stream al video element");
+      const video = videoRef.current;
 
-         video.muted = true;
-         video.playsInline = true;
-         video.autoplay = true;
-         video.controls = false;
-         video.srcObject = stream;
+      video.muted = true;
+      video.playsInline = true;
+      video.autoplay = true;
+      video.controls = false;
+      video.srcObject = stream;
+
+      // AGGIUNGI QR SCANNER
+      const qrScanner = new QrScanner(
+        video,
+        (result) => {
+          console.log("🎯 QR Code detected:", result.data);
+          setCode(result.data.toUpperCase());
+
+          // Auto-submit se è 12 caratteri
+          if (result.data.length === 12) {
+            toast({
+              title: "QR Code rilevato!",
+              description: `Codice: ${result.data}`,
+              duration: 2000
+            });
+
+            // Ferma scanner e processa
+            qrScanner.stop();
+            stopCamera();
+
+            // Simula form submit
+            const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
+            handleScan(fakeEvent);
+          }
+        },
+        {
+          returnDetailedScanResult: true,
+          highlightScanRegion: true,
+          highlightCodeOutline: true,
+        }
+      );
+
+      qrScannerRef.current = qrScanner;
+      qrScanner.start();
 
          console.log("🎬 DEBUG: Stream assegnato, configurando eventi");
 
@@ -227,7 +264,6 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
                   objectFit: 'cover',
                   display: 'block',
                   visibility: 'visible',
-                  transform: 'scaleX(-1)', // Mirror
                 }}
               />
 
