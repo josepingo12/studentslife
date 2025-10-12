@@ -309,14 +309,44 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
             </Button>
           </div>
         ) : (
-          <Button
-            onClick={startCamera}
-            className="w-full mb-4 h-14 bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-            size="lg"
-          >
-            <Camera className="w-5 h-5 mr-2" />
-            Apri Fotocamera Posteriore
-          </Button>
+          <div className="space-y-2">
+            {/* BOTTONE TEST */}
+            <Button
+              onClick={() => {
+                alert("BOTTONE TEST FUNZIONA!");
+                console.log("Test button clicked");
+                toast({
+                  title: "Test",
+                  description: "🧪 Bottone test cliccato!",
+                  duration: 2000
+                });
+              }}
+              variant="outline"
+              className="w-full mb-2"
+              type="button"
+            >
+              🧪 TEST BOTTONE
+            </Button>
+
+            {/* BOTTONE PRINCIPALE CON DEBUG */}
+            <Button
+              onClick={() => {
+                console.log("🔥 BOTTONE FOTOCAMERA CLICCATO!");
+                toast({
+                  title: "Debug",
+                  description: "🔥 Bottone cliccato - chiamando startCamera",
+                  duration: 2000
+                });
+                startCamera();
+              }}
+              className="w-full mb-4 h-14 bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+              size="lg"
+              type="button"
+            >
+              <Camera className="w-5 h-5 mr-2" />
+              Apri Fotocamera Posteriore
+            </Button>
+          </div>
         )}
 
         <div className="relative mb-4">
