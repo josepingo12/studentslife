@@ -31,6 +31,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
     setScanning(false);
   };
 
+<<<<<<< HEAD
  const startCamera = async () => {
    try {
      if (!navigator.mediaDevices?.getUserMedia) {
@@ -115,6 +116,148 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
      });
    }
  };
+=======
+  const startCamera = async () => {
+    try {
+      if (!('mediaDevices' in navigator) || !navigator.mediaDevices.getUserMedia) {
+        toast({
+          title: "Non supportato",
+          description: "Il browser non supporta l'accesso alla fotocamera.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Stop any existing camera stream first
+      stopCamera();
+
+      // Ensure permissions prompt appears, then pick the rear camera
+      const ensurePermission = async () => {
+        try {
+          // Some browsers require an initial call to expose device labels
+          const temp = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          temp.getTracks().forEach((t) => t.stop());
+        } catch (_) {
+          // Ignore: we will still try to get a stream below with constraints
+        }
+      };
+
+      const pickRearDeviceId = async (): Promise<string | undefined> => {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videos = devices.filter((d) => d.kind === 'videoinput');
+        if (videos.length === 0) return undefined;
+        // Prefer names that indicate back/rear/environment
+        const rear = videos.find((d) => /back|rear|environment|trase|poste/i.test(d.label));
+        return (rear || videos[videos.length - 1])?.deviceId; // often last is rear on phones
+      };
+
+      await ensurePermission();
+
+      let stream: MediaStream | null = null;
+
+      // 1) Try by deviceId (most reliable for back camera)
+      try {
+        const deviceId = await pickRearDeviceId();
+        if (deviceId) {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              deviceId: { exact: deviceId },
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+            },
+            audio: false,
+          });
+        }
+      } catch (e) {
+        console.log('DeviceId selection failed, falling back to facingMode', e);
+      }
+
+      // 2) Fallback: facingMode exact environment
+      if (!stream) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { exact: 'environment' },
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+            },
+            audio: false,
+          });
+        } catch (e) {
+          console.log('Exact environment failed, trying ideal');
+        }
+      }
+
+      // 3) Fallback: facingMode environment (non exact)
+      if (!stream) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: 'environment',
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+            },
+            audio: false,
+          });
+        } catch (e) {
+          console.log('Ideal environment failed, trying any camera');
+        }
+      }
+
+      // 4) Final fallback: any camera
+      if (!stream) {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false,
+        });
+      }
+
+      if (!stream) throw new Error('Impossibile ottenere lo stream della fotocamera');
+
+      streamRef.current = stream;
+
+      if (videoRef.current) {
+        const video = videoRef.current;
+        // iOS Safari requirements
+        video.setAttribute('playsinline', 'true');
+        video.setAttribute('autoplay', 'true');
+        video.muted = true;
+        video.srcObject = stream;
+        // Start playback when ready
+        const playPromise = video.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch((err) => console.warn('Autoplay blocked:', err));
+        }
+      }
+
+      setScanning(true);
+      toast({
+        title: 'Fotocamera attiva',
+        description: 'Inquadra il QR Code per scansionarlo',
+      });
+    } catch (error: any) {
+      console.error('Errore fotocamera:', error);
+
+      let message = 'Impossibile accedere alla fotocamera';
+      if (error.name === 'NotAllowedError') {
+        message = 'Permesso fotocamera negato. Abilita i permessi nelle impostazioni del browser.';
+      } else if (error.name === 'NotFoundError') {
+        message = 'Nessuna fotocamera trovata sul dispositivo';
+      } else if (error.name === 'NotReadableError') {
+        message = "Fotocamera già in uso da un'altra applicazione";
+      } else if (error.name === 'OverconstrainedError') {
+        message = 'Le impostazioni richieste non sono supportate dalla fotocamera';
+      }
+
+      toast({
+        title: 'Errore Fotocamera',
+        description: message,
+        variant: 'destructive',
+        duration: 5000,
+      });
+    }
+  };
+>>>>>>> 8317817f8259ae2ee63afa81964ba931708057ec
 
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -234,14 +377,20 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
             }}
             />
               
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="border-2 border-white border-dashed w-64 h-64 rounded-lg flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="border-4 border-white border-dashed w-64 h-64 rounded-lg flex items-center justify-center animate-pulse">
                   <div className="text-white text-sm bg-black/70 px-3 py-2 rounded-lg text-center">
-                    <div className="font-semibold">Inquadra il QR Code</div>
-                    <div className="text-xs mt-1">Inserisci manualmente il codice sotto</div>
+                    <div className="font-semibold">📷 Inquadra il QR Code</div>
+                    <div className="text-xs mt-1">Fotocamera posteriore attiva</div>
                   </div>
                 </div>
               </div>
+            </div>
+            
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-sm">
+              <p className="text-center text-blue-600 dark:text-blue-400">
+                💡 <strong>Suggerimento:</strong> Mantieni il QR code ben illuminato e stabile
+              </p>
             </div>
             
             <Button
@@ -257,11 +406,11 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         ) : (
           <Button
             onClick={startCamera}
-            className="w-full mb-4 h-14 bg-gradient-to-br from-primary to-primary/80"
+            className="w-full mb-4 h-14 bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
             size="lg"
           >
             <Camera className="w-5 h-5 mr-2" />
-            Apri Fotocamera
+            Apri Fotocamera Posteriore
           </Button>
         )}
 

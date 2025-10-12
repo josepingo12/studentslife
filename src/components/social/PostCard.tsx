@@ -219,42 +219,68 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
       )}
 
       {/* Media Content - SUPPORTO VIDEO E IMMAGINI */}
-      {post.media_type === 'video' && post.video_url ? (
-        <div className="relative">
-          <video
-            src={post.video_url}
-            className="w-full max-h-96 object-cover rounded-none"
-            controls
-            preload="metadata"
-            poster={post.image_url} // Usa immagine come poster se disponibile
-          >
-            Il tuo browser non supporta i video.
-          </video>
-        </div>
-      ) : post.media_type === 'image' && post.image_url ? (
-        <div
-          className="cursor-pointer"
-          onClick={() => setImageViewerOpen(true)}
-        >
-          <img
-            src={post.image_url}
-            alt="Post"
-            className="w-full max-h-96 object-cover"
-          />
-        </div>
-      ) : post.image_url ? (
+      {(() => {
+        const isVideoUrl = (url?: string) => !!url && /(\.mp4|\.webm|\.ogg)(\?.*)?$/i.test(url);
+        // Prefer explicit media_type
+        if (post.media_type === 'video' && (post.video_url || post.image_url)) {
+          const src = post.video_url || post.image_url; // fallback in case old data stored video under image_url
+          return (
+            <div className="relative">
+              <video
+                src={src}
+                className="w-full max-h-96 object-cover rounded-none"
+                controls
+                preload="metadata"
+              >
+                Il tuo browser non supporta i video.
+              </video>
+            </div>
+          );
+        }
+        if (post.media_type === 'image' && post.image_url) {
+          return (
+            <div
+              className="cursor-pointer"
+              onClick={() => setImageViewerOpen(true)}
+            >
+              <img
+                src={post.image_url}
+                alt="Post"
+                className="w-full max-h-96 object-cover"
+              />
+            </div>
+          );
+        }
         // Fallback per post vecchi senza media_type
-        <div
-          className="cursor-pointer"
-          onClick={() => setImageViewerOpen(true)}
-        >
-          <img
-            src={post.image_url}
-            alt="Post"
-            className="w-full max-h-96 object-cover"
-          />
-        </div>
-      ) : null}
+        if (post.image_url) {
+          if (isVideoUrl(post.image_url)) {
+            return (
+              <div className="relative">
+                <video
+                  src={post.image_url}
+                  className="w-full max-h-96 object-cover rounded-none"
+                  controls
+                  preload="metadata"
+                />
+              </div>
+            );
+          }
+          return (
+            <div
+              className="cursor-pointer"
+              onClick={() => setImageViewerOpen(true)}
+            >
+              <img
+                src={post.image_url}
+                alt="Post"
+                className="w-full max-h-96 object-cover"
+              />
+            </div>
+          );
+        }
+        return null;
+      })()}
+
 
       {/* Stats */}
       <div className="px-4 py-2 border-t border-border flex items-center gap-4">

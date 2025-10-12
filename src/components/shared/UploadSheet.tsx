@@ -23,9 +23,11 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete }: UploadShe
   const [success, setSuccess] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>, type: "image" | "video") => {
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !uploadType) return;
+
+    const isVideo = file.type.startsWith("video/");
 
     setUploading(true);
     setUploadProgress(0);
@@ -61,13 +63,17 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete }: UploadShe
       clearInterval(progressInterval);
       setUploadProgress(100);
 
-      // Create post or story
+      // Create post or story con media_type corretto
+      const isVideo = file.type.startsWith("video/");
+
       if (uploadType === "story") {
         const { error: storyError } = await supabase
           .from("stories")
           .insert({
             user_id: userId,
-            image_url: publicUrl,
+            image_url: isVideo ? null : publicUrl,
+            video_url: isVideo ? publicUrl : null,
+            media_type: isVideo ? 'video' : 'image',
           });
 
         if (storyError) throw storyError;
@@ -77,7 +83,9 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete }: UploadShe
           .insert({
             user_id: userId,
             content: content || null,
-            image_url: publicUrl,
+            image_url: isVideo ? null : publicUrl,
+            video_url: isVideo ? publicUrl : null,
+            media_type: isVideo ? 'video' : 'image',
           });
 
         if (postError) throw postError;
@@ -218,52 +226,26 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete }: UploadShe
               )}
 
               <div className="space-y-3">
-                <label className="text-sm font-medium text-gray-700">Scegli il tipo di contenuto</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileSelect(e, "image")}
-                      className="hidden"
-                      id="image-upload"
-                    />
-                    <label htmlFor="image-upload">
-                      <Button
-                        type="button"
-                        className="w-full h-20 flex-col gap-2 bg-gradient-to-br from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 rounded-2xl"
-                        asChild
-                      >
-                        <div className="cursor-pointer">
-                          <Image className="w-6 h-6" />
-                          <span className="text-sm font-medium">Foto</span>
-                        </div>
-                      </Button>
-                    </label>
-                  </div>
-
-                  <div>
-                    <input
-                      type="file"
-                      accept="video/*"
-                      onChange={(e) => handleFileSelect(e, "video")}
-                      className="hidden"
-                      id="video-upload"
-                    />
-                    <label htmlFor="video-upload">
-                      <Button
-                        type="button"
-                        className="w-full h-20 flex-col gap-2 bg-gradient-to-br from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white border-0 rounded-2xl"
-                        asChild
-                      >
-                        <div className="cursor-pointer">
-                          <Video className="w-6 h-6" />
-                          <span className="text-sm font-medium">Video</span>
-                        </div>
-                      </Button>
-                    </label>
-                  </div>
-                </div>
+                <label className="text-sm font-medium text-gray-700">Seleziona dal dispositivo</label>
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  id="media-upload"
+                />
+                <label htmlFor="media-upload">
+                  <Button
+                    type="button"
+                    className="w-full h-20 flex-col gap-2 bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-white border-0 rounded-2xl"
+                    asChild
+                  >
+                    <div className="cursor-pointer">
+                      <Camera className="w-6 h-6" />
+                      <span className="text-sm font-medium">Foto/Video</span>
+                    </div>
+                  </Button>
+                </label>
               </div>
 
               <Button

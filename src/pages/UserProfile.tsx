@@ -476,20 +476,36 @@ const UserProfile = () => {
                       setPostDetailOpen(true);
                     }}
                   >
-                    {post.image_url ? (
-                      <img
-                        src={post.image_url}
-                        alt="Post"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-muted p-2">
-                        <p className="text-xs text-muted-foreground line-clamp-3 text-center">
-                          {post.content}
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                      {(() => {
+                        const isVideoUrl = (url?: string) => !!url && /(\.mp4|\.webm|\.ogg)(\?.*)?$/i.test(url);
+                        if (posts && post.media_type === 'video' && (post.video_url || post.image_url)) {
+                          return (
+                            <video src={post.video_url || post.image_url} className="w-full h-full object-cover" muted playsInline />
+                          );
+                        }
+                        if (post.image_url) {
+                          if (isVideoUrl(post.image_url)) {
+                            return (
+                              <video src={post.image_url} className="w-full h-full object-cover" muted playsInline />
+                            );
+                          }
+                          return (
+                            <img
+                              src={post.image_url}
+                              alt="Post"
+                              className="w-full h-full object-cover"
+                            />
+                          );
+                        }
+                        return (
+                          <div className="w-full h-full flex items-center justify-center bg-muted p-2">
+                            <p className="text-xs text-muted-foreground line-clamp-3 text-center">
+                              {post.content}
+                            </p>
+                          </div>
+                        );
+                      })()}
+                    </div>
                 ))}
               </div>
             )}
@@ -512,19 +528,35 @@ const UserProfile = () => {
                         setPostDetailOpen(true);
                       }}
                     >
-                      {post.image_url ? (
-                        <img
-                          src={post.image_url}
-                          alt="Post"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-muted p-2">
-                          <p className="text-xs text-muted-foreground line-clamp-3 text-center">
-                            {post.content}
-                          </p>
-                        </div>
-                      )}
+                      {(() => {
+                        const isVideoUrl = (url?: string) => !!url && /(\.mp4|\.webm|\.ogg)(\?.*)?$/i.test(url);
+                        if (post.media_type === 'video' && (post.video_url || post.image_url)) {
+                          return (
+                            <video src={post.video_url || post.image_url} className="w-full h-full object-cover" muted playsInline />
+                          );
+                        }
+                        if (post.image_url) {
+                          if (isVideoUrl(post.image_url)) {
+                            return (
+                              <video src={post.image_url} className="w-full h-full object-cover" muted playsInline />
+                            );
+                          }
+                          return (
+                            <img
+                              src={post.image_url}
+                              alt="Post"
+                              className="w-full h-full object-cover"
+                            />
+                          );
+                        }
+                        return (
+                          <div className="w-full h-full flex items-center justify-center bg-muted p-2">
+                            <p className="text-xs text-muted-foreground line-clamp-3 text-center">
+                              {post.content}
+                            </p>
+                          </div>
+                        );
+                      })()}
                     </div>
                   ))}
                 </div>

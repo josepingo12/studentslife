@@ -21,8 +21,7 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
   const [loading, setLoading] = useState(false);
-  const [showImageUpload, setShowImageUpload] = useState(false);
-  const [showVideoUpload, setShowVideoUpload] = useState(false);
+  const [showMediaUpload, setShowMediaUpload] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +44,7 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
           user_id: userId,
           content: content.trim(),
           image_url: mediaType === 'image' ? mediaUrl : null,
-          video_url: mediaType === 'video' ? mediaUrl : null, // Aggiungi questo campo al database
+          video_url: mediaType === 'video' ? mediaUrl : null,
           media_type: mediaType,
         });
 
@@ -59,8 +58,7 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
       setContent("");
       setMediaUrl(null);
       setMediaType(null);
-      setShowImageUpload(false);
-      setShowVideoUpload(false);
+      setShowMediaUpload(false);
       onPostCreated();
     } catch (error: any) {
       toast({
@@ -73,11 +71,10 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
     }
   };
 
-  const handleMediaUploaded = (url: string, type: 'image' | 'video') => {
+  const handleMediaUploaded = (url: string, type?: 'image' | 'video') => {
     setMediaUrl(url);
-    setMediaType(type);
-    setShowImageUpload(false);
-    setShowVideoUpload(false);
+    setMediaType(type || 'image');
+    setShowMediaUpload(false);
   };
 
   const removeMedia = () => {
@@ -128,62 +125,30 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
         </div>
       )}
 
-      {/* Image Upload */}
-      {showImageUpload && !mediaUrl && (
+      {/* Media Upload */}
+      {showMediaUpload && !mediaUrl && (
         <ImageUpload
           bucket="posts"
           userId={userId}
-          onImageUploaded={(url) => handleMediaUploaded(url, 'image')}
-          accept="image/*"
-          maxSizeMB={10}
-          showPreview={false}
-        />
-      )}
-
-      {/* Video Upload */}
-      {showVideoUpload && !mediaUrl && (
-        <ImageUpload
-          bucket="posts"
-          userId={userId}
-          onImageUploaded={(url) => handleMediaUploaded(url, 'video')}
-          accept="video/*"
-          maxSizeMB={50} // Video più grandi
+          onImageUploaded={handleMediaUploaded}
+          accept="image/*,video/*"
+          maxSizeMB={50}
           showPreview={false}
         />
       )}
 
       <div className="flex items-center justify-between">
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="gap-2"
-            onClick={() => {
-              setShowImageUpload(!showImageUpload);
-              setShowVideoUpload(false);
-            }}
-            disabled={loading || !!mediaUrl}
-          >
-            <ImageIcon className="w-4 h-4" />
-            {showImageUpload ? t('common.cancel') : 'Foto'}
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="gap-2"
-            onClick={() => {
-              setShowVideoUpload(!showVideoUpload);
-              setShowImageUpload(false);
-            }}
-            disabled={loading || !!mediaUrl}
-          >
-            <VideoIcon className="w-4 h-4" />
-            {showVideoUpload ? t('common.cancel') : 'Video'}
-          </Button>
-        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="gap-2"
+          onClick={() => setShowMediaUpload(!showMediaUpload)}
+          disabled={loading || !!mediaUrl}
+        >
+          <ImageIcon className="w-4 h-4" />
+          {showMediaUpload ? t('common.cancel') : 'Foto/Video'}
+        </Button>
 
         <Button
           type="submit"

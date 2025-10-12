@@ -463,24 +463,30 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          media_type: string | null
           updated_at: string
           user_id: string
+          video_url: string | null
         }
         Insert: {
           content?: string | null
           created_at?: string
           id?: string
           image_url?: string | null
+          media_type?: string | null
           updated_at?: string
           user_id: string
+          video_url?: string | null
         }
         Update: {
           content?: string | null
           created_at?: string
           id?: string
           image_url?: string | null
+          media_type?: string | null
           updated_at?: string
           user_id?: string
+          video_url?: string | null
         }
         Relationships: [
           {
@@ -722,21 +728,27 @@ export type Database = {
           expires_at: string
           id: string
           image_url: string
+          media_type: string | null
           user_id: string
+          video_url: string | null
         }
         Insert: {
           created_at?: string
           expires_at?: string
           id?: string
           image_url: string
+          media_type?: string | null
           user_id: string
+          video_url?: string | null
         }
         Update: {
           created_at?: string
           expires_at?: string
           id?: string
           image_url?: string
+          media_type?: string | null
           user_id?: string
+          video_url?: string | null
         }
         Relationships: [
           {

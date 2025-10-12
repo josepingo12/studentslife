@@ -180,11 +180,29 @@ const PostDetailModal = ({ open, onOpenChange, post, currentUserId }: PostDetail
               <X className="w-5 h-5" />
             </Button>
             
-            <img
-              src={post.image_url}
-              alt="Post"
-              className="max-w-full max-h-full object-contain animate-fade-in"
-            />
+            {(() => {
+              const isVideoUrl = (url?: string) => !!url && /(\.mp4|\.webm|\.ogg)(\?.*)?$/i.test(url);
+              const hasVideo = post.media_type === 'video' || isVideoUrl(post.video_url) || isVideoUrl(post.image_url);
+              const videoSrc = post.video_url || (isVideoUrl(post.image_url) ? post.image_url : undefined);
+              if (hasVideo && videoSrc) {
+                return (
+                  <video
+                    src={videoSrc}
+                    className="max-w-full max-h-full object-contain animate-fade-in"
+                    controls
+                    preload="metadata"
+                  />
+                );
+              }
+              return (
+                <img
+                  src={post.image_url}
+                  alt="Post"
+                  className="max-w-full max-h-full object-contain animate-fade-in"
+                />
+              );
+            })()}
+
           </div>
 
           {/* Bottom Sheet - Comments Section */}
