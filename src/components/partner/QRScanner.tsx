@@ -31,55 +31,90 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
     setScanning(false);
   };
 
-  const startCamera = async () => {
-    try {
-      if (!navigator.mediaDevices?.getUserMedia) {
-        toast({
-          title: "Non supportato",
-          description: "Il browser non supporta l'accesso alla fotocamera.",
-          variant: "destructive",
-        });
-        return;
-      }
+ const startCamera = async () => {
+   try {
+     if (!navigator.mediaDevices?.getUserMedia) {
+       toast({
+         title: "Non supportato",
+         description: "Il browser non supporta l'accesso alla fotocamera.",
+         variant: "destructive",
+       });
+       return;
+     }
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { 
-          facingMode: "environment",
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }
-      });
+     // Prima ottieni i dispositivi disponibili
+     const devices = await navigator.mediaDevices.enumerateDevices();
+     const videoDevices = devices.filter(device => device.kind === 'videoinput');
 
-      streamRef.current = stream;
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
+     // Trova la fotocamera posteriore
+     const backCamera = videoDevices.find(device =>
+       device.label.toLowerCase().includes('back') ||
+       device.label.toLowerCase().includes('rear') ||
+       device.label.toLowerCase().includes('environment')
+     );
 
-      setScanning(true);
-      toast({
-        title: "Fotocamera attiva",
-        description: "Inquadra il QR Code per scansionarlo",
-      });
+     const constraints = {
+       video: {
+         width: { ideal: 1280, max: 1920 },
+         height: { ideal: 720, max: 1080 },
+         frameRate: { ideal: 30, max: 30 }
+       }
+     };
 
-    } catch (error: any) {
-      console.error("Errore fotocamera:", error);
-      
-      let message = "Impossibile accedere alla fotocamera";
-      if (error.name === "NotAllowedError") {
-        message = "Permesso fotocamera negato";
-      } else if (error.name === "NotFoundError") {
-        message = "Nessuna fotocamera trovata";
-      }
+     // Se hai trovato la fotocamera posteriore, usala
+     if (backCamera?.deviceId) {
+       constraints.video.deviceId = { exact: backCamera.deviceId };
+     } else {
+       // Fallback su facingMode
+       constraints.video.facingMode = "environment";
+     }
 
-      toast({
-        title: "Errore",
-        description: message,
-        variant: "destructive",
-      });
-    }
-  };
+     const stream = await navigator.mediaDevices.getUserMedia(constraints);
+     streamRef.current = stream;
+
+     if (videoRef.current) {
+       videoRef.current.srcObject = stream;
+
+       // IMPORTANTE: Aspetta che il video sia pronto
+       videoRef.current.onloadedmetadata = () => {
+         if (videoRef.current) {
+           videoRef.current.play().catch(console.error);
+         }
+       };
+
+       // Forza il play dopo un breve delay
+       setTimeout(() => {
+         if (videoRef.current) {
+           videoRef.current.play().catch(console.error);
+         }
+       }, 100);
+     }
+
+     setScanning(true);
+     toast({
+       title: "Fotocamera attiva",
+       description: "Inquadra il QR Code per scansionarlo",
+     });
+
+   } catch (error: any) {
+     console.error("Errore fotocamera:", error);
+
+     let message = "Impossibile accedere alla fotocamera";
+     if (error.name === "NotAllowedError") {
+       message = "Permesso fotocamera negato";
+     } else if (error.name === "NotFoundError") {
+       message = "Nessuna fotocamera trovata";
+     } else if (error.name === "NotReadableError") {
+       message = "Fotocamera in uso da un'altra app";
+     }
+
+     toast({
+       title: "Errore",
+       description: message,
+       variant: "destructive",
+     });
+   }
+ };
 
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -187,13 +222,17 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         {scanning ? (
           <div className="space-y-4">
             <div className="relative rounded-lg overflow-hidden bg-black">
-              <video
-                ref={videoRef}
-                className="w-full h-[400px] object-cover"
-                playsInline
-                muted
-                autoPlay
-              />
+            <video
+            ref={videoRef}
+            className="w-full h-[400px] object-cover"
+            playsInline
+            muted
+            autoPlay
+            controls={false}
+            style={{
+            transform: 'scaleX(-1)', // Mirror per UX migliore
+            }}
+            />
               
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="border-2 border-white border-dashed w-64 h-64 rounded-lg flex items-center justify-center">
