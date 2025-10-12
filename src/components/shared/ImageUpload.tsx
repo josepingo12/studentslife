@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 interface ImageUploadProps {
   bucket: "avatars" | "stories" | "posts" | "gallery";
   userId: string;
-  onImageUploaded: (url: string) => void;
+  onImageUploaded: (url: string, type?: 'image' | 'video') => void;
   accept?: string;
   maxSizeMB?: number;
   showPreview?: boolean;
@@ -61,16 +61,18 @@ const ImageUpload = ({
         .from(bucket)
         .getPublicUrl(data.path);
 
+      const fileType = file.type.startsWith('video/') ? 'video' : 'image';
+      
       toast({
         title: "Upload completato!",
-        description: file.type.startsWith('video/') ? "Video caricato con successo" : "Immagine caricata con successo",
+        description: fileType === 'video' ? "Video caricato con successo" : "Immagine caricata con successo",
       });
 
-      onImageUploaded(publicUrl);
+      onImageUploaded(publicUrl, fileType);
       
       if (showPreview) {
         setPreview(publicUrl);
-        setPreviewType(file.type.startsWith('video/') ? 'video' : 'image');
+        setPreviewType(fileType);
       }
     } catch (error: any) {
       console.error("Upload error:", error);
