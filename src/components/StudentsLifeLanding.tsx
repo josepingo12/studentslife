@@ -17,33 +17,43 @@ const StudentsLifeLanding: React.FC = () => {
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
   const [deviceType, setDeviceType] = useState<'ios' | 'android'>('ios');
+  
+  // Chatbot states
+  const [showChatbot, setShowChatbot] = useState(false);
   const [chatMessages, setChatMessages] = useState([
     { type: 'bot', text: '¡Hola! Soy el asistente de StudentsLife. ¿En qué puedo ayudarte?' }
   ]);
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
 
-  // Preguntas y respuestas del chatbot
-  const chatQuestions = [
-    {
-      question: "¿Qué es StudentsLife?",
-      answer: "StudentsLife es la plataforma líder que conecta estudiantes Erasmus en Valladolid con descuentos exclusivos, red social y chat integrado. ¡Todo en una app!"
-    },
-    {
-      question: "¿Cómo funcionan los descuentos?",
-      answer: "Súper fácil: 1️⃣ Encuentra el partner en la app 2️⃣ Genera tu código QR personalizado 3️⃣ Muéstralo en el comercio y ahorra hasta 30%"
-    },
-    {
-      question: "¿Es gratis para estudiantes?",
-      answer: "¡Completamente GRATIS para estudiantes! Solo paga el partner que quiere ofrecer descuentos. Tú solo disfrutas y ahorras 💰"
-    },
-    {
-      question: "¿Qué servicios incluye?",
-      answer: "Incluye: 🍕 Restaurantes y bares 💄 Belleza y bienestar 🎮 Entretenimiento 📱 Electrónica 💪 Sport & fitness 🛍️ Shopping"
-    }
+  // Preguntas predefinidas
+  const predefinedQuestions = [
+    "¿Qué es StudentsLife?",
+    "¿Cómo funcionan los descuentos?",
+    "¿Es gratis para estudiantes?",
+    "¿Qué servicios incluye?",
+    "¿Cómo me registro?",
+    "¿Cuánto cuesta para partners?",
+    "¿Hay app móvil?",
+    "¿Funciona en Valladolid?"
   ];
 
-  // Array delle screenshot (stesso di prima)
+  // Respuestas automáticas
+  const getAutomaticResponse = (question: string): string => {
+    const responses: { [key: string]: string } = {
+      "¿Qué es StudentsLife?": "StudentsLife es la plataforma líder que conecta estudiantes Erasmus en Valladolid con descuentos exclusivos, red social y chat integrado. ¡Todo en una app! 🎓",
+      "¿Cómo funcionan los descuentos?": "Súper fácil: 1️⃣ Encuentra el partner en la app 2️⃣ Genera tu código QR personalizado 3️⃣ Muéstralo en el comercio y ahorra hasta 30% 💰",
+      "¿Es gratis para estudiantes?": "¡Completamente GRATIS para estudiantes! Solo paga el partner que quiere ofrecer descuentos. Tú solo disfrutas y ahorras 🎉",
+      "¿Qué servicios incluye?": "Incluye: 🍕 Restaurantes y bares 💄 Belleza y bienestar 🎮 Entretenimiento 📱 Electrónica 💪 Sport & fitness 🛍️ Shopping ✈️ Viajes",
+      "¿Cómo me registro?": "¡Facilísimo! Solo haz clic en 'Registrarse como Estudiante', completa tus datos y ya puedes empezar a ahorrar. ¡Toma menos de 2 minutos! ⚡",
+      "¿Cuánto cuesta para partners?": "Para partners: €19.99/mes los primeros 50, después €29.99/mes. ¡Pero ahora tenemos oferta de lanzamiento con primer mes GRATIS! 🎁",
+      "¿Hay app móvil?": "¡Sí! Es una PWA (Progressive Web App) que funciona como app nativa. Puedes añadirla a tu pantalla de inicio desde el navegador 📱",
+      "¿Funciona en Valladolid?": "¡Exacto! Estamos especializados en Valladolid para estudiantes Erasmus. Conocemos todos los mejores lugares de la ciudad 🏛️"
+    };
+    
+    return responses[question] || "¡Excelente pregunta! Nuestro equipo te responderá pronto. Mientras tanto, puedes contactarnos al +34 672 908 898 📞";
+  };
+
+  // Array delle screenshot
   const screenshots = [
     {
       src: screen1,
@@ -59,7 +69,7 @@ const StudentsLifeLanding: React.FC = () => {
     }
   ];
 
-  // Tutorial steps (stesso di prima)
+  // Tutorial steps
   const iosSteps = [
     {
       title: "Paso 1: Abre Safari",
@@ -120,34 +130,6 @@ const StudentsLifeLanding: React.FC = () => {
       setCurrentSlide((prev) => (prev + 1) % screenshots.length);
     }, 4000);
 
-    // Chatbot auto-demo
-    const chatInterval = setInterval(() => {
-      if (currentMessageIndex < chatQuestions.length) {
-        setIsTyping(true);
-        
-        setTimeout(() => {
-          setChatMessages(prev => [
-            ...prev,
-            { type: 'user', text: chatQuestions[currentMessageIndex].question }
-          ]);
-          setIsTyping(false);
-          
-          setTimeout(() => {
-            setIsTyping(true);
-            
-            setTimeout(() => {
-              setChatMessages(prev => [
-                ...prev,
-                { type: 'bot', text: chatQuestions[currentMessageIndex].answer }
-              ]);
-              setIsTyping(false);
-              setCurrentMessageIndex(prev => (prev + 1) % chatQuestions.length);
-            }, 2000);
-          }, 1000);
-        }, 1000);
-      }
-    }, 8000);
-
     // Tutorial auto-advance
     let tutorialInterval: NodeJS.Timeout;
     if (showTutorial) {
@@ -159,7 +141,7 @@ const StudentsLifeLanding: React.FC = () => {
       }, 3000);
     }
 
-    // Animazioni iOS-style fluide (stesso di prima)
+    // Animazioni iOS-style fluide
     const observerOptions: IntersectionObserverInit = {
       threshold: 0.1,
       rootMargin: '0px 0px -30px 0px'
@@ -211,10 +193,9 @@ const StudentsLifeLanding: React.FC = () => {
       window.removeEventListener('scroll', handleScroll);
       observer.disconnect();
       clearInterval(slideInterval);
-      clearInterval(chatInterval);
       if (tutorialInterval) clearInterval(tutorialInterval);
     };
-  }, [screenshots.length, showTutorial, deviceType, currentMessageIndex]);
+  }, [screenshots.length, showTutorial, deviceType]);
 
   const handleRegisterClick = () => navigate('/register-client');
   const handlePartnerClick = () => navigate('/register-partner');
@@ -239,16 +220,129 @@ const StudentsLifeLanding: React.FC = () => {
     setTutorialStep(0);
   };
 
-  const resetChatDemo = () => {
-    setChatMessages([
-      { type: 'bot', text: '¡Hola! Soy el asistente de StudentsLife. ¿En qué puedo ayudarte?' }
-    ]);
-    setCurrentMessageIndex(0);
+  const handleQuestionClick = (question: string) => {
+    setChatMessages(prev => [...prev, { type: 'user', text: question }]);
+    
+    setIsTyping(true);
+    
+    setTimeout(() => {
+      setIsTyping(false);
+      setChatMessages(prev => [...prev, { type: 'bot', text: getAutomaticResponse(question) }]);
+    }, 1500);
+  };
+
+  const toggleChatbot = () => {
+    setShowChatbot(!showChatbot);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-white">
-      {/* Hero Section - Responsive Images (stesso di prima) */}
+      {/* Floating Chatbot Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <button
+          onClick={toggleChatbot}
+          className="w-16 h-16 bg-blue-500 hover:bg-blue-600 rounded-full shadow-2xl flex items-center justify-center transform hover:scale-110 transition-all duration-300 animate-pulse"
+        >
+          <img 
+            src={robotoAvatar}
+            alt="Chat Assistant" 
+            className="w-12 h-12 rounded-full border-2 border-white"
+          />
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+        </button>
+      </div>
+
+      {/* Chatbot Modal */}
+      {showChatbot && (
+        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96">
+          <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden">
+            {/* Chat Header */}
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <img src={robotoAvatar} className="w-10 h-10 rounded-full border-2 border-white mr-3" />
+                  <div>
+                    <h3 className="font-bold">StudentsLife Assistant</h3>
+                    <p className="text-xs opacity-90">● En línea</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={toggleChatbot}
+                  className="text-white hover:bg-white/20 rounded-full p-1 transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Chat Messages */}
+            <div className="h-80 overflow-y-auto p-4 bg-gray-50">
+              {chatMessages.map((message, index) => (
+                <div key={index} className={`mb-4 ${message.type === 'user' ? 'text-right' : 'text-left'}`}>
+                  <div className={`inline-block max-w-xs px-4 py-2 rounded-2xl ${
+                    message.type === 'user' 
+                      ? 'bg-blue-500 text-white rounded-br-sm' 
+                      : 'bg-white text-gray-800 rounded-bl-sm shadow-sm'
+                  }`}>
+                    {message.type === 'bot' && (
+                      <div className="flex items-center mb-1">
+                        <img src={robotoAvatar} className="w-4 h-4 rounded-full mr-2" />
+                        <span className="text-xs text-gray-500">Bot</span>
+                      </div>
+                    )}
+                    <p className="text-sm">{message.text}</p>
+                  </div>
+                </div>
+              ))}
+              
+              {isTyping && (
+                <div className="text-left mb-4">
+                  <div className="inline-block bg-white text-gray-800 rounded-2xl rounded-bl-sm px-4 py-2 shadow-sm">
+                    <div className="flex items-center">
+                      <img src={robotoAvatar} className="w-4 h-4 rounded-full mr-2" />
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Predefined Questions */}
+            <div className="p-4 border-t border-gray-200 bg-white">
+              <p className="text-xs text-gray-600 mb-3">Preguntas frecuentes:</p>
+              <div className="grid grid-cols-2 gap-2">
+                {predefinedQuestions.slice(0, 4).map((question, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleQuestionClick(question)}
+                    className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg transition-colors text-left"
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+              
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {predefinedQuestions.slice(4, 8).map((question, index) => (
+                  <button
+                    key={index + 4}
+                    onClick={() => handleQuestionClick(question)}
+                    className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg transition-colors text-left"
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hero Section */}
       <header className="relative h-screen flex items-center justify-center overflow-hidden" ref={heroRef}>
         <div className="hero-bg absolute inset-0 w-full h-full">
           <img 
@@ -264,7 +358,7 @@ const StudentsLifeLanding: React.FC = () => {
         </div>
       </header>
 
-      {/* Tutorial Modal (stesso di prima) */}
+      {/* Tutorial Modal */}
       {showTutorial && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
@@ -337,163 +431,11 @@ const StudentsLifeLanding: React.FC = () => {
         </div>
       )}
 
-      {/* Chatbot Demo Section */}
-      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-gray-900 to-black text-white">
+      {/* Pricing Section - Bianco e Azzurro */}
+      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16 animate-fade-in">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">
-              Asistente IA 24/7
-            </h2>
-            <p className="text-lg sm:text-xl text-gray-300 px-4">
-              Nuestro chatbot inteligente responde todas tus dudas al instante
-            </p>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center animate-fade-in">
-            {/* Chatbot Demo */}
-            <div className="relative floating-element order-2 lg:order-1">
-              <div className="bg-gray-800 rounded-3xl shadow-2xl p-6 border border-gray-700 max-w-md mx-auto lg:max-w-none">
-                {/* Chat Header */}
-                <div className="flex items-center mb-6 pb-4 border-b border-gray-700">
-                  <div className="relative">
-                    <img 
-                      src={robotoAvatar}
-                      alt="StudentsLife Assistant" 
-                      className="w-12 h-12 rounded-full ring-2 ring-blue-500"
-                    />
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-800"></div>
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="font-bold text-white">StudentsLife Assistant</h3>
-                    <p className="text-sm text-green-400">● En línea</p>
-                  </div>
-                  <button 
-                    onClick={resetChatDemo}
-                    className="ml-auto text-gray-400 hover:text-white transition-colors"
-                  >
-                    🔄
-                  </button>
-                </div>
-
-                {/* Chat Messages */}
-                <div className="chat-messages space-y-4 h-80 overflow-y-auto mb-4">
-                  {chatMessages.map((message, index) => (
-                    <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-xs lg:max-w-sm px-4 py-3 rounded-2xl ${
-                        message.type === 'user' 
-                          ? 'bg-blue-500 text-white rounded-br-sm' 
-                          : 'bg-gray-700 text-gray-100 rounded-bl-sm'
-                      }`}>
-                        {message.type === 'bot' && (
-                          <div className="flex items-center mb-2">
-                            <img src={robotoAvatar} className="w-6 h-6 rounded-full mr-2" />
-                            <span className="text-xs text-gray-400">StudentsLife Bot</span>
-                          </div>
-                        )}
-                        <p className="text-sm leading-relaxed">{message.text}</p>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {isTyping && (
-                    <div className="flex justify-start">
-                      <div className="bg-gray-700 text-gray-100 rounded-2xl rounded-bl-sm px-4 py-3">
-                        <div className="flex items-center space-x-1">
-                          <img src={robotoAvatar} className="w-6 h-6 rounded-full mr-2" />
-                          <div className="flex space-x-1">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Chat Input */}
-                <div className="flex items-center space-x-2">
-                  <input 
-                    type="text" 
-                    placeholder="Escribe tu pregunta..."
-                    className="flex-1 bg-gray-700 text-white px-4 py-3 rounded-full border border-gray-600 focus:border-blue-500 focus:outline-none"
-                    disabled
-                  />
-                  <button className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full transition-colors">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              
-              <div className="absolute -inset-2 sm:-inset-4 bg-blue-400/10 sm:bg-blue-400/20 rounded-3xl blur-lg sm:blur-xl opacity-50"></div>
-            </div>
-
-            {/* Content */}
-            <div className="space-y-6 sm:space-y-8 order-1 lg:order-2 px-4 sm:px-0">
-              <div className="animate-fade-in text-center lg:text-left">
-                <h3 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">
-                  Respuestas Instantáneas
-                </h3>
-                <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8 leading-relaxed">
-                  Nuestro asistente IA conoce todo sobre StudentsLife y Valladolid
-                </p>
-              </div>
-
-              <div className="space-y-4 sm:space-y-6 animate-fade-in">
-                <div className="flex items-start space-x-3 sm:space-x-4">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-900 rounded-xl flex items-center justify-center flex-shrink-0 text-lg sm:text-xl">
-                    🤖
-                  </div>
-                  <div>
-                    <h4 className="text-base sm:text-lg font-bold text-white mb-1 sm:mb-2">
-                      Inteligencia Artificial
-                    </h4>
-                    <p className="text-gray-300 leading-relaxed text-sm sm:text-base">
-                      Respuestas precisas sobre descuentos, partners y servicios
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3 sm:space-x-4">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-900 rounded-xl flex items-center justify-center flex-shrink-0 text-lg sm:text-xl">
-                    ⚡
-                  </div>
-                  <div>
-                    <h4 className="text-base sm:text-lg font-bold text-white mb-1 sm:mb-2">
-                      Disponible 24/7
-                    </h4>
-                    <p className="text-gray-300 leading-relaxed text-sm sm:text-base">
-                      Siempre listo para ayudarte, cualquier hora del día
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3 sm:space-x-4">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-900 rounded-xl flex items-center justify-center flex-shrink-0 text-lg sm:text-xl">
-                    🎯
-                  </div>
-                  <div>
-                    <h4 className="text-base sm:text-lg font-bold text-white mb-1 sm:mb-2">
-                      Recomendaciones Personalizadas
-                    </h4>
-                    <p className="text-gray-300 leading-relaxed text-sm sm:text-base">
-                      Sugerencias basadas en tu ubicación y preferencias
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12 sm:mb-16 animate-fade-in">
-            <div className="inline-flex items-center bg-green-100 text-green-800 px-6 py-2 rounded-full font-semibold mb-6">
+            <div className="inline-flex items-center bg-blue-100 text-blue-800 px-6 py-2 rounded-full font-semibold mb-6">
               🎉 ¡Oferta de Lanzamiento!
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
@@ -506,39 +448,39 @@ const StudentsLifeLanding: React.FC = () => {
 
           <div className="grid md:grid-cols-2 gap-8 sm:gap-12 animate-fade-in mb-16">
             {/* Plan Estudiantes */}
-            <div className="bg-gradient-to-br from-green-400 to-emerald-500 rounded-3xl shadow-2xl p-8 text-white transform hover:scale-105 transition-all duration-300 floating-element">
+            <div className="bg-white rounded-3xl shadow-2xl p-8 border-2 border-blue-200 transform hover:scale-105 transition-all duration-300 floating-element">
               <div className="text-center">
                 <div className="text-6xl mb-6">🎓</div>
-                <h3 className="text-2xl font-bold mb-4">Para Estudiantes</h3>
-                <div className="text-5xl font-black mb-2">GRATIS</div>
-                <p className="text-green-100 mb-8">Siempre y para siempre</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Para Estudiantes</h3>
+                <div className="text-5xl font-black mb-2 text-blue-600">GRATIS</div>
+                <p className="text-blue-600 mb-8">Siempre y para siempre</p>
                 
                 <ul className="space-y-4 mb-8 text-left">
                   <li className="flex items-center">
-                    <span className="text-2xl mr-3">✅</span>
+                    <span className="text-2xl mr-3 text-blue-500">✅</span>
                     <span>Acceso a todos los descuentos</span>
                   </li>
                   <li className="flex items-center">
-                    <span className="text-2xl mr-3">✅</span>
+                    <span className="text-2xl mr-3 text-blue-500">✅</span>
                     <span>Red social integrada</span>
                   </li>
                   <li className="flex items-center">
-                    <span className="text-2xl mr-3">✅</span>
+                    <span className="text-2xl mr-3 text-blue-500">✅</span>
                     <span>Chat con partners y amigos</span>
                   </li>
                   <li className="flex items-center">
-                    <span className="text-2xl mr-3">✅</span>
+                    <span className="text-2xl mr-3 text-blue-500">✅</span>
                     <span>Códigos QR ilimitados</span>
                   </li>
                   <li className="flex items-center">
-                    <span className="text-2xl mr-3">✅</span>
+                    <span className="text-2xl mr-3 text-blue-500">✅</span>
                     <span>Soporte 24/7</span>
                   </li>
                 </ul>
 
                 <Button
                   onClick={handleRegisterClick}
-                  className="w-full bg-white text-green-600 hover:bg-green-50 py-4 rounded-full text-lg font-bold transform hover:scale-105 transition-all duration-300"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-full text-lg font-bold transform hover:scale-105 transition-all duration-300"
                 >
                   Registrarse Gratis
                 </Button>
@@ -553,34 +495,34 @@ const StudentsLifeLanding: React.FC = () => {
                 <div className="mb-6">
                   <div className="text-3xl font-bold text-blue-600 mb-2">Primeros 50 Partners</div>
                   <div className="text-4xl font-black text-gray-900">€19.99<span className="text-lg font-normal">/mes</span></div>
-                  <p className="text-red-500 font-semibold">Después: €29.99/mes</p>
+                  <p className="text-blue-600 font-semibold">Después: €29.99/mes</p>
                 </div>
                 
-                <div className="bg-yellow-100 border border-yellow-300 rounded-2xl p-4 mb-8">
-                  <div className="text-yellow-800 font-bold mb-2">🎁 ¡Oferta Especial!</div>
-                  <p className="text-yellow-700 text-sm">Regístrate ahora y obtén:</p>
-                  <p className="text-yellow-800 font-bold">Primer mes GRATIS + €10 descuento/mes</p>
+                <div className="bg-blue-100 border border-blue-300 rounded-2xl p-4 mb-8">
+                  <div className="text-blue-800 font-bold mb-2">🎁 ¡Oferta Especial!</div>
+                  <p className="text-blue-700 text-sm">Regístrate ahora y obtén:</p>
+                  <p className="text-blue-800 font-bold">Primer mes GRATIS + €10 descuento/mes</p>
                 </div>
 
                 <ul className="space-y-4 mb-8 text-left">
                   <li className="flex items-center">
-                    <span className="text-2xl mr-3">✅</span>
+                    <span className="text-2xl mr-3 text-blue-500">✅</span>
                     <span>Panel de control completo</span>
                   </li>
                   <li className="flex items-center">
-                    <span className="text-2xl mr-3">✅</span>
+                    <span className="text-2xl mr-3 text-blue-500">✅</span>
                     <span>Gestión de descuentos</span>
                   </li>
                   <li className="flex items-center">
-                    <span className="text-2xl mr-3">✅</span>
+                    <span className="text-2xl mr-3 text-blue-500">✅</span>
                     <span>Chat directo con estudiantes</span>
                   </li>
                   <li className="flex items-center">
-                    <span className="text-2xl mr-3">✅</span>
+                    <span className="text-2xl mr-3 text-blue-500">✅</span>
                     <span>Estadísticas detalladas</span>
                   </li>
                   <li className="flex items-center">
-                    <span className="text-2xl mr-3">✅</span>
+                    <span className="text-2xl mr-3 text-blue-500">✅</span>
                     <span>Promoción en la app</span>
                   </li>
                 </ul>
@@ -595,8 +537,8 @@ const StudentsLifeLanding: React.FC = () => {
             </div>
           </div>
 
-          {/* Launch Offer Banner */}
-          <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl shadow-2xl p-8 text-center text-white animate-fade-in">
+          {/* Launch Offer Banner - Bianco e Azzurro */}
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl shadow-2xl p-8 text-center text-white animate-fade-in">
             <h3 className="text-2xl sm:text-3xl font-bold mb-4">
               🚀 Antes del Lanzamiento Oficial
             </h3>
@@ -605,16 +547,20 @@ const StudentsLifeLanding: React.FC = () => {
             </p>
             <div className="grid sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+                <h4 className="font-bold text-lg mb-2">Para Estudiantes</h4>
+                <p className="text-blue-100">Acceso anticipado gratuito + beneficios exclusivos</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
                 <h4 className="font-bold text-lg mb-2">Para Partners</h4>
-                <p className="text-purple-100">Período de prueba gratuito + descuento permanente</p>
+                <p className="text-blue-100">Período de prueba gratuito + descuento permanente</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* App Installation Tutorial Section (stesso di prima) */}
-      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-indigo-50">
+      {/* App Installation Tutorial Section */}
+      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16 animate-fade-in">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
@@ -707,7 +653,7 @@ const StudentsLifeLanding: React.FC = () => {
         </div>
       </section>
 
-      {/* App Preview Carousel Section (stesso di prima) */}
+      {/* App Preview Carousel Section */}
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16 animate-fade-in">
@@ -801,7 +747,7 @@ const StudentsLifeLanding: React.FC = () => {
         </div>
       </section>
 
-      {/* Features Section (stesso di prima) */}
+      {/* Features Section */}
       <section className="py-12 sm:py-16 lg:py-24 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12 sm:mb-16 lg:mb-20 animate-fade-in">
@@ -823,7 +769,7 @@ const StudentsLifeLanding: React.FC = () => {
             <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-12 sm:mb-16">
               Categorías Disponibles
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4 sm:gap-6">
               {categories.map((category, index) => (
                 <CategoryCard key={index} {...category} index={index} />
               ))}
@@ -832,7 +778,7 @@ const StudentsLifeLanding: React.FC = () => {
         </div>
       </section>
 
-      {/* Partners Section (stesso di prima) */}
+      {/* Partners Section */}
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
           <div className="animate-fade-in">
@@ -988,7 +934,7 @@ const StudentsLifeLanding: React.FC = () => {
         </div>
       </section>
 
-      {/* CTA Section (stesso di prima) */}
+      {/* CTA Section */}
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-r from-blue-500 to-blue-600">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
@@ -1022,7 +968,7 @@ const StudentsLifeLanding: React.FC = () => {
         </div>
       </section>
 
-      {/* Footer (stesso di prima) */}
+      {/* Footer */}
       <footer className="bg-white py-12 sm:py-16 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
           <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">StudentsLife</h3>
@@ -1036,7 +982,7 @@ const StudentsLifeLanding: React.FC = () => {
   );
 };
 
-// Componenti e dati (stessi di prima)
+// Componenti helper
 const FeatureCard: React.FC<{
   icon: string;
   title: string;
@@ -1078,7 +1024,7 @@ const AppFeatureItem: React.FC<{
 }> = ({ icon, title, description, index }) => (
   <div 
     className="flex items-start space-x-3 sm:space-x-4 group"
-    style={{ animationDelay: `\${index * 100}ms` }}
+    style={{ animationDelay: `${index * 100}ms` }}
   >
     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 text-lg sm:text-xl group-hover:scale-110 group-hover:bg-blue-200 transition-all duration-300">
       {icon}
@@ -1092,7 +1038,7 @@ const AppFeatureItem: React.FC<{
   </div>
 );
 
-// Dati (stessi di prima)
+// Dati
 const features = [
   {
     icon: "💰",
@@ -1110,50 +1056,53 @@ const features = [
     description: "Habla con partners y amigos, guarda chats en favoritos"
   },
   {
-icon: "👤",
-title: "Perfil Personal",
-description: "Personaliza tu perfil y gestiona tus preferencias"
-},
-{
-icon: "📂",
-title: "Categorías Guardadas",
-description: "Tus búsquedas se guardan automáticamente para uso futuro"
-},
-{
-icon: "📍",
-title: "Enfoque Local",
-description: "Especializado en Valladolid para estudiantes Erasmus"
-}
+    icon: "👤",
+    title: "Perfil Personal",
+    description: "Personaliza tu perfil y gestiona tus preferencias"
+  },
+  {
+    icon: "📂",
+    title: "Categorías Guardadas",
+    description: "Tus búsquedas se guardan automáticamente para uso futuro"
+  },
+  {
+    icon: "📍",
+    title: "Enfoque Local",
+    description: "Especializado en Valladolid para estudiantes Erasmus"
+  }
 ];
+
 const categories = [
-{ icon: "💄", name: "Belleza", color: "from-pink-400 to-rose-400" },
-{ icon: "🎮", name: "Entretenimiento", color: "from-purple-400 to-indigo-400" },
-{ icon: "📱", name: "Electrónica", color: "from-blue-400 to-cyan-400" },
-{ icon: "💪", name: "Sport & Fitness", color: "from-green-400 to-emerald-400" },
-{ icon: "🍕", name: "Bar & Restaurantes", color: "from-orange-400 to-red-400" },
-{ icon: "🛍️", name: "Shopping", color: "from-yellow-400 to-orange-400" },
-{ icon: "✈️", name: "Viajes", color: "from-teal-400 to-cyan-400" }
+  { icon: "💄", name: "Belleza", color: "from-pink-400 to-rose-400" },
+  { icon: "🎮", name: "Entretenimiento", color: "from-purple-400 to-indigo-400" },
+  { icon: "📱", name: "Electrónica", color: "from-blue-400 to-cyan-400" },
+  { icon: "💪", name: "Sport & Fitness", color: "from-green-400 to-emerald-400" },
+  { icon: "🍕", name: "Bar & Restaurantes", color: "from-orange-400 to-red-400" },
+  { icon: "🛍️", name: "Shopping", color: "from-yellow-400 to-orange-400" },
+  { icon: "✈️", name: "Viajes", color: "from-teal-400 to-cyan-400" }
 ];
+
 const appFeatures = [
-{
-icon: "📱",
-title: "Descarga QR con Descuentos",
-description: "Entra en el perfil del partner y descarga tu código QR con descuento exclusivo"
-},
-{
-icon: "⭐",
-title: "Sistema de Favoritos",
-description: "Guarda chats, partners y categorías en favoritos para acceso rápido"
-},
-{
-icon: "🔄",
-title: "Historial Inteligente",
-description: "Las categorías que visitas se guardan automáticamente"
-},
-{
-icon: "🎯",
-title: "Búsqueda Avanzada",
-description: "Encuentra exactamente lo que buscas por categoría y ubicación"
-}
+  {
+    icon: "📱",
+    title: "Descarga QR con Descuentos",
+    description: "Entra en el perfil del partner y descarga tu código QR con descuento exclusivo"
+  },
+  {
+    icon: "⭐",
+    title: "Sistema de Favoritos",
+    description: "Guarda chats, partners y categorías en favoritos para acceso rápido"
+  },
+  {
+    icon: "🔄",
+    title: "Historial Inteligente",
+    description: "Las categorías que visitas se guardan automáticamente"
+  },
+  {
+    icon: "🎯",
+    title: "Búsqueda Avanzada",
+    description: "Encuentra exactamente lo que buscas por categoría y ubicación"
+  }
 ];
+
 export default StudentsLifeLanding;
