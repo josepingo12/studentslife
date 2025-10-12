@@ -31,85 +31,81 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
     setScanning(false);
   };
 
-  const startCamera = async () => {
-    try {
-      console.log("🎥 DEBUG: Inizio richiesta fotocamera");
+ const startCamera = async () => {
+   try {
+     console.log("🎥 DEBUG: Inizio richiesta fotocamera");
 
-      if (!navigator.mediaDevices?.getUserMedia) {
-        console.error("❌ Browser non supporta getUserMedia");
-        toast({
-          title: "Non supportato",
-          description: "Il browser non supporta l'accesso alla fotocamera.",
-          variant: "destructive",
-        });
-        return;
-      }
+     if (!navigator.mediaDevices?.getUserMedia) {
+       console.error("❌ Browser non supporta getUserMedia");
+       return;
+     }
 
-      console.log("🛑 DEBUG: Stopping existing camera");
-      stopCamera();
+     console.log("🛑 DEBUG: Stopping existing camera");
+     stopCamera();
 
-      console.log("📸 DEBUG: Richiedendo stream fotocamera...");
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: "environment" },
-          width: { ideal: 1280, max: 1920 },
-          height: { ideal: 720, max: 1080 }
-        },
-        audio: false
-      });
+     console.log("📸 DEBUG: Richiedendo stream fotocamera...");
+     const stream = await navigator.mediaDevices.getUserMedia({
+       video: {
+         facingMode: { ideal: "environment" },
+         width: { ideal: 1280, max: 1920 },
+         height: { ideal: 720, max: 1080 }
+       },
+       audio: false
+     });
 
-      console.log(`✅ DEBUG: Stream ottenuto con ${stream.getVideoTracks().length} tracks`);
-      streamRef.current = stream;
+     console.log(`✅ DEBUG: Stream ottenuto con ${stream.getVideoTracks().length} tracks`);
+     streamRef.current = stream;
 
-      if (videoRef.current) {
-        console.log("📺 DEBUG: Assegnando stream al video element");
-        const video = videoRef.current;
+     // IMPORTANTE: Imposta scanning = true PRIMA di configurare il video
+     console.log("🔄 DEBUG: Setting scanning to true");
+     setScanning(true);
 
-        video.muted = true;
-        video.playsInline = true;
-        video.autoplay = true;
-        video.controls = false;
-        video.srcObject = stream;
+     // Aspetta che React renderizzi il video element
+     setTimeout(() => {
+       if (videoRef.current) {
+         console.log("📺 DEBUG: Assegnando stream al video element");
+         const video = videoRef.current;
 
-        console.log("🎬 DEBUG: Stream assegnato, configurando eventi");
+         video.muted = true;
+         video.playsInline = true;
+         video.autoplay = true;
+         video.controls = false;
+         video.srcObject = stream;
 
-        video.onloadedmetadata = async () => {
-          try {
-            console.log("🎭 DEBUG: Metadata loaded, tentando play");
-            await video.play();
-            console.log("🎉 DEBUG: Video playing successfully!");
-          } catch (err) {
-            console.error("❌ DEBUG: Play failed:", err);
-          }
-        };
+         console.log("🎬 DEBUG: Stream assegnato, configurando eventi");
 
-        setTimeout(async () => {
-          try {
-            if (video.paused) {
-              console.log("🚀 DEBUG: Fallback play attempt");
-              await video.play();
-              console.log("🎊 DEBUG: Fallback play successful!");
-            }
-          } catch (err) {
-            console.error("❌ DEBUG: Fallback play failed:", err);
-          }
-        }, 500);
-      }
+         video.onloadedmetadata = async () => {
+           try {
+             console.log("🎭 DEBUG: Metadata loaded, tentando play");
+             await video.play();
+             console.log("🎉 DEBUG: Video playing successfully!");
+           } catch (err) {
+             console.error("❌ DEBUG: Play failed:", err);
+           }
+         };
 
-      console.log("🔄 DEBUG: Setting scanning to true");
-      setScanning(true);
-      console.log("✨ DEBUG: startCamera function completed successfully");
+         setTimeout(async () => {
+           try {
+             if (video.paused) {
+               console.log("🚀 DEBUG: Fallback play attempt");
+               await video.play();
+               console.log("🎊 DEBUG: Fallback play successful!");
+             }
+           } catch (err) {
+             console.error("❌ DEBUG: Fallback play failed:", err);
+           }
+         }, 500);
+       } else {
+         console.error("❌ DEBUG: videoRef.current is still null!");
+       }
+     }, 100); // Aspetta 100ms per il re-render
 
-    } catch (error) {
-      console.error("💥 DEBUG: startCamera error:", error);
-      toast({
-        title: "Errore Camera",
-        description: `💥 ${error.message}`,
-        variant: "destructive",
-        duration: 5000
-      });
-    }
-  };
+     console.log("✨ DEBUG: startCamera function completed successfully");
+
+   } catch (error) {
+     console.error("💥 DEBUG: startCamera error:", error);
+   }
+ };
 
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
