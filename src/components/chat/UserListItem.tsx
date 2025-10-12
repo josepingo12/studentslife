@@ -31,11 +31,9 @@ const UserListItem = ({
   };
 
   return (
-    <div
-      className="ios-card p-4 flex items-center gap-3 cursor-pointer hover:scale-[1.02] transition-transform"
-    >
-      <div onClick={() => onUserClick(user.id)} className="flex items-center gap-3 flex-1">
-        <div className="relative">
+    <div className="ios-card p-4 flex items-center gap-3 cursor-pointer hover:scale-[1.02] transition-transform w-full overflow-hidden">
+      <div onClick={() => onUserClick(user.id)} className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="relative flex-shrink-0">
           <Avatar className="h-14 w-14">
             <AvatarImage src={user.profile_image_url} />
             <AvatarFallback className="bg-primary text-primary-foreground">
@@ -49,11 +47,11 @@ const UserListItem = ({
           )}
         </div>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
-            <p className="font-semibold truncate">{getDisplayName()}</p>
+        <div className="flex-1 min-w-0 overflow-hidden">
+          <div className="flex items-center justify-between gap-2">
+            <p className="font-semibold truncate flex-1">{getDisplayName()}</p>
             {lastMessage && (
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground flex-shrink-0">
                 {formatDistanceToNow(new Date(lastMessage.created_at), {
                   addSuffix: false,
                   locale: it,
@@ -61,12 +59,14 @@ const UserListItem = ({
               </span>
             )}
           </div>
-          
+
           {lastMessage && (
-            <p className="text-sm text-muted-foreground truncate mt-1">
-              {lastMessage.sender_id === currentUserId && "Tu: "}
-              {lastMessage.content}
-            </p>
+            <div className="mt-1 overflow-hidden">
+              <p className="text-sm text-muted-foreground truncate">
+                {lastMessage.sender_id === currentUserId && "Tu: "}
+                {lastMessage.content}
+              </p>
+            </div>
           )}
         </div>
       </div>
@@ -76,7 +76,7 @@ const UserListItem = ({
           e.stopPropagation();
           onToggleFavorite(user.id);
         }}
-        className="p-2"
+        className="p-2 flex-shrink-0"
       >
         <Star 
           className={`w-5 h-5 ${isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`}

@@ -295,23 +295,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
           </div>
         ) : (
           <div className="space-y-2">
-            {/* BOTTONE TEST */}
-            <Button
-              onClick={() => {
-                alert("BOTTONE TEST FUNZIONA!");
-                console.log("Test button clicked");
-                toast({
-                  title: "Test",
-                  description: "🧪 Bottone test cliccato!",
-                  duration: 2000
-                });
-              }}
-              variant="outline"
-              className="w-full mb-2"
-              type="button"
-            >
-              🧪 TEST BOTTONE
-            </Button>
+
 
             {/* BOTTONE PRINCIPALE CON DEBUG */}
             <Button
