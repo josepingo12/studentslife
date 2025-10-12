@@ -329,23 +329,37 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
             </Button>
 
             {/* BOTTONE PRINCIPALE CON DEBUG */}
-            <Button
-              onClick={() => {
-                console.log("🔥 BOTTONE FOTOCAMERA CLICCATO!");
-                toast({
-                  title: "Debug",
-                  description: "🔥 Bottone cliccato - chiamando startCamera",
-                  duration: 2000
-                });
-                startCamera();
-              }}
-              className="w-full mb-4 h-14 bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-              size="lg"
-              type="button"
-            >
-              <Camera className="w-5 h-5 mr-2" />
-              Apri Fotocamera Posteriore
-            </Button>
+           <Button
+             onClick={async () => {
+               try {
+                 console.log("🔥 BOTTONE FOTOCAMERA CLICCATO!");
+                 toast({
+                   title: "Debug",
+                   description: "🔥 Bottone cliccato - chiamando startCamera",
+                   duration: 2000
+                 });
+
+                 console.log("🚀 Chiamando startCamera...");
+                 await startCamera();
+                 console.log("✅ startCamera completata");
+
+               } catch (error) {
+                 console.error("💥 ERRORE in onClick:", error);
+                 toast({
+                   title: "Errore onClick",
+                   description: `💥 ${error.message}`,
+                   variant: "destructive",
+                   duration: 5000
+                 });
+               }
+             }}
+             className="w-full mb-4 h-14 bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+             size="lg"
+             type="button"
+           >
+             <Camera className="w-5 h-5 mr-2" />
+             Apri Fotocamera Posteriore
+           </Button>
           </div>
         )}
 
