@@ -1131,7 +1131,7 @@ const categories = [
 { icon: "📱", name: "Electrónica", color: "from-blue-400 to-cyan-400" },
 { icon: "💪", name: "Sport & Fitness", color: "from-green-400 to-emerald-400" },
 { icon: "🍕", name: "Bar & Restaurantes", color: "from-orange-400 to-red-400" },
-{ icon: "🛍️", name: "Shopping", color: "from-yellow-400 to-orange-400" }
+{ icon: "🛍️", name: "Shopping", color: "from-yellow-400 to-orange-400" },
 { icon: "✈️", name: "Viajes", color: "from-teal-400 to-cyan-400" }
 ];
 const appFeatures = [
