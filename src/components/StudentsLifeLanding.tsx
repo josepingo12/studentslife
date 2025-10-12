@@ -573,7 +573,7 @@ const StudentsLifeLanding: React.FC = () => {
           <p className="text-gray-600 mb-6 sm:mb-8 px-4">
             Conectando estudiantes en Valladolid con los mejores descuentos y experiencias
           </p>
-          <p className="text-gray-400 text-sm sm:text-base">&copy; 2024 StudentsLife. Todos los derechos reservados.</p>
+          <p className="text-gray-400 text-sm sm:text-base">&copy; 2025 StudentsLife. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>
@@ -666,7 +666,7 @@ const features = [
   {
     icon: "📍",
     title: "Enfoque Local",
-    description: "Especializado en Valladolid para estudiantes Erasmus"
+    description: "Especializado en Valladolid para estudiantes"
   }
 ];
 
