@@ -33,6 +33,13 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
 
   const startCamera = async () => {
     try {
+      // Toast per vedere se la funzione viene chiamata
+      toast({
+        title: "Debug",
+        description: "🎥 Inizio richiesta fotocamera",
+        duration: 3000
+      });
+
       if (!navigator.mediaDevices?.getUserMedia) {
         toast({
           title: "Non supportato",
@@ -55,6 +62,12 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         audio: false
       });
 
+      toast({
+        title: "Debug",
+        description: `✅ Stream ottenuto: ${stream.getVideoTracks().length} tracks`,
+        duration: 3000
+      });
+
       streamRef.current = stream;
 
       if (videoRef.current) {
@@ -69,13 +82,28 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         // Assegna lo stream
         video.srcObject = stream;
 
+        toast({
+          title: "Debug",
+          description: "📺 Stream assegnato al video",
+          duration: 3000
+        });
+
         // Aspetta che sia pronto e poi play
         video.onloadedmetadata = async () => {
           try {
             await video.play();
-            console.log("Video started successfully");
+            toast({
+              title: "Debug",
+              description: "🎬 Video metadata loaded & playing",
+              duration: 3000
+            });
           } catch (err) {
-            console.error("Play failed:", err);
+            toast({
+              title: "Errore Play Metadata",
+              description: `❌ ${err.message}`,
+              variant: "destructive",
+              duration: 5000
+            });
           }
         };
 
@@ -84,9 +112,19 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
           try {
             if (video.paused) {
               await video.play();
+              toast({
+                title: "Debug",
+                description: "🚀 Fallback play eseguito",
+                duration: 3000
+              });
             }
           } catch (err) {
-            console.error("Fallback play failed:", err);
+            toast({
+              title: "Errore Fallback Play",
+              description: `❌ ${err.message}`,
+              variant: "destructive",
+              duration: 5000
+            });
           }
         }, 500);
       }
@@ -98,7 +136,12 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
       });
 
     } catch (error: any) {
-      console.error("Errore fotocamera:", error);
+      toast({
+        title: "Errore Camera",
+        description: `💥 ${error.message}`,
+        variant: "destructive",
+        duration: 5000
+      });
 
       let message = "Impossibile accedere alla fotocamera";
       if (error.name === "NotAllowedError") {
@@ -221,17 +264,23 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         {scanning ? (
           <div className="space-y-4">
             <div className="relative rounded-lg overflow-hidden bg-black">
-           <video
-           ref={videoRef}
-           className="w-full h-[400px] object-cover"
-           playsInline={true}
-           muted={true}
-           autoPlay={true}
-           controls={false}
-           style={{
-           backgroundColor: '#000',
-           }}
-           />
+              <video
+                ref={videoRef}
+                className="w-full h-[400px] object-cover"
+                playsInline={true}
+                muted={true}
+                autoPlay={true}
+                controls={false}
+                style={{
+                  backgroundColor: '#000',
+                  width: '100%',
+                  height: '400px',
+                  objectFit: 'cover',
+                  display: 'block',
+                  visibility: 'visible',
+                  transform: 'scaleX(-1)', // Mirror
+                }}
+              />
 
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="border-4 border-white border-dashed w-64 h-64 rounded-lg flex items-center justify-center animate-pulse">
