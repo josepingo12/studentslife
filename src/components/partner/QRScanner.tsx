@@ -33,14 +33,10 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
 
   const startCamera = async () => {
     try {
-      // Toast per vedere se la funzione viene chiamata
-      toast({
-        title: "Debug",
-        description: "🎥 Inizio richiesta fotocamera",
-        duration: 3000
-      });
+      console.log("🎥 DEBUG: Inizio richiesta fotocamera");
 
       if (!navigator.mediaDevices?.getUserMedia) {
+        console.error("❌ Browser non supporta getUserMedia");
         toast({
           title: "Non supportato",
           description: "Il browser non supporta l'accesso alla fotocamera.",
@@ -49,10 +45,10 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         return;
       }
 
-      // Stop existing stream
+      console.log("🛑 DEBUG: Stopping existing camera");
       stopCamera();
 
-      // Richiedi i permessi prima
+      console.log("📸 DEBUG: Richiedendo stream fotocamera...");
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: { ideal: "environment" },
@@ -62,98 +58,55 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         audio: false
       });
 
-      toast({
-        title: "Debug",
-        description: `✅ Stream ottenuto: ${stream.getVideoTracks().length} tracks`,
-        duration: 3000
-      });
-
+      console.log(`✅ DEBUG: Stream ottenuto con ${stream.getVideoTracks().length} tracks`);
       streamRef.current = stream;
 
       if (videoRef.current) {
+        console.log("📺 DEBUG: Assegnando stream al video element");
         const video = videoRef.current;
 
-        // IMPORTANTE: Imposta tutto prima di assegnare lo stream
         video.muted = true;
         video.playsInline = true;
         video.autoplay = true;
         video.controls = false;
-
-        // Assegna lo stream
         video.srcObject = stream;
 
-        toast({
-          title: "Debug",
-          description: "📺 Stream assegnato al video",
-          duration: 3000
-        });
+        console.log("🎬 DEBUG: Stream assegnato, configurando eventi");
 
-        // Aspetta che sia pronto e poi play
         video.onloadedmetadata = async () => {
           try {
+            console.log("🎭 DEBUG: Metadata loaded, tentando play");
             await video.play();
-            toast({
-              title: "Debug",
-              description: "🎬 Video metadata loaded & playing",
-              duration: 3000
-            });
+            console.log("🎉 DEBUG: Video playing successfully!");
           } catch (err) {
-            toast({
-              title: "Errore Play Metadata",
-              description: `❌ ${err.message}`,
-              variant: "destructive",
-              duration: 5000
-            });
+            console.error("❌ DEBUG: Play failed:", err);
           }
         };
 
-        // Fallback: forza play dopo 500ms
         setTimeout(async () => {
           try {
             if (video.paused) {
+              console.log("🚀 DEBUG: Fallback play attempt");
               await video.play();
-              toast({
-                title: "Debug",
-                description: "🚀 Fallback play eseguito",
-                duration: 3000
-              });
+              console.log("🎊 DEBUG: Fallback play successful!");
             }
           } catch (err) {
-            toast({
-              title: "Errore Fallback Play",
-              description: `❌ ${err.message}`,
-              variant: "destructive",
-              duration: 5000
-            });
+            console.error("❌ DEBUG: Fallback play failed:", err);
           }
         }, 500);
       }
 
+      console.log("🔄 DEBUG: Setting scanning to true");
       setScanning(true);
-      toast({
-        title: "Fotocamera attiva",
-        description: "Inquadra il QR Code per scansionarlo",
-      });
+      console.log("✨ DEBUG: startCamera function completed successfully");
 
-    } catch (error: any) {
+    } catch (error) {
+      console.error("💥 DEBUG: startCamera error:", error);
       toast({
         title: "Errore Camera",
         description: `💥 ${error.message}`,
         variant: "destructive",
         duration: 5000
-      });
-
-      let message = "Impossibile accedere alla fotocamera";
-      if (error.name === "NotAllowedError") {
-        message = "Permesso fotocamera negato";
-      } else if (error.name === "NotFoundError") {
-        message = "Nessuna fotocamera trovata";
-      }
-
-      toast({
-        title: "Errore",
-        description: message,
-        variant: "destructive",
       });
     }
   };
@@ -329,37 +282,37 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
             </Button>
 
             {/* BOTTONE PRINCIPALE CON DEBUG */}
-           <Button
-             onClick={async () => {
-               try {
-                 console.log("🔥 BOTTONE FOTOCAMERA CLICCATO!");
-                 toast({
-                   title: "Debug",
-                   description: "🔥 Bottone cliccato - chiamando startCamera",
-                   duration: 2000
-                 });
+            <Button
+              onClick={async () => {
+                try {
+                  console.log("🔥 BOTTONE FOTOCAMERA CLICCATO!");
+                  toast({
+                    title: "Debug",
+                    description: "🔥 Bottone cliccato - chiamando startCamera",
+                    duration: 2000
+                  });
 
-                 console.log("🚀 Chiamando startCamera...");
-                 await startCamera();
-                 console.log("✅ startCamera completata");
+                  console.log("🚀 Chiamando startCamera...");
+                  await startCamera();
+                  console.log("✅ startCamera completata");
 
-               } catch (error) {
-                 console.error("💥 ERRORE in onClick:", error);
-                 toast({
-                   title: "Errore onClick",
-                   description: `💥 ${error.message}`,
-                   variant: "destructive",
-                   duration: 5000
-                 });
-               }
-             }}
-             className="w-full mb-4 h-14 bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-             size="lg"
-             type="button"
-           >
-             <Camera className="w-5 h-5 mr-2" />
-             Apri Fotocamera Posteriore
-           </Button>
+                } catch (error) {
+                  console.error("💥 ERRORE in onClick:", error);
+                  toast({
+                    title: "Errore onClick",
+                    description: `💥 ${error.message}`,
+                    variant: "destructive",
+                    duration: 5000
+                  });
+                }
+              }}
+              className="w-full mb-4 h-14 bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+              size="lg"
+              type="button"
+            >
+              <Camera className="w-5 h-5 mr-2" />
+              Apri Fotocamera Posteriore
+            </Button>
           </div>
         )}
 
