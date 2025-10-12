@@ -33,7 +33,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
 
   const startCamera = async () => {
     try {
-      if (!('mediaDevices' in navigator) || !navigator.mediaDevices.getUserMedia) {
+      if (!navigator.mediaDevices?.getUserMedia) {
         toast({
           title: "Non supportato",
           description: "Il browser non supporta l'accesso alla fotocamera.",
@@ -42,132 +42,75 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         return;
       }
 
-      // Stop any existing camera stream first
+      // Stop existing stream
       stopCamera();
 
-      // Ensure permissions prompt appears, then pick the rear camera
-      const ensurePermission = async () => {
-        try {
-          // Some browsers require an initial call to expose device labels
-          const temp = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-          temp.getTracks().forEach((t) => t.stop());
-        } catch (_) {
-          // Ignore: we will still try to get a stream below with constraints
-        }
-      };
-
-      const pickRearDeviceId = async (): Promise<string | undefined> => {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videos = devices.filter((d) => d.kind === 'videoinput');
-        if (videos.length === 0) return undefined;
-        // Prefer names that indicate back/rear/environment
-        const rear = videos.find((d) => /back|rear|environment|trase|poste/i.test(d.label));
-        return (rear || videos[videos.length - 1])?.deviceId; // often last is rear on phones
-      };
-
-      await ensurePermission();
-
-      let stream: MediaStream | null = null;
-
-      // 1) Try by deviceId (most reliable for back camera)
-      try {
-        const deviceId = await pickRearDeviceId();
-        if (deviceId) {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              deviceId: { exact: deviceId },
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-            },
-            audio: false,
-          });
-        }
-      } catch (e) {
-        console.log('DeviceId selection failed, falling back to facingMode', e);
-      }
-
-      // 2) Fallback: facingMode exact environment
-      if (!stream) {
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: { exact: 'environment' },
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-            },
-            audio: false,
-          });
-        } catch (e) {
-          console.log('Exact environment failed, trying ideal');
-        }
-      }
-
-      // 3) Fallback: facingMode environment (non exact)
-      if (!stream) {
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: 'environment',
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-            },
-            audio: false,
-          });
-        } catch (e) {
-          console.log('Ideal environment failed, trying any camera');
-        }
-      }
-
-      // 4) Final fallback: any camera
-      if (!stream) {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 1280 }, height: { ideal: 720 } },
-          audio: false,
-        });
-      }
-
-      if (!stream) throw new Error('Impossibile ottenere lo stream della fotocamera');
+      // Richiedi i permessi prima
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280, max: 1920 },
+          height: { ideal: 720, max: 1080 }
+        },
+        audio: false
+      });
 
       streamRef.current = stream;
 
       if (videoRef.current) {
         const video = videoRef.current;
-        // iOS Safari requirements
-        video.setAttribute('playsinline', 'true');
-        video.setAttribute('autoplay', 'true');
+
+        // IMPORTANTE: Imposta tutto prima di assegnare lo stream
         video.muted = true;
+        video.playsInline = true;
+        video.autoplay = true;
+        video.controls = false;
+
+        // Assegna lo stream
         video.srcObject = stream;
-        // Start playback when ready
-        const playPromise = video.play();
-        if (playPromise && typeof playPromise.catch === 'function') {
-          playPromise.catch((err) => console.warn('Autoplay blocked:', err));
-        }
+
+        // Aspetta che sia pronto e poi play
+        video.onloadedmetadata = async () => {
+          try {
+            await video.play();
+            console.log("Video started successfully");
+          } catch (err) {
+            console.error("Play failed:", err);
+          }
+        };
+
+        // Fallback: forza play dopo 500ms
+        setTimeout(async () => {
+          try {
+            if (video.paused) {
+              await video.play();
+            }
+          } catch (err) {
+            console.error("Fallback play failed:", err);
+          }
+        }, 500);
       }
 
       setScanning(true);
       toast({
-        title: 'Fotocamera attiva',
-        description: 'Inquadra il QR Code per scansionarlo',
+        title: "Fotocamera attiva",
+        description: "Inquadra il QR Code per scansionarlo",
       });
-    } catch (error: any) {
-      console.error('Errore fotocamera:', error);
 
-      let message = 'Impossibile accedere alla fotocamera';
-      if (error.name === 'NotAllowedError') {
-        message = 'Permesso fotocamera negato. Abilita i permessi nelle impostazioni del browser.';
-      } else if (error.name === 'NotFoundError') {
-        message = 'Nessuna fotocamera trovata sul dispositivo';
-      } else if (error.name === 'NotReadableError') {
-        message = "Fotocamera già in uso da un'altra applicazione";
-      } else if (error.name === 'OverconstrainedError') {
-        message = 'Le impostazioni richieste non sono supportate dalla fotocamera';
+    } catch (error: any) {
+      console.error("Errore fotocamera:", error);
+
+      let message = "Impossibile accedere alla fotocamera";
+      if (error.name === "NotAllowedError") {
+        message = "Permesso fotocamera negato";
+      } else if (error.name === "NotFoundError") {
+        message = "Nessuna fotocamera trovata";
       }
 
       toast({
-        title: 'Errore Fotocamera',
+        title: "Errore",
         description: message,
-        variant: 'destructive',
-        duration: 5000,
+        variant: "destructive",
       });
     }
   };
@@ -278,17 +221,17 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         {scanning ? (
           <div className="space-y-4">
             <div className="relative rounded-lg overflow-hidden bg-black">
-            <video
-            ref={videoRef}
-            className="w-full h-[400px] object-cover"
-            playsInline
-            muted
-            autoPlay
-            controls={false}
-            style={{
-            transform: 'scaleX(-1)', // Mirror per UX migliore
-            }}
-            />
+           <video
+           ref={videoRef}
+           className="w-full h-[400px] object-cover"
+           playsInline={true}
+           muted={true}
+           autoPlay={true}
+           controls={false}
+           style={{
+           backgroundColor: '#000',
+           }}
+           />
 
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="border-4 border-white border-dashed w-64 h-64 rounded-lg flex items-center justify-center animate-pulse">
