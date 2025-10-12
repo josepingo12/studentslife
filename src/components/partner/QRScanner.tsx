@@ -31,92 +31,6 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
     setScanning(false);
   };
 
-<<<<<<< HEAD
- const startCamera = async () => {
-   try {
-     if (!navigator.mediaDevices?.getUserMedia) {
-       toast({
-         title: "Non supportato",
-         description: "Il browser non supporta l'accesso alla fotocamera.",
-         variant: "destructive",
-       });
-       return;
-     }
-
-     // Prima ottieni i dispositivi disponibili
-     const devices = await navigator.mediaDevices.enumerateDevices();
-     const videoDevices = devices.filter(device => device.kind === 'videoinput');
-
-     // Trova la fotocamera posteriore
-     const backCamera = videoDevices.find(device =>
-       device.label.toLowerCase().includes('back') ||
-       device.label.toLowerCase().includes('rear') ||
-       device.label.toLowerCase().includes('environment')
-     );
-
-     const constraints = {
-       video: {
-         width: { ideal: 1280, max: 1920 },
-         height: { ideal: 720, max: 1080 },
-         frameRate: { ideal: 30, max: 30 }
-       }
-     };
-
-     // Se hai trovato la fotocamera posteriore, usala
-     if (backCamera?.deviceId) {
-       constraints.video.deviceId = { exact: backCamera.deviceId };
-     } else {
-       // Fallback su facingMode
-       constraints.video.facingMode = "environment";
-     }
-
-     const stream = await navigator.mediaDevices.getUserMedia(constraints);
-     streamRef.current = stream;
-
-     if (videoRef.current) {
-       videoRef.current.srcObject = stream;
-
-       // IMPORTANTE: Aspetta che il video sia pronto
-       videoRef.current.onloadedmetadata = () => {
-         if (videoRef.current) {
-           videoRef.current.play().catch(console.error);
-         }
-       };
-
-       // Forza il play dopo un breve delay
-       setTimeout(() => {
-         if (videoRef.current) {
-           videoRef.current.play().catch(console.error);
-         }
-       }, 100);
-     }
-
-     setScanning(true);
-     toast({
-       title: "Fotocamera attiva",
-       description: "Inquadra il QR Code per scansionarlo",
-     });
-
-   } catch (error: any) {
-     console.error("Errore fotocamera:", error);
-
-     let message = "Impossibile accedere alla fotocamera";
-     if (error.name === "NotAllowedError") {
-       message = "Permesso fotocamera negato";
-     } else if (error.name === "NotFoundError") {
-       message = "Nessuna fotocamera trovata";
-     } else if (error.name === "NotReadableError") {
-       message = "Fotocamera in uso da un'altra app";
-     }
-
-     toast({
-       title: "Errore",
-       description: message,
-       variant: "destructive",
-     });
-   }
- };
-=======
   const startCamera = async () => {
     try {
       if (!('mediaDevices' in navigator) || !navigator.mediaDevices.getUserMedia) {
@@ -257,11 +171,10 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
       });
     }
   };
->>>>>>> 8317817f8259ae2ee63afa81964ba931708057ec
 
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!code || code.length !== 12) {
       toast({
         title: "Codice non valido",
@@ -308,7 +221,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
 
       const now = new Date();
       const endDate = new Date(qrData.events.end_date);
-      
+
       if (now > endDate) {
         setResult({ valid: false, message: "Evento scaduto" });
         return;
@@ -376,7 +289,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
             transform: 'scaleX(-1)', // Mirror per UX migliore
             }}
             />
-              
+
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="border-4 border-white border-dashed w-64 h-64 rounded-lg flex items-center justify-center animate-pulse">
                   <div className="text-white text-sm bg-black/70 px-3 py-2 rounded-lg text-center">
@@ -386,13 +299,13 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-sm">
               <p className="text-center text-blue-600 dark:text-blue-400">
                 💡 <strong>Suggerimento:</strong> Mantieni il QR code ben illuminato e stabile
               </p>
             </div>
-            
+
             <Button
               onClick={stopCamera}
               variant="outline"
@@ -452,8 +365,8 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
       {result && (
         <div
           className={`ios-card p-6 animate-fade-in border-2 ${
-            result.valid 
-              ? "bg-green-500/10 border-green-500/20" 
+            result.valid
+              ? "bg-green-500/10 border-green-500/20"
               : "bg-destructive/10 border-destructive/20"
           }`}
         >
@@ -463,7 +376,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
             ) : (
               <XCircle className="w-12 h-12 text-destructive flex-shrink-0" />
             )}
-            
+
             <div className="flex-1">
               <h3
                 className={`text-xl font-bold mb-2 ${
