@@ -727,7 +727,7 @@ export type Database = {
           created_at: string
           expires_at: string
           id: string
-          image_url: string
+          image_url: string | null
           media_type: string | null
           user_id: string
           video_url: string | null
@@ -736,7 +736,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
-          image_url: string
+          image_url?: string | null
           media_type?: string | null
           user_id: string
           video_url?: string | null
@@ -745,7 +745,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
-          image_url?: string
+          image_url?: string | null
           media_type?: string | null
           user_id?: string
           video_url?: string | null

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Image as ImageIcon, Video as VideoIcon } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import ImageUpload from "@/components/shared/ImageUpload";
 
 interface CreateStoryDialogProps {
@@ -18,9 +18,22 @@ const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: Creat
   const [mediaUrl, setMediaUrl] = useState("");
   const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
   const [loading, setLoading] = useState(false);
-  const handleMediaUploaded = async (url: string, type: 'image' | 'video') => {
+
+  const handleMediaUploaded = (url: string, type: 'image' | 'video') => {
     setMediaUrl(url);
     setMediaType(type);
+  };
+
+  const handlePublish = async () => {
+    if (!mediaUrl || !mediaType) {
+      toast({
+        title: "Errore",
+        description: "Seleziona un'immagine o un video prima di pubblicare",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -28,16 +41,16 @@ const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: Creat
         .from("stories")
         .insert({
           user_id: userId,
-          image_url: type === 'image' ? url : null,
-          video_url: type === 'video' ? url : null,
-          media_type: type,
+          image_url: mediaType === 'image' ? mediaUrl : null,
+          video_url: mediaType === 'video' ? mediaUrl : null,
+          media_type: mediaType,
         });
 
       if (error) throw error;
 
       toast({
         title: "Storia pubblicata!",
-        description: type === 'video' 
+        description: mediaType === 'video' 
           ? "Video caricato! Durata massima: 25 secondi"
           : "La tua storia sarà visibile per 24 ore",
       });
@@ -68,6 +81,9 @@ const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: Creat
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Crea una Storia</DialogTitle>
+          <DialogDescription>
+            Carica una foto o un video per condividere la tua storia. Sarà visibile per 24 ore.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <ImageUpload
@@ -79,16 +95,26 @@ const CreateStoryDialog = ({ open, onOpenChange, userId, onStoryCreated }: Creat
             showPreview={true}
           />
 
-          <p className="text-xs text-muted-foreground text-center">
-            La tua storia sarà visibile per 24 ore
-          </p>
-
-          {loading && (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              <span className="ml-2">Pubblicazione...</span>
-            </div>
+          {mediaUrl && (
+            <Button
+              onClick={handlePublish}
+              disabled={loading}
+              className="w-full"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Pubblicazione...
+                </>
+              ) : (
+                "Pubblica Storia"
+              )}
+            </Button>
           )}
+
+          <p className="text-xs text-muted-foreground text-center">
+            {mediaType === 'video' ? 'Video caricato - Durata massima: 25 secondi' : 'La tua storia sarà visibile per 24 ore'}
+          </p>
         </div>
       </DialogContent>
     </Dialog>
