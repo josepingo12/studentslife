@@ -17,9 +17,9 @@ import PostCard from "@/components/social/PostCard";
 import UploadSheet from "@/components/shared/UploadSheet";
 import NotificationBadge from "@/components/chat/NotificationBadge";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
-import { useUnreadLikes } from "@/hooks/useUnreadLikes";
+import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import SettingsSheet from "@/components/partner/SettingsSheet";
-import LikesNotificationsSheet from "@/components/social/LikesNotificationsSheet";
+import NotificationsSheet from "@/components/social/NotificationsSheet";
 
 const PartnerDashboard = () => {
   const navigate = useNavigate();
@@ -35,7 +35,8 @@ const PartnerDashboard = () => {
   const [settingsSheetOpen, setSettingsSheetOpen] = useState(false);
   const [likesSheetOpen, setLikesSheetOpen] = useState(false);
   const totalUnread = useUnreadMessages(user?.id);
-  const unreadLikes = useUnreadLikes(user?.id);
+  const unreadNotifications = useUnreadNotifications(user?.id);
+  const [userRole, setUserRole] = useState<string>();
 
   useEffect(() => {
     checkAuth();
@@ -44,6 +45,23 @@ const PartnerDashboard = () => {
       subscribeToNewPosts();
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    const loadUserRole = async () => {
+      if (user?.id) {
+        const { data } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .single();
+        
+        if (data) {
+          setUserRole(data.role);
+        }
+      }
+    };
+    loadUserRole();
+  }, [user?.id]);
 
   const subscribeToNewPosts = () => {
     const channel = supabase
@@ -306,9 +324,9 @@ const PartnerDashboard = () => {
           >
             <div className="relative">
               <Heart className="w-5 h-5" />
-              <NotificationBadge count={unreadLikes} />
+              <NotificationBadge count={unreadNotifications} />
             </div>
-            <span className="text-xs font-medium">Mi piace</span>
+            <span className="text-xs font-medium">Notifiche</span>
           </button>
 
           <button
@@ -352,11 +370,12 @@ const PartnerDashboard = () => {
         onOpenChange={setSettingsSheetOpen}
       />
 
-      {/* Likes Notifications Sheet */}
-      <LikesNotificationsSheet
+      {/* Notifications Sheet */}
+      <NotificationsSheet
         open={likesSheetOpen}
         onOpenChange={setLikesSheetOpen}
         userId={user.id}
+        userRole={userRole}
       />
     </div>
   );
