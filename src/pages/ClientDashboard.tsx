@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LogOut, Settings, User, Home, Users, MessageCircle, UserCircle, Plus, Search, X } from "lucide-react";
+import { LogOut, Settings, User, Home, Users, MessageCircle, UserCircle, Plus, Search, X, Heart } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import CategoryCarousel from "@/components/client/CategoryCarousel";
@@ -16,7 +16,9 @@ import PostCard from "@/components/social/PostCard";
 import UploadSheet from "@/components/shared/UploadSheet";
 import NotificationBadge from "@/components/chat/NotificationBadge";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { useUnreadLikes } from "@/hooks/useUnreadLikes";
 import ChatsList from "@/components/chat/ChatsList";
+import LikesNotificationsSheet from "@/components/social/LikesNotificationsSheet";
 import { useTranslation } from "react-i18next";
 
 const ClientDashboard = () => {
@@ -30,10 +32,12 @@ const ClientDashboard = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
+  const [likesSheetOpen, setLikesSheetOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
   const totalUnread = useUnreadMessages(user?.id);
+  const unreadLikes = useUnreadLikes(user?.id);
 
   useEffect(() => {
     checkAuth();
@@ -345,9 +349,21 @@ const ClientDashboard = () => {
           {/* Central Upload Button */}
           <button
             onClick={() => setUploadSheetOpen(true)}
-            className="relative -mt-6 bg-gradient-to-br from-primary to-primary/80 rounded-full p-4 shadow-lg hover:scale-105 transition-transform"
+            className="flex flex-col items-center gap-1 transition-colors text-muted-foreground"
           >
-            <Plus className="w-8 h-8 text-white" />
+            <Plus className="w-6 h-6" />
+            <span className="text-xs font-medium">Carica</span>
+          </button>
+
+          <button
+            onClick={() => setLikesSheetOpen(true)}
+            className="flex flex-col items-center gap-1 transition-colors text-muted-foreground relative"
+          >
+            <div className="relative">
+              <Heart className="w-6 h-6" />
+              <NotificationBadge count={unreadLikes} />
+            </div>
+            <span className="text-xs font-medium">Mi piace</span>
           </button>
 
           <button
@@ -383,6 +399,13 @@ const ClientDashboard = () => {
             loadPosts();
           }
         }}
+      />
+
+      {/* Likes Notifications Sheet */}
+      <LikesNotificationsSheet
+        open={likesSheetOpen}
+        onOpenChange={setLikesSheetOpen}
+        userId={user.id}
       />
     </div>
   );

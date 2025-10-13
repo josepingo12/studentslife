@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Home, QrCode, BarChart3, UserCircle, Users, Plus, Calendar, Image as ImageIcon, MessageCircle, ArrowLeftRight, Settings } from "lucide-react";
+import { Home, QrCode, BarChart3, UserCircle, Users, Plus, Calendar, Image as ImageIcon, MessageCircle, ArrowLeftRight, Settings, Heart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import PartnerGalleryManager from "@/components/partner/PartnerGalleryManager";
@@ -17,7 +17,9 @@ import PostCard from "@/components/social/PostCard";
 import UploadSheet from "@/components/shared/UploadSheet";
 import NotificationBadge from "@/components/chat/NotificationBadge";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { useUnreadLikes } from "@/hooks/useUnreadLikes";
 import SettingsSheet from "@/components/partner/SettingsSheet";
+import LikesNotificationsSheet from "@/components/social/LikesNotificationsSheet";
 
 const PartnerDashboard = () => {
   const navigate = useNavigate();
@@ -31,7 +33,9 @@ const PartnerDashboard = () => {
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
   const [settingsSheetOpen, setSettingsSheetOpen] = useState(false);
+  const [likesSheetOpen, setLikesSheetOpen] = useState(false);
   const totalUnread = useUnreadMessages(user?.id);
+  const unreadLikes = useUnreadLikes(user?.id);
 
   useEffect(() => {
     checkAuth();
@@ -297,6 +301,17 @@ const PartnerDashboard = () => {
           </button>
 
           <button
+            onClick={() => setLikesSheetOpen(true)}
+            className="flex flex-col items-center gap-1 transition-colors text-muted-foreground relative"
+          >
+            <div className="relative">
+              <Heart className="w-5 h-5" />
+              <NotificationBadge count={unreadLikes} />
+            </div>
+            <span className="text-xs font-medium">Mi piace</span>
+          </button>
+
+          <button
             onClick={() => navigate("/chats")}
             className="flex flex-col items-center gap-1 transition-colors text-muted-foreground relative"
           >
@@ -335,6 +350,13 @@ const PartnerDashboard = () => {
       <SettingsSheet
         open={settingsSheetOpen}
         onOpenChange={setSettingsSheetOpen}
+      />
+
+      {/* Likes Notifications Sheet */}
+      <LikesNotificationsSheet
+        open={likesSheetOpen}
+        onOpenChange={setLikesSheetOpen}
+        userId={user.id}
       />
     </div>
   );
