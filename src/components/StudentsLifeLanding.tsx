@@ -1104,5 +1104,103 @@ const appFeatures = [
     description: "Encuentra exactamente lo que buscas por categoría y ubicación"
   }
 ];
+// PWA Install Prompt - Aggiungi dopo tutti gli useEffect esistenti
+useEffect(() => {
+  // PWA Install Logic
+  let deferredPrompt;
+  let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  let isStandalone = window.matchMedia('(display-mode: standalone)').matches;
 
+  // Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+  }
+
+  // Android - Prompt automatico
+  const handleBeforeInstallPrompt = (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    setTimeout(showInstallPrompt, 3000);
+  };
+
+  // iOS - Istruzioni manuali in spagnolo
+  const showIOSInstallInstructions = () => {
+    if (document.querySelector('.ios-install-prompt')) return; // Evita duplicati
+
+    const installPrompt = document.createElement('div');
+    installPrompt.className = 'ios-install-prompt';
+    installPrompt.innerHTML = `
+      <div class="install-header">
+        <img src="/logo.png" alt="StudentsLife" class="install-logo">
+        <h3>¡Instala StudentsLife!</h3>
+        <button class="close-btn" onclick="this.closest('.ios-install-prompt').remove()">×</button>
+      </div>
+      <div class="install-steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <p>Toca el botón <strong>Compartir</strong></p>
+            <div class="share-icon">📤</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <p>Selecciona <strong>"Añadir a pantalla de inicio"</strong></p>
+            <div class="home-icon">📱</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <p>Confirma tocando <strong>"Añadir"</strong></p>
+            <div class="check-icon">✅</div>
+          </div>
+        </div>
+      </div>
+      <div class="install-benefits">
+        <p>🚀 Acceso rápido • 📱 Como app nativa • 🔔 Notificaciones</p>
+      </div>
+      <div class="install-footer">
+        <button class="install-later" onclick="this.closest('.ios-install-prompt').remove()">
+          Más tarde
+        </button>
+      </div>
+    `;
+    document.body.appendChild(installPrompt);
+  };
+
+  // Android - Prompt nativo
+  const showAndroidInstallPrompt = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        deferredPrompt = null;
+      });
+    }
+  };
+
+  // Función principal
+  const showInstallPrompt = () => {
+    if (isStandalone) return; // Ya está instalada
+
+    if (isIOS) {
+      showIOSInstallInstructions();
+    } else if (deferredPrompt) {
+      showAndroidInstallPrompt();
+    }
+  };
+
+  // Event listeners
+  window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+  // Auto-trigger dopo 3 secondi
+  const installTimer = setTimeout(showInstallPrompt, 3000);
+
+  // Cleanup
+  return () => {
+    window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    clearTimeout(installTimer);
+  };
+}, []);
 export default StudentsLifeLanding;
