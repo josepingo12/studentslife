@@ -13,21 +13,47 @@ export const InstallPWA = () => {
   const [showAndroidInstall, setShowAndroidInstall] = useState(false);
 
   useEffect(() => {
+    console.log('InstallPWA: Component mounted');
+    
     // Verifica se è già installata come PWA
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    if (isStandalone) return;
+    const isIOSStandalone = (window.navigator as any).standalone === true;
+    
+    console.log('isStandalone:', isStandalone);
+    console.log('isIOSStandalone:', isIOSStandalone);
+    
+    if (isStandalone || isIOSStandalone) {
+      console.log('App is already installed, not showing prompt');
+      return;
+    }
 
     // Rileva iOS
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isIOSDevice = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+    const isAppleDevice = isIOS || isIOSDevice;
     
-    // Verifica se è Safari su iOS
-    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome|CriOS|FxiOS|EdgiOS/.test(navigator.userAgent);
+    console.log('User Agent:', navigator.userAgent);
+    console.log('Platform:', navigator.platform);
+    console.log('isIOS:', isIOS);
+    console.log('isIOSDevice:', isIOSDevice);
+    console.log('isAppleDevice:', isAppleDevice);
     
-    if (isIOS && isSafari) {
-      // Mostra il prompt iOS dopo 3 secondi solo se non è stata già installata
+    // Verifica se è Safari su iOS (non Chrome, Firefox, etc.)
+    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome|CriOS|FxiOS|EdgiOS|OPR/.test(navigator.userAgent);
+    
+    console.log('isSafari:', isSafari);
+    
+    if (isAppleDevice && isSafari) {
+      // Mostra il prompt iOS dopo 1 secondo solo se non è stata già installata
       const iosInstallDismissed = localStorage.getItem('iosInstallDismissed');
+      console.log('iosInstallDismissed:', iosInstallDismissed);
+      
       if (!iosInstallDismissed) {
-        setTimeout(() => setShowIOSInstall(true), 3000);
+        console.log('Showing iOS install prompt in 1 second');
+        setTimeout(() => {
+          console.log('Showing iOS install prompt now');
+          setShowIOSInstall(true);
+        }, 1000);
       }
     }
 
