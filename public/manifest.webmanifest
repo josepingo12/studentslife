@@ -1,0 +1,36 @@
+{
+  "name": "Students Life",
+  "short_name": "StudentsLife",
+  "description": "StudentsLife conecta estudiantes con partners locales. Descuentos exclusivos, eventos especiales y beneficios únicos.",
+  "theme_color": "#6366f1",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "social", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Social Feed",
+      "short_name": "Social",
+      "description": "Accedi al feed social",
+      "url": "/social",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Partners",
+      "short_name": "Partners",
+      "description": "Esplora i partner",
+      "url": "/client",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    }
+  ]
+}
