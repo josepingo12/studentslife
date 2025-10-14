@@ -27,23 +27,25 @@ export const InstallPWA = () => {
       return;
     }
 
-    // Rileva iOS
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const isIOSDevice = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
-    const isAppleDevice = isIOS || isIOSDevice;
+    // Rileva iOS (inclusi iPadOS moderni che si identificano come Mac)
+    const ua = navigator.userAgent || '';
+    const platform = navigator.platform || '';
+    const isIPhoneIPadIPod = /iPhone|iPad|iPod/i.test(ua);
+    const isiPadOS13Plus = platform === 'MacIntel' && (navigator.maxTouchPoints || 0) > 1;
+    const isIOSLike = isIPhoneIPadIPod || isiPadOS13Plus || (ua.includes('Mac') && 'ontouchend' in window);
     
-    console.log('User Agent:', navigator.userAgent);
-    console.log('Platform:', navigator.platform);
-    console.log('isIOS:', isIOS);
-    console.log('isIOSDevice:', isIOSDevice);
-    console.log('isAppleDevice:', isAppleDevice);
+    console.log('User Agent:', ua);
+    console.log('Platform:', platform);
+    console.log('isIPhoneIPadIPod:', isIPhoneIPadIPod);
+    console.log('isiPadOS13Plus:', isiPadOS13Plus);
+    console.log('isIOSLike:', isIOSLike);
     
-    // Verifica se è Safari su iOS (non Chrome, Firefox, etc.)
-    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome|CriOS|FxiOS|EdgiOS|OPR/.test(navigator.userAgent);
+    // Verifica se è Safari su iOS (non Chrome, Firefox, Edge, Opera su iOS)
+    const isSafari = /^((?!chrome|android|crios|fxios|edgios|opr).)*safari/i.test(ua);
     
     console.log('isSafari:', isSafari);
     
-    if (isAppleDevice && isSafari) {
+    if (isIOSLike && isSafari) {
       // Mostra il prompt iOS dopo 1 secondo solo se non è stata già installata
       const iosInstallDismissed = localStorage.getItem('iosInstallDismissed');
       console.log('iosInstallDismissed:', iosInstallDismissed);
