@@ -20,6 +20,7 @@ import UserProfile from "./pages/UserProfile";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminSetup from "./pages/AdminSetup";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { InstallPWA } from "./components/shared/InstallPWA";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <InstallPWA />
       <HashRouter>
         <Routes>
           <Route path="/" element={<Index />} />
