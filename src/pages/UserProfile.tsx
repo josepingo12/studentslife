@@ -3,7 +3,9 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Grid, Bookmark, Camera, Pencil, Users, Home, UserCircle, Plus, Edit2, Settings } from "lucide-react";
+import { MessageCircle, Grid, Bookmark, Camera, Pencil, Users, Home, UserCircle, Plus, Edit2, Settings, Award } from "lucide-react";
+import { useBadges } from "@/hooks/useBadges";
+import { BadgeAnimation } from "@/components/gamification/BadgeAnimation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import PostDetailModal from "@/components/social/PostDetailModal";
@@ -36,8 +38,14 @@ const UserProfile = () => {
   const [bioText, setBioText] = useState("");
   const [settingsSheetOpen, setSettingsSheetOpen] = useState(false);
   const [likesSheetOpen, setLikesSheetOpen] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  const { badges, newBadge, setNewBadge, loadUserStats } = useBadges(
+    userId || currentUser?.id,
+    userRole
+  );
 
   useEffect(() => {
     checkAuth();
@@ -71,8 +79,43 @@ const UserProfile = () => {
     }
 
     setCurrentUser(user);
+    
+    // Get user role
+    const { data: roleData } = await supabase.rpc('get_user_role', { _user_id: user.id });
+    setUserRole(roleData);
+    
     await loadProfile(userId || user.id);
     await loadUserContent(userId || user.id);
+    
+    // Track access for gamification (only for own profile)
+    if (!userId || userId === user.id) {
+      await trackAccess(user.id);
+    }
+  };
+
+  const trackAccess = async (userId: string) => {
+    try {
+      const { data: stats } = await supabase
+        .from('user_stats')
+        .select('total_accesses')
+        .eq('user_id', userId)
+        .single();
+
+      if (stats) {
+        await supabase
+          .from('user_stats')
+          .update({ total_accesses: (stats.total_accesses || 0) + 1 })
+          .eq('user_id', userId);
+      } else {
+        await supabase
+          .from('user_stats')
+          .insert({ user_id: userId, total_accesses: 1 });
+      }
+      
+      await loadUserStats();
+    } catch (error) {
+      console.error('Error tracking access:', error);
+    }
   };
 
   const loadProfile = async (id: string) => {
@@ -414,7 +457,7 @@ const UserProfile = () => {
           </div>
 
           {/* Stats */}
-          <div className="flex justify-center gap-8 py-4 border-y border-border/50 mb-4">
+          <div className="flex justify-center gap-6 py-4 border-y border-border/50 mb-4">
             <div className="text-center">
               <p className="text-xl font-bold">{posts.length}</p>
               <p className="text-xs text-muted-foreground">{t('profile.posts')}</p>
@@ -430,6 +473,22 @@ const UserProfile = () => {
               <p className="text-xl font-bold">{totalViews}</p>
               <p className="text-xs text-muted-foreground">{t('profile.views')}</p>
             </div>
+            {isOwnProfile && (
+              <button 
+                onClick={() => navigate('/badges')}
+                className="text-center hover:opacity-80 transition-all hover:scale-110 relative group"
+              >
+                <div className="relative">
+                  <Award className="w-6 h-6 mx-auto text-primary animate-pulse" />
+                  {badges.filter(b => b.earned).length > 0 && (
+                    <div className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                      {badges.filter(b => b.earned).length}
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Badge</p>
+              </button>
+            )}
           </div>
 
           {!isOwnProfile && (
@@ -640,6 +699,9 @@ const UserProfile = () => {
         open={settingsSheetOpen}
         onOpenChange={setSettingsSheetOpen}
       />
+
+      {/* Badge Animation */}
+      <BadgeAnimation badge={newBadge} onClose={() => setNewBadge(null)} />
     </div>
   );
 };

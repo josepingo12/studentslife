@@ -16,6 +16,7 @@ import Social from "./pages/Social";
 import Chats from "./pages/Chats";
 import ChatConversation from "./pages/ChatConversation";
 import UserProfile from "./pages/UserProfile";
+import Badges from "./pages/Badges";
 
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminSetup from "./pages/AdminSetup";
@@ -96,7 +97,15 @@ const App = () => (
             } 
           />
           <Route 
-            path="/admin" 
+            path="/badges" 
+            element={
+              <ProtectedRoute>
+                <Badges />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin"
             element={
               <ProtectedRoute requireRole="admin">
                 <AdminDashboard />
