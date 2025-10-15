@@ -62,28 +62,11 @@ const Login = () => {
           .eq("id", data.user.id)
           .maybeSingle();
 
-        // Check if account is approved
         if (profile?.account_status !== "approved") {
-          await supabase.auth.signOut();
-          
-          let errorTitle = t("auth.accountNotApproved");
-          let errorMessage = t("auth.accountNotApprovedMessage");
-          
-          if (profile?.account_status === "rejected") {
-            errorTitle = t("auth.accountRejected");
-            errorMessage = t("auth.accountRejectedMessage");
-          } else if (profile?.account_status === "blocked") {
-            errorTitle = t("auth.accountBlocked");
-            errorMessage = t("auth.accountBlockedMessage");
-          }
-          
-          toast({
-            title: errorTitle,
-            description: errorMessage,
-            variant: "destructive",
-            duration: 8000,
-          });
-          return;
+        await supabase.auth.signOut();
+        // Redirect alla pagina di attesa invece del toast
+        navigate("/pending-approval");
+        return;
         }
 
         // Get user role to redirect appropriately

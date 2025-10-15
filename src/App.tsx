@@ -17,7 +17,7 @@ import Chats from "./pages/Chats";
 import ChatConversation from "./pages/ChatConversation";
 import UserProfile from "./pages/UserProfile";
 import Badges from "./pages/Badges";
-
+import PendingApproval from "./pages/PendingApproval";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminSetup from "./pages/AdminSetup";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -38,7 +38,7 @@ const App = () => (
           <Route path="/register-partner" element={<RegisterPartner />} />
           <Route path="/login" element={<Login />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          
+          <Route path="/pending-approval" element={<PendingApproval />} />
           {/* Protected Routes */}
           <Route 
             path="/client-dashboard" 
