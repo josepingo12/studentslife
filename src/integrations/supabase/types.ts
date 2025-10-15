@@ -32,6 +32,42 @@ export type Database = {
         }
         Relationships: []
       }
+      badges: {
+        Row: {
+          badge_type: Database["public"]["Enums"]["badge_type"]
+          color: string
+          created_at: string | null
+          description: string
+          icon: string
+          id: string
+          name: string
+          threshold: number
+          user_type: Database["public"]["Enums"]["badge_user_type"]
+        }
+        Insert: {
+          badge_type: Database["public"]["Enums"]["badge_type"]
+          color: string
+          created_at?: string | null
+          description: string
+          icon: string
+          id?: string
+          name: string
+          threshold: number
+          user_type?: Database["public"]["Enums"]["badge_user_type"]
+        }
+        Update: {
+          badge_type?: Database["public"]["Enums"]["badge_type"]
+          color?: string
+          created_at?: string | null
+          description?: string
+          icon?: string
+          id?: string
+          name?: string
+          threshold?: number
+          user_type?: Database["public"]["Enums"]["badge_user_type"]
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string | null
@@ -842,6 +878,38 @@ export type Database = {
           },
         ]
       }
+      user_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string | null
+          id: string
+          seen: boolean | null
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string | null
+          id?: string
+          seen?: boolean | null
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string | null
+          id?: string
+          seen?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -859,6 +927,42 @@ export type Database = {
           created_at?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_stats: {
+        Row: {
+          id: string
+          total_accesses: number | null
+          total_events_created: number | null
+          total_likes: number | null
+          total_posts: number | null
+          total_qr_downloaded: number | null
+          total_qr_scanned: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          total_accesses?: number | null
+          total_events_created?: number | null
+          total_likes?: number | null
+          total_posts?: number | null
+          total_qr_downloaded?: number | null
+          total_qr_scanned?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          total_accesses?: number | null
+          total_events_created?: number | null
+          total_likes?: number | null
+          total_posts?: number | null
+          total_qr_downloaded?: number | null
+          total_qr_scanned?: number | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -917,6 +1021,14 @@ export type Database = {
     }
     Enums: {
       app_role: "client" | "partner" | "admin"
+      badge_type:
+        | "access"
+        | "likes"
+        | "qr_downloaded"
+        | "posts"
+        | "qr_scanned"
+        | "events_created"
+      badge_user_type: "client" | "partner" | "both"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1045,6 +1157,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["client", "partner", "admin"],
+      badge_type: [
+        "access",
+        "likes",
+        "qr_downloaded",
+        "posts",
+        "qr_scanned",
+        "events_created",
+      ],
+      badge_user_type: ["client", "partner", "both"],
     },
   },
 } as const
