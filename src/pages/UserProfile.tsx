@@ -489,22 +489,7 @@ const UserProfile = () => {
               <p className="text-xl font-bold">{totalViews}</p>
               <p className="text-xs text-muted-foreground">{t('profile.views')}</p>
             </div>
-            {isOwnProfile && (
-              <button 
-                onClick={() => navigate('/badges')}
-                className="text-center hover:opacity-80 transition-all hover:scale-110 relative group"
-              >
-                <div className="relative">
-                  <Award className="w-6 h-6 mx-auto text-primary animate-pulse" />
-                  {badges.filter(b => b.earned).length > 0 && (
-                    <div className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
-                      {badges.filter(b => b.earned).length}
-                    </div>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">Badge</p>
-              </button>
-            )}
+
           </div>
 
           {!isOwnProfile && (

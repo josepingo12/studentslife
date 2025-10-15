@@ -12,11 +12,7 @@ const Badges = () => {
   const { user, userRole } = useAuth();
   const { badges, newBadge, setNewBadge, loading } = useBadges(user?.id, userRole);
 
-  useEffect(() => {
-    if (!user) {
-      navigate("/login");
-    }
-  }, [user, navigate]);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
