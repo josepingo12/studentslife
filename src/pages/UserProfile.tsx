@@ -399,7 +399,23 @@ const UserProfile = () => {
             onChange={handleAvatarUpload}
           />
 
-          <h2 className="text-2xl font-bold mb-1">{getDisplayName()}</h2>
+          <div className="flex items-center justify-center gap-3">
+            <h2 className="text-2xl font-bold">{getDisplayName()}</h2>
+            {isOwnProfile && (
+              <button
+                onClick={() => navigate('/badges')}
+                className="relative group animate-pulse hover:animate-none"
+                title="I tuoi badge"
+              >
+                <Award className="w-7 h-7 text-primary drop-shadow-lg" />
+                {badges.filter(b => b.earned).length > 0 && (
+                  <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-lg animate-bounce">
+                    {badges.filter(b => b.earned).length}
+                  </div>
+                )}
+              </button>
+            )}
+          </div>
           
           {profile?.university && (
             <p className="text-sm text-muted-foreground mb-2">{profile.university}</p>
