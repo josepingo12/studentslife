@@ -16,7 +16,7 @@ export type Database = {
     Tables: {
       access_logs: {
         Row: {
-          accessed_at: string | nullprofiles: {
+          accessed_at: string | null
           id: string
           user_id: string
         }
@@ -550,7 +550,7 @@ export type Database = {
           business_description: string | null
           business_name: string | null
           business_phone: string | null
-          contact_email: string | null      // ← AGGIUNGI QUESTO
+          contact_email: string | null
           country: string | null
           cover_image_url: string | null
           created_at: string | null
@@ -558,10 +558,10 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
-          last_payment_amount: number | null // ← AGGIUNGI QUESTO
-          last_payment_date: string | null   // ← AGGIUNGI QUESTO
+          last_payment_amount: number | null
+          last_payment_date: string | null
           phone: string | null
-          phone_number: string | null        // ← AGGIUNGI QUESTO
+          phone_number: string | null
           profile_image_url: string | null
           university: string | null
           updated_at: string | null
@@ -574,7 +574,7 @@ export type Database = {
           business_description?: string | null
           business_name?: string | null
           business_phone?: string | null
-          contact_email?: string | null      // ← AGGIUNGI QUESTO
+          contact_email?: string | null
           country?: string | null
           cover_image_url?: string | null
           created_at?: string | null
@@ -582,10 +582,10 @@ export type Database = {
           first_name?: string | null
           id: string
           last_name?: string | null
-          last_payment_amount?: number | null // ← AGGIUNGI QUESTO
-          last_payment_date?: string | null   // ← AGGIUNGI QUESTO
+          last_payment_amount?: number | null
+          last_payment_date?: string | null
           phone?: string | null
-          phone_number?: string | null        // ← AGGIUNGI QUESTO
+          phone_number?: string | null
           profile_image_url?: string | null
           university?: string | null
           updated_at?: string | null
@@ -598,7 +598,7 @@ export type Database = {
           business_description?: string | null
           business_name?: string | null
           business_phone?: string | null
-          contact_email?: string | null      // ← AGGIUNGI QUESTO
+          contact_email?: string | null
           country?: string | null
           cover_image_url?: string | null
           created_at?: string | null
@@ -606,17 +606,16 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
-          last_payment_amount?: number | null // ← AGGIUNGI QUESTO
-          last_payment_date?: string | null   // ← AGGIUNGI QUESTO
+          last_payment_amount?: number | null
+          last_payment_date?: string | null
           phone?: string | null
-          phone_number?: string | null        // ← AGGIUNGI QUESTO
+          phone_number?: string | null
           profile_image_url?: string | null
           university?: string | null
           updated_at?: string | null
         }
         Relationships: []
       }
-
       qr_codes: {
         Row: {
           client_id: string
@@ -1008,10 +1007,7 @@ export type Database = {
       }
     }
     Functions: {
-      generate_qr_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generate_qr_code: { Args: never; Returns: string }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -1027,10 +1023,7 @@ export type Database = {
         Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
       }
-      set_admin_by_email: {
-        Args: { _email: string }
-        Returns: undefined
-      }
+      set_admin_by_email: { Args: { _email: string }; Returns: undefined }
     }
     Enums: {
       app_role: "client" | "partner" | "admin"
