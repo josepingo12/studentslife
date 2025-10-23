@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Check, X, Ban, Users, Briefcase, Phone, Mail, Euro, CalendarIcon, Edit, Trash2 } from "lucide-react";
+import { Check, X, Ban, Users, Briefcase, Phone, Mail, Euro, CalendarIcon, Edit, Trash2, Search } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select,
   SelectContent,
@@ -25,6 +26,7 @@ interface Profile {
   first_name: string | null;
   last_name: string | null;
   business_name: string | null;
+  profile_image_url: string | null;
   account_status: string;
   contact_email: string | null;
   phone_number: string | null;
@@ -36,7 +38,9 @@ interface Profile {
 
 const UsersManagement = () => {
   const [users, setUsers] = useState<Profile[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<Profile[]>([]);
   const [filter, setFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
@@ -50,6 +54,25 @@ const UsersManagement = () => {
   useEffect(() => {
     fetchUsers();
   }, [filter]);
+
+  useEffect(() => {
+    filterUsers();
+  }, [users, searchQuery]);
+
+  const filterUsers = () => {
+    let filtered = users;
+    
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = users.filter(user => 
+        user.email.toLowerCase().includes(query) ||
+        user.business_name?.toLowerCase().includes(query) ||
+        `${user.first_name} ${user.last_name}`.toLowerCase().includes(query)
+      );
+    }
+    
+    setFilteredUsers(filtered);
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -229,30 +252,51 @@ const UsersManagement = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold">Gestione Utenti</h2>
-        <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filtra per tipo" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tutti gli utenti</SelectItem>
-            <SelectItem value="partner">Solo Partner</SelectItem>
-            <SelectItem value="client">Solo Clienti</SelectItem>
-          </SelectContent>
-        </Select>
+        
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 sm:min-w-[300px]">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Cerca per nome, email o attività..."
+              className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="Filtra per tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tutti gli utenti</SelectItem>
+              <SelectItem value="partner">Solo Partner</SelectItem>
+              <SelectItem value="client">Solo Clienti</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="grid gap-4">
-        {users.map((user) => (
+        {filteredUsers.map((user) => (
           <Card key={user.id}>
             <CardHeader>
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <CardTitle className="text-lg">
-                    {user.business_name || `${user.first_name} ${user.last_name}` || user.email}
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
+              <div className="flex justify-between items-start gap-4">
+                <div className="flex items-start gap-3 flex-1">
+                  <Avatar className="h-12 w-12 border-2 border-primary/20">
+                    <AvatarImage src={user.profile_image_url || undefined} />
+                    <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                      {user.business_name?.[0] || user.first_name?.[0] || user.email[0].toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div className="flex-1">
+                    <CardTitle className="text-lg">
+                      {user.business_name || `${user.first_name} ${user.last_name}` || user.email}
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
 
                   {/* Informazioni di contatto e pagamento */}
                   <div className="mt-3 space-y-2">
@@ -301,6 +345,7 @@ const UsersManagement = () => {
                         )}
                       </div>
                     )}
+                  </div>
                   </div>
                 </div>
 
