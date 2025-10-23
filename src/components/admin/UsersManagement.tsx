@@ -28,6 +28,7 @@ interface Profile {
   account_status: string;
   contact_email: string | null;
   phone_number: string | null;
+  phone: string | null;
   last_payment_date: string | null;
   last_payment_amount: number | null;
   user_roles: { role: string }[];
@@ -58,6 +59,7 @@ const UsersManagement = () => {
         .from("profiles")
         .select(`
           *,
+          phone,
           contact_email,
           phone_number,
           last_payment_date,
@@ -131,8 +133,8 @@ const UsersManagement = () => {
   const startEditing = (user: Profile) => {
     setEditingUser(user.id);
     setEditForm({
-      contact_email: user.contact_email || "",
-      phone_number: user.phone_number || "",
+      contact_email: user.contact_email || user.email || "",
+      phone_number: user.phone_number || user.phone || "",
       payment_date: user.last_payment_date ? new Date(user.last_payment_date) : undefined,
       payment_amount: user.last_payment_amount?.toString() || "",
     });
@@ -229,15 +231,36 @@ const UsersManagement = () => {
 
                   {/* Informazioni di contatto e pagamento */}
                   <div className="mt-3 space-y-2">
-                    <div className="flex items-center gap-4 text-sm">
-                      <div className="flex items-center gap-1">
-                        <Mail className="h-3 w-3" />
-                        <span>{user.contact_email || "Non inserita"}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Phone className="h-3 w-3" />
-                        <span>{user.phone_number || "Non inserito"}</span>
-                      </div>
+                    <div className="flex items-center gap-4 text-sm flex-wrap">
+                      {(user.contact_email || user.email) && (
+                        <a 
+                          href={`mailto:${user.contact_email || user.email}`}
+                          className="flex items-center gap-1 hover:text-primary transition-colors"
+                        >
+                          <Mail className="h-3 w-3" />
+                          <span className="underline">{user.contact_email || user.email}</span>
+                        </a>
+                      )}
+                      
+                      {(user.phone_number || user.phone) && (
+                        <div className="flex items-center gap-2">
+                          <a 
+                            href={`tel:${user.phone_number || user.phone}`}
+                            className="flex items-center gap-1 hover:text-primary transition-colors"
+                          >
+                            <Phone className="h-3 w-3" />
+                            <span className="underline">{user.phone_number || user.phone}</span>
+                          </a>
+                          <a
+                            href={`https://wa.me/${(user.phone_number || user.phone || '').replace(/[^0-9]/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-green-600 hover:text-green-700 transition-colors"
+                          >
+                            WhatsApp
+                          </a>
+                        </div>
+                      )}
                     </div>
 
                     {user.last_payment_date && (
