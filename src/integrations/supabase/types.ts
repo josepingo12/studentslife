@@ -16,7 +16,7 @@ export type Database = {
     Tables: {
       access_logs: {
         Row: {
-          accessed_at: string | null
+          accessed_at: string | nullprofiles: {
           id: string
           user_id: string
         }
@@ -550,6 +550,7 @@ export type Database = {
           business_description: string | null
           business_name: string | null
           business_phone: string | null
+          contact_email: string | null      // ← AGGIUNGI QUESTO
           country: string | null
           cover_image_url: string | null
           created_at: string | null
@@ -557,7 +558,10 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
+          last_payment_amount: number | null // ← AGGIUNGI QUESTO
+          last_payment_date: string | null   // ← AGGIUNGI QUESTO
           phone: string | null
+          phone_number: string | null        // ← AGGIUNGI QUESTO
           profile_image_url: string | null
           university: string | null
           updated_at: string | null
@@ -570,6 +574,7 @@ export type Database = {
           business_description?: string | null
           business_name?: string | null
           business_phone?: string | null
+          contact_email?: string | null      // ← AGGIUNGI QUESTO
           country?: string | null
           cover_image_url?: string | null
           created_at?: string | null
@@ -577,7 +582,10 @@ export type Database = {
           first_name?: string | null
           id: string
           last_name?: string | null
+          last_payment_amount?: number | null // ← AGGIUNGI QUESTO
+          last_payment_date?: string | null   // ← AGGIUNGI QUESTO
           phone?: string | null
+          phone_number?: string | null        // ← AGGIUNGI QUESTO
           profile_image_url?: string | null
           university?: string | null
           updated_at?: string | null
@@ -590,6 +598,7 @@ export type Database = {
           business_description?: string | null
           business_name?: string | null
           business_phone?: string | null
+          contact_email?: string | null      // ← AGGIUNGI QUESTO
           country?: string | null
           cover_image_url?: string | null
           created_at?: string | null
@@ -597,13 +606,17 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          last_payment_amount?: number | null // ← AGGIUNGI QUESTO
+          last_payment_date?: string | null   // ← AGGIUNGI QUESTO
           phone?: string | null
+          phone_number?: string | null        // ← AGGIUNGI QUESTO
           profile_image_url?: string | null
           university?: string | null
           updated_at?: string | null
         }
         Relationships: []
       }
+
       qr_codes: {
         Row: {
           client_id: string
