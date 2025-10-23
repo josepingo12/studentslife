@@ -35,6 +35,7 @@ const RegisterPartner = () => {
     businessName: "",
     businessAddress: "",
     businessCity: "",
+    businessPhone: "",
     businessCategory: "",
   });
 
@@ -128,6 +129,7 @@ const RegisterPartner = () => {
             business_name: formData.businessName,
             business_address: formData.businessAddress,
             business_city: formData.businessCity,
+            business_phone: formData.businessPhone,
             business_category: formData.businessCategory,
           })
           .eq("id", authData.user.id);
@@ -253,6 +255,19 @@ const RegisterPartner = () => {
               className="ios-input"
               value={formData.businessCity}
               onChange={(e) => setFormData({ ...formData, businessCity: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="businessPhone">Telefono Aziendale *</Label>
+            <Input
+              id="businessPhone"
+              type="tel"
+              required
+              className="ios-input"
+              placeholder="+39 123 456 7890"
+              value={formData.businessPhone}
+              onChange={(e) => setFormData({ ...formData, businessPhone: e.target.value })}
             />
           </div>
 

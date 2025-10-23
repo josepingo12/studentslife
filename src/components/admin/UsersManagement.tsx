@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Check, X, Ban, Users, Briefcase, Phone, Mail, Euro, CalendarIcon, Edit } from "lucide-react";
+import { Check, X, Ban, Users, Briefcase, Phone, Mail, Euro, CalendarIcon, Edit, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -28,7 +28,7 @@ interface Profile {
   account_status: string;
   contact_email: string | null;
   phone_number: string | null;
-  phone: string | null;
+  business_phone: string | null;
   last_payment_date: string | null;
   last_payment_amount: number | null;
   user_roles: { role: string }[];
@@ -59,7 +59,7 @@ const UsersManagement = () => {
         .from("profiles")
         .select(`
           *,
-          phone,
+          business_phone,
           contact_email,
           phone_number,
           last_payment_date,
@@ -130,11 +130,36 @@ const UsersManagement = () => {
     }
   };
 
+  const deleteUser = async (userId: string) => {
+    if (!confirm("Sei sicuro di voler eliminare questo utente? Questa azione è irreversibile.")) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.admin.deleteUser(userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Successo",
+        description: "Utente eliminato con successo",
+      });
+
+      fetchUsers();
+    } catch (error: any) {
+      toast({
+        title: "Errore",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const startEditing = (user: Profile) => {
     setEditingUser(user.id);
     setEditForm({
       contact_email: user.contact_email || user.email || "",
-      phone_number: user.phone_number || user.phone || "",
+      phone_number: user.phone_number || user.business_phone || "",
       payment_date: user.last_payment_date ? new Date(user.last_payment_date) : undefined,
       payment_amount: user.last_payment_amount?.toString() || "",
     });
@@ -242,20 +267,20 @@ const UsersManagement = () => {
                         </a>
                       )}
                       
-                      {(user.phone_number || user.phone) && (
+                      {(user.phone_number || user.business_phone) && (
                         <div className="flex items-center gap-2">
                           <a 
-                            href={`tel:${user.phone_number || user.phone}`}
+                            href={`tel:${user.phone_number || user.business_phone}`}
                             className="flex items-center gap-1 hover:text-primary transition-colors"
                           >
                             <Phone className="h-3 w-3" />
-                            <span className="underline">{user.phone_number || user.phone}</span>
+                            <span className="underline">{user.phone_number || user.business_phone}</span>
                           </a>
                           <a
-                            href={`https://wa.me/${(user.phone_number || user.phone || '').replace(/[^0-9]/g, '')}`}
+                            href={`https://wa.me/${(user.phone_number || user.business_phone || '').replace(/[^0-9]/g, '')}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-green-600 hover:text-green-700 transition-colors"
+                            className="text-green-600 hover:text-green-700 transition-colors text-xs"
                           >
                             WhatsApp
                           </a>
@@ -411,6 +436,15 @@ const UsersManagement = () => {
                     Sblocca
                   </Button>
                 )}
+                
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => deleteUser(user.id)}
+                >
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  Elimina Utente
+                </Button>
               </div>
             </CardContent>
           </Card>
