@@ -321,7 +321,7 @@ const UsersManagement = () => {
                             <span className="underline">{user.phone_number || user.business_phone}</span>
                           </a>
                           <a
-                            href={`https://wa.me/${(user.phone_number || user.business_phone || '').replace(/[^0-9]/g, '')}`}
+                            href={`https://wa.me/+34${(user.phone_number || user.business_phone || '').replace(/[^0-9]/g, '')}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-green-600 hover:text-green-700 transition-colors text-xs"

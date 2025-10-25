@@ -9,6 +9,7 @@ import { Calendar, Percent, Plus, Trash2, BarChart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageUpload from "@/components/shared/ImageUpload";
 import { Switch } from "@/components/ui/switch";
+import { useTranslation } from "react-i18next";
 
 interface PartnerEventsManagerProps {
   partnerId: string;
@@ -16,6 +17,7 @@ interface PartnerEventsManagerProps {
 
 const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
@@ -58,16 +60,16 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
 
     if (error) {
       toast({
-        title: "Errore",
-        description: "Impossibile creare l'evento",
+        title: t("eventManager.error"),
+        description: t("eventManager.cannotCreate"),
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: "Evento creato!",
-      description: "Il tuo evento è ora visibile ai clienti",
+      title: t("eventManager.eventCreated"),
+      description: t("eventManager.eventVisible"),
     });
 
     setShowDialog(false);
@@ -89,15 +91,15 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
 
     if (error) {
       toast({
-        title: "Errore",
-        description: "Impossibile eliminare l'evento",
+        title: t("eventManager.error"),
+        description: t("eventManager.cannotDelete"),
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: "Evento eliminato",
+      title: t("eventManager.eventDeleted"),
     });
 
     fetchEvents();
@@ -109,17 +111,17 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
         <DialogTrigger asChild>
           <Button className="w-full ios-button h-12">
             <Plus className="w-5 h-5 mr-2" />
-            Crea Nuovo Evento
+            {t("eventManager.createNewEvent")}
           </Button>
         </DialogTrigger>
         <DialogContent className="ios-card max-w-md h-[90vh] overflow-y-auto sm:max-h-[90vh] sm:h-auto flex flex-col">
           <DialogHeader className="flex-shrink-0">
-            <DialogTitle>Nuovo Evento</DialogTitle>
+            <DialogTitle>{t("eventManager.newEvent")}</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4 pb-4 overflow-y-auto flex-1">
             <div className="space-y-2">
-              <Label>Titolo *</Label>
+              <Label>{t("eventManager.titleRequired")}</Label>
               <Input
                 required
                 className="ios-input"
@@ -129,7 +131,7 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label>Descrizione</Label>
+              <Label>{t("eventManager.description")}</Label>
               <Textarea
                 className="ios-input"
                 value={formData.description}
@@ -138,7 +140,7 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label>Immagine Evento</Label>
+              <Label>{t("eventManager.eventImage")}</Label>
               <ImageUpload
                 bucket="gallery"
                 userId={partnerId}
@@ -146,12 +148,12 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
                 showPreview
               />
               {formData.image_url && (
-                <p className="text-xs text-muted-foreground">✓ Immagine caricata</p>
+                <p className="text-xs text-muted-foreground">{t("eventManager.imageUploaded")}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label>Link Esterno (es. acquisto biglietti)</Label>
+              <Label>{t("eventManager.externalLink")}</Label>
               <Input
                 type="url"
                 placeholder="https://..."
@@ -162,7 +164,7 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label>Sconto % *</Label>
+              <Label>{t("eventManager.discountRequired")}</Label>
               <Input
                 type="number"
                 required
@@ -176,7 +178,7 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Data Inizio *</Label>
+                <Label>{t("eventManager.startDateRequired")}</Label>
                 <Input
                   type="date"
                   required
@@ -187,7 +189,7 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label>Data Fine *</Label>
+                <Label>{t("eventManager.endDateRequired")}</Label>
                 <Input
                   type="date"
                   required
@@ -200,9 +202,9 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
 
             <div className="ios-card p-4 flex items-center justify-between">
               <Label htmlFor="qr-enabled" className="flex flex-col gap-1">
-                <span className="font-semibold">Abilita QR Code</span>
+                <span className="font-semibold">{t("eventManager.enableQR")}</span>
                 <span className="text-xs text-muted-foreground">
-                  I clienti potranno scaricare un QR code per questo evento
+                  {t("eventManager.qrDescription")}
                 </span>
               </Label>
               <Switch
@@ -213,7 +215,7 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
             </div>
 
             <Button type="submit" className="w-full ios-button">
-              Crea Evento
+              {t("eventManager.createEvent")}
             </Button>
           </form>
         </DialogContent>
@@ -231,7 +233,7 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
       ) : events.length === 0 ? (
         <div className="ios-card p-8 text-center">
           <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-          <p className="text-muted-foreground">Nessun evento creato ancora</p>
+          <p className="text-muted-foreground">{t("eventManager.noEventsYet")}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -273,7 +275,7 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
                 </div>
 
                 <div className="ios-card p-3 mb-3 flex items-center justify-between">
-                  <span className="font-semibold text-sm">QR Code Abilitato</span>
+                  <span className="font-semibold text-sm">{t("eventManager.qrCodeEnabled")}</span>
                   <Switch
                     checked={event.qr_enabled}
                     onCheckedChange={async (checked) => {
@@ -284,13 +286,13 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
 
                       if (error) {
                         toast({
-                          title: "Errore",
-                          description: "Impossibile aggiornare l'evento",
+                          title: t("eventManager.error"),
+                          description: t("eventManager.cannotUpdate"),
                           variant: "destructive",
                         });
                       } else {
                         toast({
-                          title: checked ? "QR Code abilitato" : "QR Code disabilitato",
+                          title: checked ? t("eventManager.qrEnabled") : t("eventManager.qrDisabled"),
                         });
                         fetchEvents();
                       }
@@ -302,7 +304,7 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
                   <div className="ios-card bg-primary/10 p-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <BarChart className="w-5 h-5 text-primary" />
-                      <span className="font-semibold">QR scaricati:</span>
+                      <span className="font-semibold">{t("eventManager.qrDownloaded")}</span>
                     </div>
                     <span className="text-2xl font-bold text-primary">{qrCount}</span>
                   </div>
