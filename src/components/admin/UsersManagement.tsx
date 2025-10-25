@@ -159,9 +159,23 @@ const UsersManagement = () => {
     }
 
     try {
-      const { error } = await supabase.auth.admin.deleteUser(userId);
+      // Get the current session token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error("Sessione non valida");
+      }
+
+      // Call the edge function to delete the user
+      const { data, error } = await supabase.functions.invoke('delete-user', {
+        body: { userId },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
 
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       toast({
         title: "Successo",
