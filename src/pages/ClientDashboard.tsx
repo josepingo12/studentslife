@@ -4,8 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LogOut, Settings, User, Home, Users, MessageCircle, UserCircle, Plus, Search, X, Heart } from "lucide-react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Settings, User, Home, Users, MessageCircle, UserCircle, Plus, Search, X, Heart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import CategoryCarousel from "@/components/client/CategoryCarousel";
 import PartnersList from "@/components/client/PartnersList";
@@ -19,6 +18,7 @@ import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import ChatsList from "@/components/chat/ChatsList";
 import NotificationsSheet from "@/components/social/NotificationsSheet";
+import ClientSettingsSheet from "@/components/client/ClientSettingsSheet";
 import { useTranslation } from "react-i18next";
 
 const ClientDashboard = () => {
@@ -36,6 +36,7 @@ const ClientDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
+  const [settingsSheetOpen, setSettingsSheetOpen] = useState(false);
   const totalUnread = useUnreadMessages(user?.id);
   const unreadNotifications = useUnreadNotifications(user?.id);
   const [userRole, setUserRole] = useState<string>();
@@ -182,15 +183,6 @@ const ClientDashboard = () => {
     return profile.business_name || "Utente";
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    toast({
-      title: t('auth.logout'),
-      description: t('success.loggedOut'),
-    });
-    navigate("/login");
-  };
-
   if (!user || !profile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary flex items-center justify-center">
@@ -207,8 +199,20 @@ const ClientDashboard = () => {
       {/* Content based on active tab */}
       {activeTab === "social" ? (
         <div className="max-w-[470px] mx-auto w-full">
+          {/* Top Bar with Settings */}
+          <div className="flex justify-end px-4 pt-4">
+            <Button
+              onClick={() => setSettingsSheetOpen(true)}
+              variant="ghost"
+              size="icon"
+              className="rounded-full"
+            >
+              <Settings className="w-5 h-5" />
+            </Button>
+          </div>
+
           {/* Search Bar */}
-          <div className="mx-4 mt-4">
+          <div className="mx-4 mt-2">
             <div className="relative ios-card p-3">
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
               <Input
@@ -417,6 +421,12 @@ const ClientDashboard = () => {
             loadPosts();
           }
         }}
+      />
+
+      {/* Settings Sheet */}
+      <ClientSettingsSheet
+        open={settingsSheetOpen}
+        onOpenChange={setSettingsSheetOpen}
       />
 
       {/* Notifications Sheet */}

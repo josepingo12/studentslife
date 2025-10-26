@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,8 +7,18 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Globe, Lock } from "lucide-react";
+import { Globe, Lock, LogOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SettingsSheetProps {
   open: boolean;
@@ -17,11 +28,12 @@ interface SettingsSheetProps {
 const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [language, setLanguage] = useState(i18n.language);
-  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   useEffect(() => {
     setLanguage(i18n.language);
@@ -96,14 +108,22 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
       description: t('success.passwordChanged'),
     });
 
-    setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
-    onOpenChange(false);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: t('auth.logout'),
+      description: t('success.loggedOut'),
+    });
+    navigate("/login");
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <>
+      <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="h-auto max-h-[85vh] rounded-t-3xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t('settings.title')}</SheetTitle>
@@ -175,9 +195,37 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
               </Button>
             </div>
           </div>
+
+          {/* Logout Button */}
+          <div className="pt-4 border-t">
+            <Button
+              onClick={() => setShowLogoutDialog(true)}
+              variant="destructive"
+              className="w-full gap-2"
+            >
+              <LogOut className="w-4 h-4" />
+              {t('auth.logout')}
+            </Button>
+          </div>
         </div>
       </SheetContent>
     </Sheet>
+
+    <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Conferma Logout</AlertDialogTitle>
+          <AlertDialogDescription>
+            Sei sicuro di voler uscire dal tuo account?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Annulla</AlertDialogCancel>
+          <AlertDialogAction onClick={handleLogout}>Logout</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
   );
 };
 
