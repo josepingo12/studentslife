@@ -446,8 +446,8 @@ const ClientDashboard = () => {
         userId={user.id}
       />
 
-      {/* Floating Wallet Button - Only visible in social tab */}
-      {activeTab === "social" && (
+      {/* Floating Wallet Button - Only visible in partners tab */}
+      {activeTab === "partners" && (
         <button
           onClick={() => setWalletSheetOpen(true)}
           className="fixed bottom-24 right-6 h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-xl hover:scale-105 transition-all flex items-center justify-center z-40 border-2 border-white/20"
