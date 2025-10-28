@@ -76,14 +76,19 @@ const WalletSheet = ({ open, onOpenChange, userId }: WalletSheetProps) => {
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl">
-          <SheetHeader>
-            <SheetTitle className="text-center text-2xl font-bold">
-              Il Mio Wallet
-            </SheetTitle>
+        <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl bg-gradient-to-b from-background to-blue-50/30">
+          <SheetHeader className="mb-2">
+            <div className="flex items-center justify-center gap-3">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                <QrCode className="w-6 h-6 text-white" />
+              </div>
+              <SheetTitle className="text-2xl font-bold">
+                Il Mio Wallet
+              </SheetTitle>
+            </div>
           </SheetHeader>
 
-          <div className="mt-6 space-y-4 overflow-y-auto h-[calc(85vh-100px)]">
+          <div className="mt-6 space-y-3 overflow-y-auto h-[calc(85vh-120px)] px-1">
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -101,30 +106,42 @@ const WalletSheet = ({ open, onOpenChange, userId }: WalletSheetProps) => {
                 <button
                   key={qr.id}
                   onClick={() => handleQRClick(qr)}
-                  className="w-full ios-card p-4 flex items-center gap-4 hover:bg-accent transition-colors"
+                  className="w-full bg-card rounded-2xl p-4 flex items-center gap-4 hover:shadow-md transition-all border border-border/50 hover:border-blue-200"
                 >
-                  <Avatar className="h-16 w-16 ring-2 ring-primary/20">
-                    <AvatarImage src={qr.partnerProfile?.profile_image_url} />
-                    <AvatarFallback className="bg-primary text-primary-foreground text-lg">
-                      {qr.partnerProfile?.business_name?.[0] || "P"}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="relative">
+                    <Avatar className="h-16 w-16 ring-2 ring-blue-400/30">
+                      <AvatarImage src={qr.partnerProfile?.profile_image_url} />
+                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-lg font-bold">
+                        {qr.partnerProfile?.business_name?.[0] || "P"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                      <QrCode className="w-3.5 h-3.5 text-white" />
+                    </div>
+                  </div>
 
                   <div className="flex-1 text-left">
-                    <h4 className="font-bold text-lg">{qr.events.title}</h4>
-                    <p className="text-sm text-muted-foreground">
+                    <h4 className="font-bold text-base">{qr.events.title}</h4>
+                    <p className="text-sm text-muted-foreground font-medium">
                       {qr.partnerProfile?.business_name}
                     </p>
-                    <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground">
                       <Calendar className="w-3 h-3" />
                       <span>
                         Valido fino al{" "}
                         {new Date(qr.events.end_date).toLocaleDateString("it-IT")}
                       </span>
                     </div>
+                    {qr.events.discount_percentage && (
+                      <div className="inline-block mt-1.5 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">
+                        -{qr.events.discount_percentage}%
+                      </div>
+                    )}
                   </div>
 
-                  <QrCode className="w-8 h-8 text-primary" />
+                  <div className="text-blue-500">
+                    →
+                  </div>
                 </button>
               ))
             )}

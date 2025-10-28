@@ -446,13 +446,15 @@ const ClientDashboard = () => {
         userId={user.id}
       />
 
-      {/* Floating Wallet Button */}
-      <button
-        onClick={() => setWalletSheetOpen(true)}
-        className="fixed bottom-24 right-6 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-110 transition-transform flex items-center justify-center z-40"
-      >
-        <Wallet className="w-6 h-6" />
-      </button>
+      {/* Floating Wallet Button - Only visible in social tab */}
+      {activeTab === "social" && (
+        <button
+          onClick={() => setWalletSheetOpen(true)}
+          className="fixed bottom-24 right-6 h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-xl hover:scale-105 transition-all flex items-center justify-center z-40 border-2 border-white/20"
+        >
+          <Wallet className="w-7 h-7" />
+        </button>
+      )}
     </div>
   );
 };
