@@ -132,48 +132,29 @@ const QRCodeModal = ({ event, open, onClose }: QRCodeModalProps) => {
           </div>
 
           {/* Download Button */}
-          {!event.qrCode.is_used && (
-            <Button
-              onClick={downloadQRCode}
-              disabled={downloading}
-              className="w-full ios-button h-12"
-            >
-              <Download className="w-5 h-5 mr-2" />
-              {downloading ? t("events.saving") : t("events.saveQRCode")}
-            </Button>
-          )}
+          <Button
+            onClick={downloadQRCode}
+            disabled={downloading}
+            className="w-full ios-button h-12"
+          >
+            <Download className="w-5 h-5 mr-2" />
+            {downloading ? t("events.saving") : t("events.saveQRCode")}
+          </Button>
 
           {/* Status */}
-          <div className={`
-            ios-card p-4 flex items-center gap-3
-            ${event.qrCode.is_used ? "bg-destructive/10" : "bg-primary/10"}
-          `}>
-            {event.qrCode.is_used ? (
-              <>
-                <XCircle className="w-6 h-6 text-destructive" />
-                <div>
-                  <p className="font-semibold text-destructive">{t("events.qrCodeUsed")}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("events.usedOn")} {new Date(event.qrCode.used_at).toLocaleString()}
-                  </p>
-                </div>
-              </>
-            ) : (
-              <>
-                <CheckCircle2 className="w-6 h-6 text-primary" />
-                <div>
-                  <p className="font-semibold text-primary">{t("events.qrCodeValid")}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("events.showToPartner")}
-                  </p>
-                </div>
-              </>
-            )}
+          <div className="ios-card p-4 flex items-center gap-3 bg-primary/10">
+            <CheckCircle2 className="w-6 h-6 text-primary" />
+            <div>
+              <p className="font-semibold text-primary">{t("events.qrCodeValid")}</p>
+              <p className="text-sm text-muted-foreground">
+                Valido fino al {new Date(event.end_date).toLocaleDateString("it-IT")}
+              </p>
+            </div>
           </div>
 
           {/* Event Details */}
           <div className="text-center text-sm text-muted-foreground">
-            <p>{t("events.oneTimeUse")}</p>
+            <p>Mostra questo QR al partner per usufruire dello sconto</p>
           </div>
         </div>
       </DialogContent>

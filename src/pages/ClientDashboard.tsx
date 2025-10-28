@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Settings, User, Home, Users, MessageCircle, UserCircle, Plus, Search, X, Heart } from "lucide-react";
+import { Settings, User, Home, Users, MessageCircle, UserCircle, Plus, Search, X, Heart, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import CategoryCarousel from "@/components/client/CategoryCarousel";
 import PartnersList from "@/components/client/PartnersList";
@@ -19,6 +19,7 @@ import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import ChatsList from "@/components/chat/ChatsList";
 import NotificationsSheet from "@/components/social/NotificationsSheet";
 import ClientSettingsSheet from "@/components/client/ClientSettingsSheet";
+import WalletSheet from "@/components/client/WalletSheet";
 import { useTranslation } from "react-i18next";
 
 const ClientDashboard = () => {
@@ -37,6 +38,7 @@ const ClientDashboard = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
   const [settingsSheetOpen, setSettingsSheetOpen] = useState(false);
+  const [walletSheetOpen, setWalletSheetOpen] = useState(false);
   const totalUnread = useUnreadMessages(user?.id);
   const unreadNotifications = useUnreadNotifications(user?.id);
   const [userRole, setUserRole] = useState<string>();
@@ -436,6 +438,21 @@ const ClientDashboard = () => {
         userId={user.id}
         userRole={userRole}
       />
+
+      {/* Wallet Sheet */}
+      <WalletSheet
+        open={walletSheetOpen}
+        onOpenChange={setWalletSheetOpen}
+        userId={user.id}
+      />
+
+      {/* Floating Wallet Button */}
+      <button
+        onClick={() => setWalletSheetOpen(true)}
+        className="fixed bottom-24 right-6 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-110 transition-transform flex items-center justify-center z-40"
+      >
+        <Wallet className="w-6 h-6" />
+      </button>
     </div>
   );
 };

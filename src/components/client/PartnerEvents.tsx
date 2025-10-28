@@ -51,11 +51,14 @@ const PartnerEvents = ({ partnerId }: PartnerEventsProps) => {
       .select("*")
       .eq("event_id", event.id)
       .eq("client_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (existingQR) {
-      setSelectedEvent({ ...event, qrCode: existingQR });
-      setShowQRModal(true);
+      toast({
+        title: "QR Code già scaricato",
+        description: "Hai già questo QR code nel tuo wallet",
+        variant: "destructive",
+      });
       return;
     }
 
