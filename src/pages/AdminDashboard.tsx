@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LogOut, Users, BarChart3, FolderOpen } from "lucide-react";
+import { LogOut, Users, BarChart3, FolderOpen, UserCircle, MessageCircle } from "lucide-react";
 import UsersManagement from "@/components/admin/UsersManagement";
 import Statistics from "@/components/admin/Statistics";
 import CategoriesManagement from "@/components/admin/CategoriesManagement";
+import AdminProfile from "@/components/admin/AdminProfile";
+import AdminChats from "@/components/admin/AdminChats";
 
 const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -68,7 +70,7 @@ const AdminDashboard = () => {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-5 mb-8">
             <TabsTrigger value="users">
               <Users className="w-4 h-4 mr-2" />
               Utenti
@@ -80,6 +82,14 @@ const AdminDashboard = () => {
             <TabsTrigger value="categories">
               <FolderOpen className="w-4 h-4 mr-2" />
               Categorie
+            </TabsTrigger>
+            <TabsTrigger value="profile">
+              <UserCircle className="w-4 h-4 mr-2" />
+              Profilo
+            </TabsTrigger>
+            <TabsTrigger value="chat">
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Chat
             </TabsTrigger>
           </TabsList>
 
@@ -93,6 +103,14 @@ const AdminDashboard = () => {
 
           <TabsContent value="categories">
             <CategoriesManagement />
+          </TabsContent>
+
+          <TabsContent value="profile">
+            <AdminProfile />
+          </TabsContent>
+
+          <TabsContent value="chat">
+            <AdminChats />
           </TabsContent>
         </Tabs>
       </main>

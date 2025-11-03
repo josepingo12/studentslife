@@ -138,6 +138,33 @@ const UsersManagement = () => {
 
       if (error) throw error;
 
+      // If account is approved, send approval email
+      if (status === "approved") {
+        const user = users.find(u => u.id === userId);
+        if (user && user.email) {
+          const { data: roleData } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", userId)
+            .single();
+
+          const userName = user.first_name || user.business_name || "Usuario";
+          const userType = roleData?.role || "client";
+
+          try {
+            await supabase.functions.invoke("send-approval-email", {
+              body: {
+                user_email: user.email,
+                user_name: userName,
+                user_type: userType,
+              },
+            });
+          } catch (emailError) {
+            console.error("Failed to send approval email:", emailError);
+          }
+        }
+      }
+
       toast({
         title: "Successo",
         description: `Account ${status === "approved" ? "approvato" : status === "blocked" ? "bloccato" : "rifiutato"}`,
