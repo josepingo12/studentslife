@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
+import { Resend } from "https://esm.sh/resend@4.0.0";
 
 const resend = new Resend(Deno.env.get('RESEND_API_KEY') as string);
 
@@ -23,7 +23,7 @@ serve(async (req) => {
     const { user_email, user_name, user_type }: ApprovalEmailRequest = await req.json();
 
     const { error } = await resend.emails.send({
-      from: 'StudentsLife <onboarding@resend.dev>',
+      from: 'StudentsLife <noreply@studentslife.es>',
       to: [user_email],
       subject: '✅ ¡Tu cuenta ha sido aprobada!',
       html: `
@@ -83,7 +83,7 @@ serve(async (req) => {
                   </div>
                   
                   <div style="text-align: center; margin-bottom: 32px;">
-                    <a href="https://studentslife.lovable.app/login" style="display: inline-block; background: linear-gradient(135deg, #4F9CF9 0%, #3B82F6 100%); color: white; text-decoration: none; padding: 18px 48px; border-radius: 14px; font-weight: 700; font-size: 17px; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4); transition: transform 0.2s; letter-spacing: 0.3px;">
+                    <a href="https://studentslife.es/#/login" style="display: inline-block; background: linear-gradient(135deg, #4F9CF9 0%, #3B82F6 100%); color: white; text-decoration: none; padding: 18px 48px; border-radius: 14px; font-weight: 700; font-size: 17px; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4); transition: transform 0.2s; letter-spacing: 0.3px;">
                       Iniciar Sesión Ahora
                     </a>
                   </div>
@@ -140,7 +140,8 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error in send-approval-email function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const err = error as any;
+    return new Response(JSON.stringify({ error: err?.message || String(err) }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

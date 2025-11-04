@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
+import { Resend } from "https://esm.sh/resend@4.0.0";
 
 const resend = new Resend(Deno.env.get('RESEND_API_KEY') as string);
 
@@ -23,7 +23,7 @@ serve(async (req) => {
     const { sender_name, sender_type, message_preview }: NotifyAdminRequest = await req.json();
 
     const { error } = await resend.emails.send({
-      from: 'StudentsLife <onboarding@resend.dev>',
+      from: 'StudentsLife <noreply@studentslife.es>',
       to: ['stud3nts1ife.info@gmail.com'],
       subject: `💬 Nuevo mensaje de ${sender_type}`,
       html: `
@@ -64,7 +64,7 @@ serve(async (req) => {
                   </div>
                   
                   <div style="margin-top: 32px; text-align: center;">
-                    <a href="https://studentslife.lovable.app/admin" style="display: inline-block; background: linear-gradient(135deg, #4F9CF9 0%, #3B82F6 100%); color: white; text-decoration: none; padding: 16px 40px; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); transition: transform 0.2s;">
+                    <a href="https://studentslife.es/#/admin" style="display: inline-block; background: linear-gradient(135deg, #4F9CF9 0%, #3B82F6 100%); color: white; text-decoration: none; padding: 16px 40px; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); transition: transform 0.2s;">
                       Ver en el panel de administración
                     </a>
                   </div>
@@ -99,7 +99,8 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error in notify-admin-message function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const err = error as any;
+    return new Response(JSON.stringify({ error: err?.message || String(err) }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
