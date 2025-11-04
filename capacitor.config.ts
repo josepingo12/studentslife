@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Students Life',
   webDir: 'dist',
   server: {
-    url: 'https://61925b16-9de3-496b-ab30-37d71c46caaf.lovableproject.com?forceHideBadge=true',
+    url: 'https://studentslife.es?forceHideBadge=true',
     cleartext: true
   },
   plugins: {
