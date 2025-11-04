@@ -16,11 +16,11 @@
 **URL:** https://search.google.com/search-console
 
 **Pasos:**
-1. Añade la propiedad: `studentslife.lovable.app`
+1. Añade la propiedad: `studentslife.es`
 2. Verifica la propiedad (método HTML tag ya está en el código)
 3. **Envía el sitemap:** 
    - Ve a "Sitemaps"
-   - Añade: `https://studentslife.lovable.app/sitemap.xml`
+   - Añade: `https://studentslife.es/sitemap.xml`
 4. Solicita indexación de la página principal
 5. Monitorea el rendimiento en "Rendimiento"
 
@@ -40,7 +40,7 @@
 **Pasos:**
 1. Añade el sitio
 2. Importa datos desde Google Search Console
-3. Envía sitemap: `https://studentslife.lovable.app/sitemap.xml`
+3. Envía sitemap: `https://studentslife.es/sitemap.xml`
 
 ### 4. Schema Markup Validator
 **URL:** https://validator.schema.org/
@@ -62,7 +62,7 @@
 **Instagram:**
 - Usuario sugerido: @studentslife_es
 - Bio: "🎓 Descuentos exclusivos para estudiantes | 🎉 Eventos especiales | 🔗 Únete aquí 👇"
-- Link en bio: studentslife.lovable.app
+- Link en bio: studentslife.es
 
 **Facebook:**
 - Página: StudentsLife España
@@ -148,12 +148,12 @@
 - **Mes 3-6:** Top 3 con backlinks de calidad
 - **Mes 6+:** Posición #1 para marca + long-tail keywords
 
-## ⚠️ Importante
+## ✅ Dominio Personalizado
 
-El dominio actual es `.lovable.app`. Para máximo SEO, considera:
-1. **Comprar dominio propio:** studentslife.es o studentslife.com
-2. **Configurarlo en Lovable** (Settings > Domains)
-3. Esto mejorará significativamente la autoridad de dominio
+**Dominio principal:** studentslife.es
+- Ya configurado en el código
+- Asegúrate de que el dominio esté correctamente apuntado en Lovable (Settings > Domains)
+- Verifica que los registros DNS estén configurados correctamente
 
 ---
 

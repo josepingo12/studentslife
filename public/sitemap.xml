@@ -6,46 +6,46 @@
   
   <!-- Página Principal -->
   <url>
-    <loc>https://studentslife.lovable.app/</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://studentslife.es/</loc>
+    <lastmod>2025-11-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <mobile:mobile/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://studentslife.lovable.app/" />
-    <xhtml:link rel="alternate" hreflang="it" href="https://studentslife.lovable.app/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://studentslife.lovable.app/" />
-    <xhtml:link rel="alternate" hreflang="fr" href="https://studentslife.lovable.app/" />
-    <xhtml:link rel="alternate" hreflang="de" href="https://studentslife.lovable.app/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://studentslife.es/" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://studentslife.es/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://studentslife.es/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://studentslife.es/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://studentslife.es/" />
   </url>
 
   <!-- Registro Estudiantes -->
   <url>
-    <loc>https://studentslife.lovable.app/#/register-client</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://studentslife.es/#/register-client</loc>
+    <lastmod>2025-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <mobile:mobile/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://studentslife.lovable.app/#/register-client" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://studentslife.es/#/register-client" />
   </url>
 
   <!-- Registro Partners -->
   <url>
-    <loc>https://studentslife.lovable.app/#/register-partner</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://studentslife.es/#/register-partner</loc>
+    <lastmod>2025-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <mobile:mobile/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://studentslife.lovable.app/#/register-partner" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://studentslife.es/#/register-partner" />
   </url>
 
   <!-- Login -->
   <url>
-    <loc>https://studentslife.lovable.app/#/login</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://studentslife.es/#/login</loc>
+    <lastmod>2025-11-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <mobile:mobile/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://studentslife.lovable.app/#/login" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://studentslife.es/#/login" />
   </url>
 
 </urlset>
