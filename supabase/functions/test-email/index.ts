@@ -23,6 +23,11 @@ async function sendEmailWithFallback(emailData: any) {
       from: 'StudentsLife Test <noreply@studentslife.es>',
     });
     
+    // Controlla se c'è un errore nella risposta
+    if (result.error) {
+      throw result.error;
+    }
+    
     console.log('✅ Email test inviata con successo dal dominio personalizzato:', result);
     return { success: true, result, from: 'studentslife.es', verified: true };
   } catch (error: any) {
@@ -37,6 +42,11 @@ async function sendEmailWithFallback(emailData: any) {
           ...emailData,
           from: 'StudentsLife Test <onboarding@resend.dev>',
         });
+        
+        // Controlla se c'è un errore nella risposta fallback
+        if (fallbackResult.error) {
+          throw fallbackResult.error;
+        }
         
         console.log('✅ Email test inviata con successo via fallback:', fallbackResult);
         return { success: true, result: fallbackResult, from: 'resend.dev (fallback)', verified: false };
