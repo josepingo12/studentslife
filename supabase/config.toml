@@ -1,1 +1,10 @@
 project_id = "fkarwrqwwnssnfioiaau"
+
+[functions.send-approval-email]
+verify_jwt = false
+
+[functions.notify-admin-message]
+verify_jwt = false
+
+[functions.test-email]
+verify_jwt = false

@@ -46,6 +46,8 @@ const Statistics = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<{ id: string; name: string; role: "partner" | "client" } | null>(null);
+  const [testEmailLoading, setTestEmailLoading] = useState(false);
+  const [testEmailResult, setTestEmailResult] = useState<string>("");
 
   useEffect(() => {
     fetchStatistics();
@@ -220,13 +222,62 @@ const Statistics = () => {
     return d.toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" });
   };
 
+  const handleTestEmail = async () => {
+    setTestEmailLoading(true);
+    setTestEmailResult("");
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('test-email', {
+        body: { to_email: 'stud3nts1ife.info@gmail.com' }
+      });
+
+      if (error) {
+        setTestEmailResult(`❌ Errore: ${error.message}`);
+        console.error('Test email error:', error);
+      } else if (data?.success) {
+        setTestEmailResult(data.message || '✅ Email di test inviata con successo!');
+        console.log('Test email result:', data);
+      } else {
+        setTestEmailResult(`❌ ${data?.error || 'Errore sconosciuto'}`);
+      }
+    } catch (err: any) {
+      setTestEmailResult(`❌ Errore: ${err.message}`);
+      console.error('Test email exception:', err);
+    } finally {
+      setTestEmailLoading(false);
+    }
+  };
+
   if (loading) {
     return <div>Caricamento statistiche...</div>;
   }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Statistiche</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 className="text-2xl font-bold">Statistiche</h2>
+        
+        <div className="flex flex-col gap-2 w-full sm:w-auto">
+          <Button 
+            onClick={handleTestEmail}
+            disabled={testEmailLoading}
+            variant="outline"
+            className="w-full sm:w-auto"
+          >
+            {testEmailLoading ? "Invio in corso..." : "🧪 Testa Email"}
+          </Button>
+          
+          {testEmailResult && (
+            <div className={`text-sm p-3 rounded-lg ${
+              testEmailResult.includes('✅') 
+                ? 'bg-green-50 text-green-800 border border-green-200' 
+                : 'bg-red-50 text-red-800 border border-red-200'
+            }`}>
+              {testEmailResult}
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card>
