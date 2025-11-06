@@ -122,6 +122,29 @@ const RegisterClient = () => {
           throw roleError;
         }
 
+        // Invia notifica all'admin
+        try {
+          const { error: notifyError } = await supabase.functions.invoke('notify-new-registration', {
+            body: {
+              userEmail: formData.email,
+              userType: 'client',
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              university: formData.university,
+            }
+          });
+          
+          if (notifyError) {
+            console.error('Errore invio notifica admin:', notifyError);
+            // Non blocchiamo la registrazione se la notifica fallisce
+          } else {
+            console.log('✅ Notifica admin inviata con successo');
+          }
+        } catch (notifyError) {
+          console.error('Errore invio notifica admin:', notifyError);
+          // Non blocchiamo la registrazione se la notifica fallisce
+        }
+
         // Sign out immediately after registration
         await supabase.auth.signOut();
 

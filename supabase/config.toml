@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.test-email]
 verify_jwt = false
+
+[functions.notify-new-registration]
+verify_jwt = false
