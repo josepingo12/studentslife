@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useWebNotifications } from "@/hooks/useWebNotifications";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +43,9 @@ const ClientDashboard = () => {
   const totalUnread = useUnreadMessages(user?.id);
   const unreadNotifications = useUnreadNotifications(user?.id);
   const [userRole, setUserRole] = useState<string>();
+
+  // Abilita notifiche web
+  useWebNotifications({ userId: user?.id });
 
   useEffect(() => {
     checkAuth();

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useWebNotifications } from "@/hooks/useWebNotifications";
 import { Input } from "@/components/ui/input";
 import { Search, Users, Home, MessageCircle, UserCircle, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +23,9 @@ const Chats = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
   const totalUnread = useUnreadMessages(user?.id);
+
+  // Abilita notifiche web
+  useWebNotifications({ userId: user?.id });
 
   useEffect(() => {
     checkAuth();

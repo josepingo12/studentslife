@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useWebNotifications } from "@/hooks/useWebNotifications";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,12 @@ const ChatConversation = () => {
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Abilita notifiche web per questa conversazione
+  useWebNotifications({ 
+    userId: user?.id, 
+    currentConversationId: conversationId 
+  });
 
   useEffect(() => {
     checkAuth();

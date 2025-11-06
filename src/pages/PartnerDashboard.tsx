@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useWebNotifications } from "@/hooks/useWebNotifications";
 import { Button } from "@/components/ui/button";
 import { Home, QrCode, BarChart3, UserCircle, Users, Plus, Calendar, Image as ImageIcon, MessageCircle, ArrowLeftRight, Settings, Heart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -37,6 +38,9 @@ const PartnerDashboard = () => {
   const totalUnread = useUnreadMessages(user?.id);
   const unreadNotifications = useUnreadNotifications(user?.id);
   const [userRole, setUserRole] = useState<string>();
+
+  // Abilita notifiche web
+  useWebNotifications({ userId: user?.id });
 
   useEffect(() => {
     checkAuth();
