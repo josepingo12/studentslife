@@ -2,16 +2,16 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+'Access-Control-Allow-Origin': '*',
+'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 interface NotificationPayload {
-  recipientUserId: string;
-  senderName: string;
-  messageContent: string;
-  conversationId: string;
-  senderId: string;
+recipientUserId: string;
+senderName: string;
+messageContent: string;
+conversationId: string;
+senderId: string;
 }
 
 // Helper function to convert base64url to base64
@@ -178,11 +178,12 @@ serve(async (req) => {
       );
     }
 
+    console.log('Using FCM token from DB for user', recipientUserId, ':', userDevice.fcm_token); // <-- LOG AGGIUNTO QUI
     console.log('✅ FCM token found for platform:', userDevice.platform);
 
     // Prepare FCM message
-    const truncatedMessage = messageContent.length > 100 
-      ? messageContent.substring(0, 97) + '...' 
+    const truncatedMessage = messageContent.length > 100
+      ? messageContent.substring(0, 97) + '...'
       : messageContent;
 
     const fcmMessage = {
@@ -225,9 +226,9 @@ serve(async (req) => {
 
     // Send notification using FCM HTTP v1 API
     const fcmUrl = `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`;
-    
+
     console.log('📤 Sending FCM notification...');
-    
+
     const fcmResponse = await fetch(fcmUrl, {
       method: 'POST',
       headers: {
@@ -241,7 +242,7 @@ serve(async (req) => {
       const errorText = await fcmResponse.text();
       console.error('❌ FCM API error:', errorText);
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: 'Failed to send FCM notification',
           details: errorText,
           status: fcmResponse.status
@@ -254,8 +255,8 @@ serve(async (req) => {
     console.log('✅ FCM notification sent successfully:', fcmResult);
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         message: 'Notification sent successfully',
         fcmMessageId: fcmResult.name,
         recipientUserId,

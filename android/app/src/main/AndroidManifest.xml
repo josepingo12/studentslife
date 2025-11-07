@@ -5,7 +5,13 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/> <!-- Questo è il permesso corretto per Android 13+ -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/> <!-- Necessario per Android 13+ -->
+    <uses-permission android:name="android.permission.VIBRATE" /> <!-- Utile per le notifiche con vibrazione -->
+    <!-- Se la tua app ha bisogno di Wake Lock per i servizi in background relativi alle notifiche (meno comune per FCM standard) -->
+    <!-- <uses-permission android:name="android.permission.WAKE_LOCK" /> -->
+
+    <!-- Le 'queries' e i permessi specifici di Firebase C2DM sono già gestiti dalle dipendenze, non serve ridichiararli qui -->
+    <!-- Anche la permission con protectionLevel="signature" è gestita dalle librerie -->
 
     <application
         android:allowBackup="true"
@@ -31,7 +37,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Intent-filter per gestire l'apertura da notifica push -->
+            <!-- Intent-filter per gestire l'apertura dell'app da una notifica push -->
             <!-- Questo permette all'app di ricevere dati dalla notifica quando viene cliccata -->
             <intent-filter>
                 <action android:name="FCM_MESSAGE_CLICK" />
@@ -51,7 +57,7 @@
         </provider>
 
         <!-- Meta-data per la configurazione delle notifiche Firebase -->
-        <!-- Questi valori predefiniti saranno usati per le notifiche generate da FCM -->
+        <!-- Questi valori predefiniti saranno usati da FCM per le notifiche di sistema -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/ic_launcher" /> <!-- L'icona della tua app -->
@@ -60,17 +66,12 @@
             android:resource="@color/ic_launcher_background" /> <!-- Assicurati che questo colore esista in res/values/colors.xml -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="fcm_default_channel" /> <!-- ID del canale di notifica predefinito -->
+            android:value="chat_messages" /> <!-- ID del canale di notifica predefinito, DEVE corrispondere al channelId nella tua Edge Function -->
 
-        <!-- Dichiarazione del servizio Firebase Messaging (gestito dal plugin Capacitor) -->
-        <!-- Questo servizio riceve i messaggi FCM -->
-        <service
-            android:name="com.getcapacitor.community.firebase.messaging.FirebaseMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
+        <!-- RIMUOVI COMPLETAMENTE QUALSIASI TAG <service> PER FCM CHE HAI AGGIUNTO MANUALMENTE QUI -->
+        <!-- I servizi FCM (come com.capacitorjs.plugins.pushnotifications.MessagingService o com.google.firebase.messaging.FirebaseMessagingService) -->
+        <!-- Vengono aggiunti automaticamente dalle dipendenze di Gradle e dalla fusione dei manifest. -->
+        <!-- Aggiungerli manualmente qui causa duplicazioni e crash. -->
 
     </application>
 

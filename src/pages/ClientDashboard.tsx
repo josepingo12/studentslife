@@ -1,3 +1,5 @@
+// File: ClientDashboard.tsx
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,8 +25,10 @@ import ClientSettingsSheet from "@/components/client/ClientSettingsSheet";
 import WalletSheet from "@/components/client/WalletSheet";
 import { useTranslation } from "react-i18next";
 import { MapPin } from "lucide-react";
-import NotificationsSheet from "@/components/social/NotificationsSheet";
-import { PushNotifications } from '@capacitor/push-notifications';
+// Rimuovi questi import se non usati per altro
+// import { PushNotifications } from '@capacitor/push-notifications';
+// import { useFCMTokenRegistration } from '@hooks/useFCMTokenRegistration';
+
 
 const ClientDashboard = () => {
   const navigate = useNavigate();
@@ -46,10 +50,14 @@ const ClientDashboard = () => {
   const totalUnread = useUnreadMessages(user?.id);
   const unreadNotifications = useUnreadNotifications(user?.id);
   const [userRole, setUserRole] = useState<string>();
-  const [fcmToken, setFcmToken] = useState<string | null>(null); // Stato per il token FCM
+  // Rimuovi questo stato, non è più necessario qui
+  // const [fcmToken, setFcmToken] = useState<string | null>(null);
 
-  // Abilita notifiche web
+  // Abilita notifiche web (se non è una piattaforma nativa)
   useWebNotifications({ userId: user?.id });
+
+  // Rimuovi la chiamata a useFCMTokenRegistration
+  // useFCMTokenRegistration(user?.id, fcmToken);
 
   const markAllNotificationsAsRead = async () => {
     if (!user?.id) return;
@@ -67,90 +75,8 @@ const ClientDashboard = () => {
     }
   };
 
-  // NUOVA LOGICA PER LE NOTIFICHE PUSH
-  useEffect(() => {
-    const initializePushNotifications = async () => {
-      if (!user?.id) return; // Assicurati che l'utente sia loggato
-
-      try {
-        // 1. Richiedi i permessi per le notifiche
-        let permStatus = await PushNotifications.requestPermissions();
-        console.log(`Notifiche permessi: ${permStatus.receive}`);
-
-        if (permStatus.receive === 'prompt' || permStatus.receive === 'denied') {
-          console.warn('Permessi di notifica non concessi.');
-          return;
-        }
-
-        // 2. Registra l'app per ricevere le notifiche
-        await PushNotifications.register();
-
-        // 3. Ottieni il token FCM
-        PushNotifications.addListener('registration', async (token) => {
-          console.log('Push registration success, token:', token.value);
-          setFcmToken(token.value);
-          // Salva il token FCM nel tuo database (Supabase)
-          await saveFcmTokenToDatabase(user.id, token.value);
-        });
-
-        PushNotifications.addListener('registrationError', (error) => {
-          console.error('Error on registration:', error);
-        });
-
-        // 4. Configura i listener per i messaggi in arrivo (app in foreground)
-        PushNotifications.addListener('pushNotificationReceived', (notification) => {
-          console.log('Push notification received (foreground):', notification);
-          // Qui puoi aggiornare la UI della chat in tempo reale (se l'utente è nella chat)
-          // o mostrare una notifica in-app personalizzata.
-          // Il plugin mostrerà automaticamente una notifica di sistema se il payload include 'notification'.
-        });
-
-        // 5. Configura i listener per l'azione sulla notifica (utente clicca sulla notifica)
-        PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
-          console.log('Push notification action performed', action);
-          // 'action.notification.data' conterrà i dati inviati dal backend.
-          const conversationId = action.notification.data?.conversationId;
-          if (conversationId) {
-            navigate(`/chat/${conversationId}`);
-          }
-        });
-
-      } catch (error) {
-        console.error('Errore nell\'inizializzazione delle notifiche push:', error);
-      }
-    };
-
-    // Chiama la funzione di inizializzazione quando l'utente è disponibile
-    if (user) {
-      initializePushNotifications();
-    }
-
-    // Cleanup: rimuovi i listener quando il componente si smonta
-    return () => {
-      PushNotifications.removeAllListeners();
-    };
-
-  }, [user, navigate]); // Aggiungi 'user' e 'navigate' alle dipendenze dell'useEffect
-
-  // Funzione per salvare il token FCM nel database (Supabase)
-  const saveFcmTokenToDatabase = async (userId: string, token: string) => {
-    try {
-      const { error } = await supabase
-        .from('user_fcm_tokens') // Assicurati che questa sia la tua tabella per i token FCM
-        .upsert(
-          { user_id: userId, fcm_token: token, platform: 'android' },
-          { onConflict: ['user_id', 'platform'] } // Aggiorna se esiste già un token per questo utente/piattaforma
-        );
-
-      if (error) {
-        console.error('Errore nel salvare il token FCM:', error);
-      } else {
-        console.log('Token FCM salvato/aggiornato nel database per utente:', userId);
-      }
-    } catch (error) {
-      console.error('Errore durante l\'operazione di upsert del token FCM:', error);
-    }
-  };
+  // --- RIMUOVI COMPLETAMENTE QUALSIASI BLOCCO useEffect CHE INIZIALIZZA LE NOTIFICHE PUSH ---
+  // --- E ANCHE LA FUNZIONE `saveFcmTokenToDatabase` SE PRESENTE QUI ---
 
 
   useEffect(() => {

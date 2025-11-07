@@ -5,50 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="efedd8c5-21e2-416a-8cc8-6981de5d5c67" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/android/app/src/main/ic_launcher-playstore.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-hdpi/ic_launcher.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-mdpi/ic_launcher.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xhdpi/ic_launcher.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/google-services.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/server.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/social/UserVideoFeed.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/social/VideoFeed.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/social/VideoViewer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/capacitor.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/capacitor.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/chat/ChatsList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/chat/ChatsList.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/chat/UserListItem.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/chat/UserListItem.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/client/PartnerCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/client/PartnerCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/client/RecentPartners.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/client/RecentPartners.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/shared/UploadSheet.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/shared/UploadSheet.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/social/CreatePost.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/social/CreatePost.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/social/CreateStoryDialog.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/social/CreateStoryDialog.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/social/LikesSheet.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/social/LikesSheet.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/social/PostCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/social/PostCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/social/StoryViewer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/social/StoryViewer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/Chats.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Chats.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/ClientDashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/ClientDashboard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/PartnerDashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/PartnerDashboard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/Social.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Social.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/UserProfile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/UserProfile.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
