@@ -22,6 +22,9 @@ import NotificationsSheet from "@/components/social/NotificationsSheet";
 import ClientSettingsSheet from "@/components/client/ClientSettingsSheet";
 import WalletSheet from "@/components/client/WalletSheet";
 import { useTranslation } from "react-i18next";
+import { MapPin } from "lucide-react";
+import NotificationsSheet from "@/components/social/NotificationsSheet";
+import { PushNotifications } from '@capacitor/push-notifications';
 
 const ClientDashboard = () => {
   const navigate = useNavigate();
@@ -43,9 +46,112 @@ const ClientDashboard = () => {
   const totalUnread = useUnreadMessages(user?.id);
   const unreadNotifications = useUnreadNotifications(user?.id);
   const [userRole, setUserRole] = useState<string>();
+  const [fcmToken, setFcmToken] = useState<string | null>(null); // Stato per il token FCM
 
   // Abilita notifiche web
   useWebNotifications({ userId: user?.id });
+
+  const markAllNotificationsAsRead = async () => {
+    if (!user?.id) return;
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('recipient_id', user.id)
+        .eq('is_read', false);
+
+      if (error) throw error;
+      console.log('Tutte le notifiche marcate come lette.');
+    } catch (error) {
+      console.error('Errore nel marcare le notifiche come lette:', error);
+    }
+  };
+
+  // NUOVA LOGICA PER LE NOTIFICHE PUSH
+  useEffect(() => {
+    const initializePushNotifications = async () => {
+      if (!user?.id) return; // Assicurati che l'utente sia loggato
+
+      try {
+        // 1. Richiedi i permessi per le notifiche
+        let permStatus = await PushNotifications.requestPermissions();
+        console.log(`Notifiche permessi: ${permStatus.receive}`);
+
+        if (permStatus.receive === 'prompt' || permStatus.receive === 'denied') {
+          console.warn('Permessi di notifica non concessi.');
+          return;
+        }
+
+        // 2. Registra l'app per ricevere le notifiche
+        await PushNotifications.register();
+
+        // 3. Ottieni il token FCM
+        PushNotifications.addListener('registration', async (token) => {
+          console.log('Push registration success, token:', token.value);
+          setFcmToken(token.value);
+          // Salva il token FCM nel tuo database (Supabase)
+          await saveFcmTokenToDatabase(user.id, token.value);
+        });
+
+        PushNotifications.addListener('registrationError', (error) => {
+          console.error('Error on registration:', error);
+        });
+
+        // 4. Configura i listener per i messaggi in arrivo (app in foreground)
+        PushNotifications.addListener('pushNotificationReceived', (notification) => {
+          console.log('Push notification received (foreground):', notification);
+          // Qui puoi aggiornare la UI della chat in tempo reale (se l'utente è nella chat)
+          // o mostrare una notifica in-app personalizzata.
+          // Il plugin mostrerà automaticamente una notifica di sistema se il payload include 'notification'.
+        });
+
+        // 5. Configura i listener per l'azione sulla notifica (utente clicca sulla notifica)
+        PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+          console.log('Push notification action performed', action);
+          // 'action.notification.data' conterrà i dati inviati dal backend.
+          const conversationId = action.notification.data?.conversationId;
+          if (conversationId) {
+            navigate(`/chat/${conversationId}`);
+          }
+        });
+
+      } catch (error) {
+        console.error('Errore nell\'inizializzazione delle notifiche push:', error);
+      }
+    };
+
+    // Chiama la funzione di inizializzazione quando l'utente è disponibile
+    if (user) {
+      initializePushNotifications();
+    }
+
+    // Cleanup: rimuovi i listener quando il componente si smonta
+    return () => {
+      PushNotifications.removeAllListeners();
+    };
+
+  }, [user, navigate]); // Aggiungi 'user' e 'navigate' alle dipendenze dell'useEffect
+
+  // Funzione per salvare il token FCM nel database (Supabase)
+  const saveFcmTokenToDatabase = async (userId: string, token: string) => {
+    try {
+      const { error } = await supabase
+        .from('user_fcm_tokens') // Assicurati che questa sia la tua tabella per i token FCM
+        .upsert(
+          { user_id: userId, fcm_token: token, platform: 'android' },
+          { onConflict: ['user_id', 'platform'] } // Aggiorna se esiste già un token per questo utente/piattaforma
+        );
+
+      if (error) {
+        console.error('Errore nel salvare il token FCM:', error);
+      } else {
+        console.log('Token FCM salvato/aggiornato nel database per utente:', userId);
+      }
+    } catch (error) {
+      console.error('Errore durante l\'operazione di upsert del token FCM:', error);
+    }
+  };
+
 
   useEffect(() => {
     checkAuth();
@@ -63,7 +169,7 @@ const ClientDashboard = () => {
           .select("role")
           .eq("user_id", user.id)
           .single();
-        
+
         if (data) {
           setUserRole(data.role);
         }
@@ -95,7 +201,7 @@ const ClientDashboard = () => {
 
   const checkAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     if (!user) {
       navigate("/login");
       return;
@@ -129,11 +235,13 @@ const ClientDashboard = () => {
     setLoadingPosts(true);
     const { data: postsData } = await supabase
       .from("posts")
-      .select(`
+      .select(
+        `
         *,
         public_profiles!posts_user_id_fkey(first_name, last_name, profile_image_url, business_name),
         likes(id, user_id)
-      `)
+        `
+      )
       .order("created_at", { ascending: false });
 
     setPosts(postsData || []);
@@ -153,7 +261,7 @@ const ClientDashboard = () => {
       if (post.id === postId) {
         return {
           ...post,
-          likes: isLiked 
+          likes: isLiked
             ? [...post.likes, { id: 'temp', user_id: user?.id }]
             : post.likes.filter((l: any) => l.user_id !== user?.id)
         };
@@ -164,7 +272,7 @@ const ClientDashboard = () => {
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
-    
+
     if (!query.trim()) {
       setSearchResults([]);
       setSearching(false);
@@ -191,90 +299,113 @@ const ClientDashboard = () => {
 
   if (!user || !profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">{t('common.loading')}</p>
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">{t('common.loading')}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary pb-24">
+    <div className="min-h-screen bg-gray-50 pb-24">
       {/* Content based on active tab */}
       {activeTab === "social" ? (
         <div className="max-w-[470px] mx-auto w-full">
-          {/* Top Bar with Settings */}
-          <div className="flex justify-end px-4 pt-4">
-            <Button
-              onClick={() => setSettingsSheetOpen(true)}
-              variant="ghost"
-              size="icon"
-              className="rounded-full"
-            >
-              <Settings className="w-5 h-5" />
-            </Button>
-          </div>
-
-          {/* Search Bar */}
-          <div className="mx-4 mt-2">
-            <div className="relative ios-card p-3">
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
-              <Input
-                type="text"
-                placeholder={t('common.search')}
-                value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="pl-10 pr-10 border-none bg-transparent focus-visible:ring-0"
-              />
-              {searchQuery && (
+          {/* Header con Menu, Posizione, Avatar e Search Bar Integrata - AZZURRO E MODERNO */}
+          <div className="mx-4 mt-4 mb-2 relative">
+            <div className="bg-blue-500 rounded-3xl px-6 py-4 shadow-lg flex flex-col gap-3">
+              {/* Top row: Menu, Location, Avatar */}
+              <div className="flex items-center justify-between">
+                {/* Menu hamburger a sinistra */}
                 <button
-                  onClick={() => handleSearch("")}
-                  className="absolute right-6 top-1/2 -translate-y-1/2 z-10"
+                  onClick={() => setSettingsSheetOpen(true)}
+                  className="flex flex-col gap-1 p-2 hover:bg-white/10 rounded-lg transition-colors"
                 >
-                  <X className="w-4 h-4 text-muted-foreground" />
+                  <div className="w-6 h-0.5 bg-white rounded-full"></div>
+                  <div className="w-6 h-0.5 bg-white rounded-full"></div>
+                  <div className="w-6 h-0.5 bg-white rounded-full"></div>
                 </button>
-              )}
 
-              {/* Search Results Dropdown */}
-              {searchQuery && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-lg shadow-lg border border-border z-50 max-h-80 overflow-y-auto">
-                  {searching ? (
-                    <p className="text-sm text-muted-foreground text-center py-6">{t('common.loading')}</p>
-                  ) : searchResults.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-6">{t('common.search')}</p>
-                  ) : (
-                    <div className="py-2">
-                      {searchResults.map((result) => (
-                        <button
-                          key={result.id}
-                          onClick={() => {
-                            navigate(`/profile/${result.id}`);
-                            setSearchQuery("");
-                            setSearchResults([]);
-                          }}
-                          className="w-full flex items-center gap-3 p-3 hover:bg-muted transition-colors"
-                        >
-                          <Avatar className="h-12 w-12">
-                            <AvatarImage src={result.profile_image_url} />
-                            <AvatarFallback className="bg-primary text-primary-foreground">
-                              {getDisplayName(result)[0].toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="text-left flex-1">
-                            <p className="font-semibold">{getDisplayName(result)}</p>
-                            {result.first_name && result.business_name && (
-                              <p className="text-xs text-muted-foreground">{result.business_name}</p>
-                            )}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                {/* Posizione al centro con icona */}
+                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 border border-white/30">
+                  <MapPin className="w-4 h-4 text-white" />
+                  <span className="text-sm font-medium text-white">Valladolid</span>
                 </div>
-              )}
+
+                {/* Avatar a destra */}
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="hover:scale-105 transition-transform"
+                >
+                  <Avatar className="h-10 w-10 ring-2 ring-white/30">
+                    <AvatarImage src={profile?.profile_image_url} />
+                    <AvatarFallback className="bg-white text-blue-500 font-semibold">
+                      {getDisplayName(profile)[0].toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </div>
+
+              {/* Bottom row: Integrated Search Bar */}
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400 z-10" />
+                <Input
+                  type="text"
+                  placeholder="Cerca utenti, luoghi, hashtag..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  className="w-full pl-10 pr-10 py-2.5 rounded-full border-none bg-blue-50 text-blue-800 placeholder:text-blue-400 focus-visible:ring-0 text-base font-medium transition-all duration-200"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => handleSearch("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 z-10 hover:bg-blue-100 rounded-full p-1 transition-colors"
+                  >
+                    <X className="w-4 h-4 text-blue-600" />
+                  </button>
+                )}
+              </div>
             </div>
+
+            {/* Search Results Dropdown - positioned relative to the parent header div */}
+            {searchQuery && (
+              <div className="absolute top-[calc(100%+0.5rem)] left-0 right-0 mt-0 bg-white rounded-2xl shadow-xl border border-blue-100 z-50 max-h-80 overflow-y-auto">
+                {searching ? (
+                  <p className="text-sm text-gray-500 text-center py-8">{t('common.loading')}</p>
+                ) : searchResults.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-8">Nessun utente trovato</p>
+                ) : (
+                  <div className="py-3">
+                    {searchResults.map((result) => (
+                      <button
+                        key={result.id}
+                        onClick={() => {
+                          navigate(`/profile/${result.id}`);
+                          setSearchQuery("");
+                          setSearchResults([]);
+                        }}
+                        className="w-full flex items-center gap-4 px-4 py-3 hover:bg-blue-50 transition-colors"
+                      >
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={result.profile_image_url} />
+                          <AvatarFallback className="bg-blue-500 text-white">
+                            {getDisplayName(result)[0].toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="text-left flex-1">
+                          <p className="font-semibold text-gray-900">{getDisplayName(result)}</p>
+                          {result.first_name && result.business_name && (
+                            <p className="text-sm text-gray-500">{result.business_name}</p>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Stories */}
@@ -284,8 +415,8 @@ const ClientDashboard = () => {
 
           {/* Create Post */}
           <div className="mx-4 mt-4">
-            <CreatePost 
-              userId={user.id} 
+            <CreatePost
+              userId={user.id}
               userProfile={profile}
               onPostCreated={handlePostCreated}
             />
@@ -295,11 +426,11 @@ const ClientDashboard = () => {
           <div className="mx-4 mt-4 space-y-4">
             {loadingPosts ? (
               <div className="text-center py-8">
-                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
               </div>
             ) : posts.length === 0 ? (
-              <div className="text-center py-12 ios-card">
-                <p className="text-muted-foreground">{t('post.noPosts')}</p>
+              <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100">
+                <p className="text-gray-600">{t('post.noPosts')}</p>
               </div>
             ) : (
               posts.map((post) => (
@@ -343,7 +474,7 @@ const ClientDashboard = () => {
 
           {!selectedCategory && (
             <div className="mt-12 text-center px-4">
-              <p className="text-muted-foreground">
+              <p className="text-gray-600">
                 {t('partner.category')}
               </p>
             </div>
@@ -351,41 +482,44 @@ const ClientDashboard = () => {
         </>
       )}
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
-        <div className="flex items-center justify-between h-20 px-4 max-w-md mx-auto">
+      {/* Bottom Navigation - Updated with modern, rounded, light blue icons */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
+        <div className="flex items-center justify-around h-20 px-4 max-w-md mx-auto">
           <button
             onClick={() => setActiveTab("social")}
-            className={`flex flex-col items-center gap-1 transition-colors ${
-              activeTab === "social" ? "text-primary" : "text-muted-foreground"
+            className={`flex flex-col items-center gap-1 p-2 rounded-full transition-colors ${
+              activeTab === "social"
+                ? "bg-blue-100 text-blue-600"
+                : "text-gray-500 hover:bg-blue-50"
             }`}
           >
             <Users className="w-6 h-6" />
             <span className="text-xs font-medium">{t('navigation.social')}</span>
           </button>
-          
+
           <button
             onClick={() => setActiveTab("partners")}
-            className={`flex flex-col items-center gap-1 transition-colors ${
-              activeTab === "partners" ? "text-primary" : "text-muted-foreground"
+            className={`flex flex-col items-center gap-1 p-2 rounded-full transition-colors ${
+              activeTab === "partners"
+                ? "bg-blue-100 text-blue-600"
+                : "text-gray-500 hover:bg-blue-50"
             }`}
           >
             <Home className="w-6 h-6" />
             <span className="text-xs font-medium">{t('navigation.partners')}</span>
           </button>
 
-          {/* Central Upload Button */}
+          {/* Central Upload Button - Now a large circular button with a Plus icon */}
           <button
             onClick={() => setUploadSheetOpen(true)}
-            className="flex flex-col items-center gap-1 transition-colors text-muted-foreground"
+            className="relative -mt-6 h-16 w-16 rounded-full bg-blue-500 text-white shadow-lg flex items-center justify-center hover:bg-blue-600 hover:scale-105 transition-all"
           >
-            <Plus className="w-6 h-6" />
-            <span className="text-xs font-medium">Carica</span>
+            <Plus className="w-8 h-8" />
           </button>
 
           <button
             onClick={() => setLikesSheetOpen(true)}
-            className="flex flex-col items-center gap-1 transition-colors text-muted-foreground relative"
+            className="flex flex-col items-center gap-1 p-2 rounded-full transition-colors text-gray-500 relative hover:bg-blue-50"
           >
             <div className="relative">
               <Heart className="w-6 h-6" />
@@ -396,8 +530,10 @@ const ClientDashboard = () => {
 
           <button
             onClick={() => setActiveTab("chats")}
-            className={`flex flex-col items-center gap-1 transition-colors relative ${
-              activeTab === "chats" ? "text-primary" : "text-muted-foreground"
+            className={`flex flex-col items-center gap-1 p-2 rounded-full transition-colors relative ${
+              activeTab === "chats"
+                ? "bg-blue-100 text-blue-600"
+                : "text-gray-500 hover:bg-blue-50"
             }`}
           >
             <div className="relative">
@@ -405,14 +541,6 @@ const ClientDashboard = () => {
               <NotificationBadge count={totalUnread} />
             </div>
             <span className="text-xs font-medium">{t('navigation.chat')}</span>
-          </button>
-          
-          <button
-            onClick={() => navigate("/profile")}
-            className="flex flex-col items-center gap-1 transition-colors text-muted-foreground"
-          >
-            <UserCircle className="w-6 h-6" />
-            <span className="text-xs font-medium">{t('navigation.profile')}</span>
           </button>
         </div>
       </div>
@@ -435,12 +563,13 @@ const ClientDashboard = () => {
         onOpenChange={setSettingsSheetOpen}
       />
 
-      {/* Notifications Sheet */}
+      {/* Notifications Sheet (questo è il tuo LikesSheet) */}
       <NotificationsSheet
         open={likesSheetOpen}
         onOpenChange={setLikesSheetOpen}
         userId={user.id}
         userRole={userRole}
+        onMarkAsRead={markAllNotificationsAsRead}
       />
 
       {/* Wallet Sheet */}
@@ -454,7 +583,7 @@ const ClientDashboard = () => {
       {activeTab === "partners" && (
         <button
           onClick={() => setWalletSheetOpen(true)}
-          className="fixed bottom-24 right-6 h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-xl hover:scale-105 transition-all flex items-center justify-center z-40 border-2 border-white/20"
+          className="fixed bottom-24 right-6 h-16 w-16 rounded-2xl bg-blue-500 text-white shadow-xl hover:scale-105 transition-all flex items-center justify-center z-40 border-2 border-white/20"
         >
           <Wallet className="w-7 h-7" />
         </button>

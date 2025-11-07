@@ -12,16 +12,27 @@ interface UploadSheetProps {
   onOpenChange: (open: boolean) => void;
   userId: string;
   onUploadComplete?: () => void;
+  // New props for camera/back button control, if needed by the parent component
+  enableCamera?: boolean;
+  hideBackButton?: boolean;
+  uploadType?: "post" | "story"; // Added to allow pre-setting upload type
 }
 
-const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete }: UploadSheetProps) => {
+const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete, uploadType: initialUploadType, enableCamera, hideBackButton }: UploadSheetProps) => {
   const { toast } = useToast();
-  const [uploadType, setUploadType] = useState<"post" | "story" | null>(null);
+  const [uploadType, setUploadType] = useState<"post" | "story" | null>(initialUploadType || null);
   const [content, setContent] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [success, setSuccess] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
+
+  // Effect to update uploadType if initialUploadType changes
+  useState(() => {
+    if (initialUploadType !== undefined) {
+      setUploadType(initialUploadType);
+    }
+  }, [initialUploadType]);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -64,8 +75,6 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete }: UploadShe
       setUploadProgress(100);
 
       // Create post or story con media_type corretto
-      const isVideo = file.type.startsWith("video/");
-
       if (uploadType === "story") {
         const { error: storyError } = await supabase
           .from("stories")
@@ -114,7 +123,7 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete }: UploadShe
   };
 
   const handleClose = () => {
-    setUploadType(null);
+    setUploadType(initialUploadType || null); // Reset to initial or null
     setContent("");
     setUploading(false);
     setUploadProgress(0);
@@ -146,7 +155,7 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete }: UploadShe
 
         <div className="px-6 py-6">
           {!uploadType ? (
-            /* Selection screen - SOLO STORIA E POST */
+            // Selection screen - SOLO STORIA E POST
             <div className="grid grid-cols-2 gap-4">
               {/* Storia */}
               <Button
@@ -187,7 +196,7 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete }: UploadShe
               </Button>
             </div>
           ) : success ? (
-            /* Success screen */
+            // Success screen
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
               <CheckCircle2 className="w-24 h-24 text-green-500 animate-pulse" />
               <h3 className="text-2xl font-bold text-green-500">Pubblicato!</h3>
@@ -196,7 +205,7 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete }: UploadShe
               </p>
             </div>
           ) : uploading ? (
-            /* Upload progress screen */
+            // Upload progress screen
             <div className="space-y-6 py-8">
               <div className="flex items-center justify-center">
                 <div className="relative">
@@ -211,7 +220,7 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete }: UploadShe
               </p>
             </div>
           ) : (
-            /* Upload form */
+            // Upload form with Camera and Gallery buttons
             <div className="space-y-6">
               {uploadType === "post" && (
                 <div className="space-y-2">
@@ -227,34 +236,53 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete }: UploadShe
 
               <div className="space-y-3">
                 <label className="text-sm font-medium text-gray-700">Seleziona dal dispositivo</label>
-                <input
-                  type="file"
-                  accept="image/*,video/*"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                  id="media-upload"
-                />
-                <label htmlFor="media-upload">
-                  <Button
-                    type="button"
-                    className="w-full h-20 flex-col gap-2 bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-white border-0 rounded-2xl"
-                    asChild
-                  >
-                    <div className="cursor-pointer">
-                      <Camera className="w-6 h-6" />
-                      <span className="text-sm font-medium">Foto/Video</span>
-                    </div>
-                  </Button>
-                </label>
+                <div className="grid grid-cols-2 gap-4"> {/* Use grid for two buttons */}
+                  {/* Camera Button */}
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    capture="user" // Suggest opening front camera
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    id="camera-upload"
+                  />
+                  <label htmlFor="camera-upload">
+                    <Button
+                      type="button"
+                      className="w-full h-20 flex-col gap-2 bg-blue-500 text-white border-0 rounded-2xl hover:bg-blue-600 transition-all duration-200"
+                      asChild
+                    >
+                      <div className="cursor-pointer flex flex-col items-center justify-center gap-2">
+                        <Camera className="w-6 h-6" />
+                        <span className="text-sm font-medium">Fotocamera</span>
+                      </div>
+                    </Button>
+                  </label>
+
+                  {/* Gallery Button */}
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    id="gallery-upload"
+                  />
+                  <label htmlFor="gallery-upload">
+                    <Button
+                      type="button"
+                      className="w-full h-20 flex-col gap-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-2xl hover:bg-blue-100 transition-all duration-200"
+                      asChild
+                    >
+                      <div className="cursor-pointer flex flex-col items-center justify-center gap-2">
+                        <Image className="w-6 h-6" />
+                        <span className="text-sm font-medium">Galleria</span>
+                      </div>
+                    </Button>
+                  </label>
+                </div>
               </div>
 
-              <Button
-                onClick={() => setUploadType(null)}
-                variant="ghost"
-                className="w-full rounded-2xl text-gray-600 hover:bg-gray-100"
-              >
-                ← Indietro
-              </Button>
+              {/* Removed the "Indietro" button as requested */}
             </div>
           )}
         </div>

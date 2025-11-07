@@ -11,8 +11,9 @@ webDir: 'dist',
 plugins: {
 Camera: {
 ios: {
-photoLibraryUsageDescription: 'Students Life needs access to your photo library to upload images.&#39;,
-cameraUsageDescription: 'Students Life needs camera access to take photos.&#39;,
+photoLibraryUsageDescription: 'Students Life needs access to your photo library to upload images.',
+
+cameraUsageDescription: 'Students Life needs camera access to take photos.',
 saveToGallery: true
 },
 android: {

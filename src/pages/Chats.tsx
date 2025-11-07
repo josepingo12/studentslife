@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useWebNotifications } from "@/hooks/useWebNotifications";
 import { Input } from "@/components/ui/input";
-import { Search, Users, Home, MessageCircle, UserCircle, Plus } from "lucide-react";
+import { Search, Users, Home, MessageCircle, UserCircle, Plus, ArrowLeft, X } from "lucide-react"; // Added X for clear button
 import { useToast } from "@/hooks/use-toast";
 import FavoritesCarousel from "@/components/chat/FavoritesCarousel";
 import UserListItem from "@/components/chat/UserListItem";
@@ -33,7 +33,7 @@ const Chats = () => {
 
   const checkAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     if (!user) {
       navigate("/login");
       return;
@@ -49,7 +49,7 @@ const Chats = () => {
 
   const loadAllUsers = async (currentUserId: string) => {
     setLoading(true);
-    
+
     // Get all users except current user
     const { data: usersData } = await supabase
       .from("profiles")
@@ -63,7 +63,8 @@ const Chats = () => {
   const loadFavorites = async (userId: string) => {
     const { data: favData } = await supabase
       .from("favorites")
-      .select(`
+      .select(
+        `
         favorite_user_id,
         profiles!favorites_favorite_user_id_fkey(
           id,
@@ -72,7 +73,8 @@ const Chats = () => {
           business_name,
           profile_image_url
         )
-      `)
+        `
+      )
       .eq("user_id", userId);
 
     if (favData) {
@@ -107,7 +109,7 @@ const Chats = () => {
     for (const conv of convData) {
       // Determine other user ID
       const otherUserId = conv.user1_id === userId ? conv.user2_id : conv.user1_id;
-      
+
       if (!otherUserId) continue;
 
       // Get last message
@@ -186,13 +188,13 @@ const Chats = () => {
           .delete()
           .eq("user_id", user.id)
           .eq("favorite_user_id", userId);
-        
+
         setFavorites(favorites.filter(f => f.id !== userId));
       } else {
         await supabase
           .from("favorites")
           .insert({ user_id: user.id, favorite_user_id: userId });
-        
+
         const userToAdd = allUsers.find(u => u.id === userId);
         if (userToAdd) {
           setFavorites([...favorites, userToAdd]);
@@ -212,36 +214,51 @@ const Chats = () => {
   const sortedUsers = [...filteredUsers].sort((a, b) => {
     const aUnread = unreadCounts.get(a.id) || 0;
     const bUnread = unreadCounts.get(b.id) || 0;
-    
+
     if (aUnread !== bUnread) {
       return bUnread - aUnread;
     }
 
     const aMsg = userMessages.get(a.id);
     const bMsg = userMessages.get(b.id);
-    
+
     if (!aMsg && !bMsg) return 0;
     if (!aMsg) return 1;
     if (!bMsg) return -1;
-    
+
     return new Date(bMsg.created_at).getTime() - new Date(aMsg.created_at).getTime();
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary pb-24">
-      {/* Header */}
-      <div className="ios-card mx-4 mt-4 p-4">
-        <h1 className="text-2xl font-bold text-primary mb-4">Chat</h1>
-        
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+    <div className="min-h-screen bg-gray-50 pb-24">
+      {/* Header with back arrow and title */}
+      <div className="bg-white rounded-b-3xl shadow-sm border-b border-gray-100 px-4 pt-6 pb-4 flex items-center justify-between">
+        <button onClick={() => navigate("/client-dashboard")} className="p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors">
+          <ArrowLeft className="w-6 h-6 text-gray-700" />
+        </button>
+        <h1 className="text-2xl font-bold text-gray-900 flex-1 text-center">Chat</h1>
+        <div className="w-10"></div> {/* Spacer to balance the layout */}
+      </div>
+
+      {/* Search Bar - Updated styling */}
+      <div className="px-4 mt-4">
+        <div className="relative w-full bg-white rounded-full shadow-sm border border-blue-100">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400 z-10" />
           <Input
+            type="text"
             placeholder="Cerca utenti..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 ios-input"
+            className="w-full pl-10 pr-10 py-2.5 rounded-full border-none bg-transparent text-gray-800 placeholder:text-gray-400 focus-visible:ring-0 text-base font-medium transition-all duration-200"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-10 hover:bg-gray-100 rounded-full p-1 transition-colors"
+            >
+              <X className="w-4 h-4 text-gray-600" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -260,72 +277,31 @@ const Chats = () => {
       <div className="mt-4 mx-4 space-y-2">
         {loading ? (
           <div className="text-center py-8">
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
           </div>
         ) : sortedUsers.length === 0 ? (
-          <div className="text-center py-12 ios-card">
-            <p className="text-muted-foreground">Nessun utente trovato</p>
+          <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100">
+            <p className="text-gray-600">Nessun utente trovato</p>
           </div>
         ) : (
-          sortedUsers.map((userItem) => (
-            <UserListItem
-              key={userItem.id}
-              user={userItem}
-              currentUserId={user?.id || ""}
-              unreadCount={unreadCounts.get(userItem.id) || 0}
-              lastMessage={userMessages.get(userItem.id)}
-              isFavorite={favorites.some(f => f.id === userItem.id)}
-              onUserClick={handleUserClick}
-              onToggleFavorite={handleToggleFavorite}
-            />
-          ))
+          <div className="space-y-2">
+            {sortedUsers.map((userItem) => {
+              const lastMsg = userMessages.get(userItem.id);
+              return (
+                <UserListItem
+                  key={userItem.id}
+                  user={userItem}
+                  currentUserId={user?.id || ""}
+                  unreadCount={unreadCounts.get(userItem.id) || 0}
+                  lastMessage={lastMsg}
+                  isFavorite={favorites.some(f => f.id === userItem.id)}
+                  onUserClick={handleUserClick}
+                  onToggleFavorite={handleToggleFavorite}
+                />
+              );
+            })}
+          </div>
         )}
-      </div>
-
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
-        <div className="flex items-center justify-between h-20 px-4 max-w-md mx-auto">
-          <button
-            onClick={() => navigate("/client-dashboard")}
-            className="flex flex-col items-center gap-1 text-muted-foreground transition-colors"
-          >
-            <Users className="w-6 h-6" />
-            <span className="text-xs font-medium">Social</span>
-          </button>
-          
-          <button
-            onClick={() => navigate("/client-dashboard")}
-            className="flex flex-col items-center gap-1 text-muted-foreground transition-colors"
-          >
-            <Home className="w-6 h-6" />
-            <span className="text-xs font-medium">Partner</span>
-          </button>
-
-          <button
-            onClick={() => setUploadSheetOpen(true)}
-            className="relative -mt-6 bg-gradient-to-br from-primary to-primary/80 rounded-full p-4 shadow-lg hover:scale-105 transition-transform"
-          >
-            <Plus className="w-8 h-8 text-white" />
-          </button>
-
-          <button
-            className="flex flex-col items-center gap-1 text-primary transition-colors relative"
-          >
-            <div className="relative">
-              <MessageCircle className="w-6 h-6" />
-              <NotificationBadge count={totalUnread} />
-            </div>
-            <span className="text-xs font-medium">Chat</span>
-          </button>
-          
-          <button
-            onClick={() => navigate("/profile")}
-            className="flex flex-col items-center gap-1 text-muted-foreground transition-colors"
-          >
-            <UserCircle className="w-6 h-6" />
-            <span className="text-xs font-medium">Profilo</span>
-          </button>
-        </div>
       </div>
 
       {/* Upload Sheet */}

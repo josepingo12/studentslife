@@ -11,9 +11,11 @@ interface LikesSheetProps {
   onOpenChange: (open: boolean) => void;
   postId?: string;
   postIds?: string[]; // For showing all likes from multiple posts (profile view)
+  // NUOVA PROP: Funzione per marcare le notifiche come lette
+  onMarkAsRead?: () => void;
 }
 
-const LikesSheet = ({ open, onOpenChange, postId, postIds }: LikesSheetProps) => {
+const LikesSheet = ({ open, onOpenChange, postId, postIds, onMarkAsRead }: LikesSheetProps) => {
   const navigate = useNavigate();
   const [likes, setLikes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,8 +23,12 @@ const LikesSheet = ({ open, onOpenChange, postId, postIds }: LikesSheetProps) =>
   useEffect(() => {
     if (open) {
       loadLikes();
+      // Chiama la funzione per marcare le notifiche come lette quando il pannello si apre
+      if (onMarkAsRead) {
+        onMarkAsRead();
+      }
     }
-  }, [open, postId, postIds]);
+  }, [open, postId, postIds, onMarkAsRead]); // Aggiunto onMarkAsRead alle dipendenze
 
   const loadLikes = async () => {
     setLoading(true);
@@ -54,8 +60,8 @@ const LikesSheet = ({ open, onOpenChange, postId, postIds }: LikesSheetProps) =>
       if (error) throw error;
 
       // Remove duplicates by user_id when showing multiple posts
-      const uniqueLikes = postIds 
-        ? data?.filter((like, index, self) => 
+      const uniqueLikes = postIds
+        ? data?.filter((like, index, self) =>
             index === self.findIndex(l => l.user_id === like.user_id)
           )
         : data;

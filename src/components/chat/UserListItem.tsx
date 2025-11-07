@@ -30,14 +30,14 @@ const UserListItem = ({
     return user.business_name || "Utente";
   };
 
-  return (
-    <div className="ios-card p-4 flex items-center gap-3 cursor-pointer hover:scale-[1.02] transition-transform w-full overflow-hidden">
-      <div onClick={() => onUserClick(user.id)} className="flex items-center gap-3 flex-1 min-w-0">
-        <div className="relative flex-shrink-0">
-          <Avatar className="h-14 w-14">
-            <AvatarImage src={user.profile_image_url} />
-            <AvatarFallback className="bg-primary text-primary-foreground">
-              {getDisplayName()[0]}
+ return (
+ <div className="ios-card p-4 flex items-center gap-3 cursor-pointer w-full overflow-hidden">
+ <div onClick={() => onUserClick(user.id)} className="flex items-center gap-3 flex-1 min-w-0">
+ <div className="relative flex-shrink-0">
+ <Avatar className="h-14 w-14">
+ <AvatarImage src={user.profile_image_url} />
+ <AvatarFallback className="bg-primary text-primary-foreground">
+ {getDisplayName()[0]}
             </AvatarFallback>
           </Avatar>
           {unreadCount > 0 && (

@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react"; // Importa useRef
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client"; // Percorso corretto
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Bookmark, Trash2, Play } from "lucide-react";
+import { Heart, MessageCircle, Bookmark, Trash2, VolumeX, Volume2, Maximize } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { it, enUS, es, fr, de } from "date-fns/locale";
@@ -11,6 +11,7 @@ import CommentsSheet from "./CommentsSheet";
 import ImageViewer from "./ImageViewer";
 import LikesSheet from "./LikesSheet";
 import { useTranslation } from "react-i18next";
+import VideoFeed from "./VideoFeed";
 
 interface PostCardProps {
   post: any;
@@ -29,11 +30,50 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
   const [likesSheetOpen, setLikesSheetOpen] = useState(false);
   const [commentsCount, setCommentsCount] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
+  const [videoFeedOpen, setVideoFeedOpen] = useState(false);
+
+
+  // Stati per la gestione del video
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isMuted, setIsMuted] = useState(true);
 
   useEffect(() => {
     loadCommentsCount();
     checkIfSaved();
   }, [post.id]);
+
+  // Logica per gestire il mute/unmute
+  const handleToggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(videoRef.current.muted);
+    }
+  };
+
+  // Logica per gestire lo schermo intero
+  const handleToggleFullscreen = () => {
+    if (videoRef.current) {
+      if (videoRef.current.requestFullscreen) {
+        videoRef.current.requestFullscreen();
+      } else if ((videoRef.current as any).webkitEnterFullscreen) {
+        (videoRef.current as any).webkitEnterFullscreen();
+      } else if ((videoRef.current as any).mozRequestFullScreen) {
+        (videoRef.current as any).mozRequestFullScreen();
+      } else if ((videoRef.current as any).msRequestFullscreen) {
+        (videoRef.current as any).msRequestFullscreen();
+      }
+    }
+  };
+
+  const handleVideoClick = () => {
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play();
+      } else {
+        videoRef.current.pause();
+      }
+    }
+  };
 
   const checkIfSaved = async () => {
     const { data } = await supabase
@@ -178,7 +218,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
   };
 
   return (
-    <div className="ios-card overflow-hidden">
+    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-4">
       {/* Header */}
       <div className="p-4 flex items-center justify-between">
         <button
@@ -187,13 +227,13 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
         >
           <Avatar className="h-10 w-10">
             <AvatarImage src={post.public_profiles?.profile_image_url} />
-            <AvatarFallback className="bg-primary text-primary-foreground">
+            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
               {displayName[0]}
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-semibold">{displayName}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="font-semibold text-gray-900">{displayName}</p>
+            <p className="text-xs text-gray-500">
               {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: getDateLocale() })}
             </p>
           </div>
@@ -204,7 +244,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
             size="icon"
             onClick={handleDelete}
             disabled={loading}
-            className="text-destructive"
+            className="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full"
           >
             <Trash2 className="w-4 h-4" />
           </Button>
@@ -214,29 +254,47 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
       {/* Content */}
       {post.content && (
         <div className="px-4 pb-3">
-          <p className="whitespace-pre-wrap">{post.content}</p>
+          <p className="whitespace-pre-wrap text-gray-800">{post.content}</p>
         </div>
       )}
 
-      {/* Media Content - SUPPORTO VIDEO E IMMAGINI */}
+      {/* Media Content */}
       {(() => {
         const isVideoUrl = (url?: string) => !!url && /(\.mp4|\.webm|\.ogg)(\?.*)?$/i.test(url);
-        // Prefer explicit media_type
-        if (post.media_type === 'video' && (post.video_url || post.image_url)) {
-          const src = post.video_url || post.image_url; // fallback in case old data stored video under image_url
-          return (
-            <div className="relative">
-              <video
-                src={src}
-                className="w-full max-h-96 object-cover rounded-none"
-                controls
-                preload="metadata"
-              >
-                Il tuo browser non supporta i video.
-              </video>
-            </div>
-          );
-        }
+
+     if (post.media_type === 'video' && (post.video_url || post.image_url)) {
+       const src = post.video_url || post.image_url;
+       return (
+         <div className="relative cursor-pointer" onClick={() => setVideoFeedOpen(true)}>
+           <video
+             ref={videoRef}
+             src={src}
+             className="w-full max-h-96 object-cover"
+             autoPlay
+             loop
+             muted={isMuted}
+             playsInline
+             preload="metadata"
+           >
+             Il tuo browser non supporta i video.
+           </video>
+           <div className="absolute bottom-3 right-3 flex gap-2">
+             <Button
+               variant="ghost"
+               size="icon"
+               className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-sm rounded-full h-8 w-8"
+               onClick={(e) => {
+                 e.stopPropagation();
+                 handleToggleMute();
+               }}
+             >
+               {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+             </Button>
+           </div>
+         </div>
+       );
+     }
+
         if (post.media_type === 'image' && post.image_url) {
           return (
             <div
@@ -251,17 +309,40 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
             </div>
           );
         }
-        // Fallback per post vecchi senza media_type
+
         if (post.image_url) {
           if (isVideoUrl(post.image_url)) {
             return (
               <div className="relative">
                 <video
+                  ref={videoRef}
                   src={post.image_url}
-                  className="w-full max-h-96 object-cover rounded-none"
-                  controls
+                  className="w-full max-h-96 object-cover"
+                  autoPlay
+                  loop
+                  muted={isMuted}
+                  playsInline
                   preload="metadata"
+                  onClick={handleVideoClick}
                 />
+                <div className="absolute bottom-3 right-3 flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-sm rounded-full h-8 w-8"
+                    onClick={handleToggleMute}
+                  >
+                    {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-sm rounded-full h-8 w-8"
+                    onClick={handleToggleFullscreen}
+                  >
+                    <Maximize className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             );
           }
@@ -281,28 +362,27 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
         return null;
       })()}
 
-
       {/* Stats */}
-      <div className="px-4 py-2 border-t border-border flex items-center gap-4">
+      <div className="px-4 py-3 flex items-center gap-4">
         <button
           onClick={() => setLikesSheetOpen(true)}
-          className="text-sm font-semibold hover:text-primary transition-colors"
+          className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
         >
           {likesCount} {t('profile.likes').toLowerCase()}
         </button>
         {commentsCount > 0 && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-gray-500">
             {commentsCount} {t('post.comments').toLowerCase()}
           </p>
         )}
       </div>
 
       {/* Actions */}
-      <div className="px-4 py-2 border-t border-border flex items-center justify-around">
+      <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-around">
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2"
+          className="gap-2 text-gray-600 hover:text-red-500 hover:bg-red-50 rounded-full px-4"
           onClick={handleLike}
           disabled={loading}
         >
@@ -314,7 +394,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2"
+          className="gap-2 text-gray-600 hover:text-blue-500 hover:bg-blue-50 rounded-full px-4"
           onClick={() => setCommentsOpen(true)}
         >
           <MessageCircle className="w-5 h-5" />
@@ -323,43 +403,52 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2"
+          className="gap-2 text-gray-600 hover:text-yellow-500 hover:bg-yellow-50 rounded-full px-4"
           onClick={handleSaveToggle}
           disabled={loading}
         >
-          <Bookmark className={`w-5 h-5 ${isSaved ? "fill-current" : ""}`} />
+          <Bookmark className={`w-5 h-5 {isSaved ? "fill-yellow-500 text-yellow-500" : ""}`} />
           {t('common.save')}
         </Button>
       </div>
 
       {/* Comments Sheet */}
-      <CommentsSheet
-        open={commentsOpen}
-        onOpenChange={(open) => {
-          setCommentsOpen(open);
-          if (!open) loadCommentsCount();
-        }}
-        postId={post.id}
-        currentUserId={currentUserId}
-      />
+            <CommentsSheet
+              open={commentsOpen}
+              onOpenChange={(open) => {
+                setCommentsOpen(open);
+                if (!open) loadCommentsCount();
+              }}
+              postId={post.id}
+              currentUserId={currentUserId}
+            />
 
-      {/* Image Viewer - Solo per immagini */}
-      {(post.media_type === 'image' || !post.media_type) && post.image_url && (
-        <ImageViewer
-          open={imageViewerOpen}
-          onOpenChange={setImageViewerOpen}
-          imageUrl={post.image_url}
-        />
-      )}
+            {/* Image Viewer - Solo per immagini */}
+            {(post.media_type === 'image' || !post.media_type) && post.image_url && (
+              <ImageViewer
+                open={imageViewerOpen}
+                onOpenChange={setImageViewerOpen}
+                imageUrl={post.image_url}
+              />
+            )}
 
-      {/* Likes Sheet */}
-      <LikesSheet
-        open={likesSheetOpen}
-        onOpenChange={setLikesSheetOpen}
-        postId={post.id}
-      />
-    </div>
-  );
-};
+            {/* Likes Sheet */}
+            <LikesSheet
+              open={likesSheetOpen}
+              onOpenChange={setLikesSheetOpen}
+              postId={post.id}
+              />
 
-export default PostCard;
+             {/* Video Feed */}
+             <VideoFeed
+               open={videoFeedOpen}
+               onOpenChange={setVideoFeedOpen}
+               initialPost={post}
+               currentUserId={currentUserId}
+               onLikeToggle={onLikeToggle}
+             />
+          </div>
+        );
+      };
+
+      export default PostCard;

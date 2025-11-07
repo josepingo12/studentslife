@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react"; // Added X icon
 import FavoritesCarousel from "./FavoritesCarousel";
 import UserListItem from "./UserListItem";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Added Avatar imports
 
 interface ChatsListProps {
   currentUserId: string;
@@ -47,7 +48,8 @@ const ChatsList = ({ currentUserId }: ChatsListProps) => {
   const loadFavorites = async (userId: string) => {
     const { data } = await supabase
       .from("favorites")
-      .select(`
+      .select(
+        `
         id,
         favorite_user_id,
         public_profiles!favorites_favorite_user_id_fkey(
@@ -57,7 +59,8 @@ const ChatsList = ({ currentUserId }: ChatsListProps) => {
           business_name,
           profile_image_url
         )
-      `)
+        `
+      )
       .eq("user_id", userId);
 
     if (data) {
@@ -200,17 +203,25 @@ const ChatsList = ({ currentUserId }: ChatsListProps) => {
 
   return (
     <div className="space-y-4">
-      {/* Search */}
+      {/* Search Bar - Updated to match modern iOS style */}
       <div className="px-4">
-        <div className="relative ios-card p-3">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400 z-10" />
           <Input
             type="text"
             placeholder="Cerca utenti..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 border-none bg-transparent focus-visible:ring-0"
+            className="w-full pl-10 pr-10 py-2.5 rounded-full border-none bg-blue-50 text-blue-800 placeholder:text-blue-400 focus-visible:ring-0 text-base font-medium transition-all duration-200"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-10 hover:bg-blue-100 rounded-full p-1 transition-colors"
+            >
+              <X className="w-4 h-4 text-blue-600" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -226,8 +237,8 @@ const ChatsList = ({ currentUserId }: ChatsListProps) => {
       {/* Users List */}
       <div className="px-4">
         {sortedUsers.length === 0 ? (
-          <div className="text-center py-12 ios-card">
-            <p className="text-muted-foreground">Nessun utente trovato</p>
+          <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100">
+            <p className="text-gray-600">Nessun utente trovato</p>
           </div>
         ) : (
           <div className="space-y-2">

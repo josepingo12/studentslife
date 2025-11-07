@@ -59,7 +59,7 @@ const RecentPartners = ({ userId }: RecentPartnersProps) => {
       const sortedPartners = recentPartnerIds
         .map(id => partnersData.find(p => p.id === id))
         .filter(Boolean);
-      
+
       setPartners(sortedPartners);
     }
 

@@ -5,7 +5,50 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="efedd8c5-21e2-416a-8cc8-6981de5d5c67" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android/app/src/main/ic_launcher-playstore.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-hdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-mdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xhdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/google-services.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/server.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/social/UserVideoFeed.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/social/VideoFeed.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/social/VideoViewer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/capacitor.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/capacitor.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/chat/ChatsList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/chat/ChatsList.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/chat/UserListItem.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/chat/UserListItem.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/client/PartnerCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/client/PartnerCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/client/RecentPartners.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/client/RecentPartners.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/shared/UploadSheet.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/shared/UploadSheet.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/social/CreatePost.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/social/CreatePost.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/social/CreateStoryDialog.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/social/CreateStoryDialog.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/social/LikesSheet.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/social/LikesSheet.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/social/PostCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/social/PostCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/social/StoryViewer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/social/StoryViewer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/Chats.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Chats.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/ClientDashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/ClientDashboard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/PartnerDashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/PartnerDashboard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/Social.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Social.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/UserProfile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/UserProfile.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,22 +81,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/josep/Desktop/studentslife-main&quot;,
-    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "com.google.services.firebase.aqiPopupShown": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/josep/Desktop/studentslife-main",
+    "show.migrate.to.gradle.popup": "false"
   }
-}</component>
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\josep\AndroidStudioProjects\studentslife-main\backend" />
+      <recent name="C:\Users\josep\AndroidStudioProjects\studentslife-main\android\app" />
+      <recent name="C:\Users\josep\AndroidStudioProjects\studentslife-main\src\components\social" />
+    </key>
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="efedd8c5-21e2-416a-8cc8-6981de5d5c67" name="Changes" comment="" />
@@ -63,5 +114,16 @@
       <updated>1760025885690</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { X, ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX, Eye } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX, Eye, MoreHorizontal, Trash2 } from "lucide-react";
 import StoryViewers from "./StoryViewers";
+import { useToast } from "@/hooks/use-toast";
 
 interface StoryViewerProps {
   storyGroup: {
@@ -14,9 +15,11 @@ interface StoryViewerProps {
   currentUserId: string;
   onClose: () => void;
   onNext?: () => void;
+  onStoryDeleted?: (storyId: string) => void; // Made onStoryDeleted optional to prevent "is not a function" error if not provided
 }
 
-const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewerProps) => {
+const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDeleted }: StoryViewerProps) => {
+  const { toast } = useToast();
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -25,8 +28,8 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
   const [viewsCount, setViewsCount] = useState(0);
   const [viewers, setViewers] = useState<any[]>([]);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // NUOVO: Salva il progresso quando viene messo in pausa
   const [savedProgress, setSavedProgress] = useState(0);
   const [remainingTime, setRemainingTime] = useState(0);
 
@@ -41,11 +44,9 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
   const MAX_VIDEO_DURATION = 25000; // 25 secondi massimo
   const isOwnStory = storyGroup.user_id === currentUserId;
   const isVideo = currentStory?.media_type === 'video' || currentStory?.video_url;
-  
-  // Calcola la durata effettiva da usare
+
   const getStoryDuration = () => {
     if (!isVideo) return STORY_DURATION;
-    // Per video: usa min(durata video, 25 secondi)
     if (videoDuration > 0) {
       return Math.min(videoDuration * 1000, MAX_VIDEO_DURATION);
     }
@@ -67,23 +68,20 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
     }
   }, [currentStory, currentUserId, isOwnStory]);
 
-  // Gestione pausa/play video
   useEffect(() => {
     if (!videoRef.current) return;
-    
-    if (isPaused || isViewersSheetOpen) {
+
+    if (isPaused || isViewersSheetOpen || showDeleteConfirm) {
       videoRef.current.pause();
     } else {
       videoRef.current.play();
     }
-  }, [isPaused, isViewersSheetOpen]);
+  }, [isPaused, isViewersSheetOpen, showDeleteConfirm]);
 
-  // TIMER LOGIC MIGLIORATO - Riprende da dove era rimasto
   useEffect(() => {
     const duration = getStoryDuration();
 
-    if (isPaused || isViewersSheetOpen) {
-      // SALVA il progresso attuale quando viene messo in pausa
+    if (isPaused || isViewersSheetOpen || showDeleteConfirm) {
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
         progressIntervalRef.current = null;
@@ -93,10 +91,7 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
         storyTimeoutRef.current = null;
       }
 
-      // Salva il progresso corrente
       setSavedProgress(progress);
-
-      // Calcola il tempo rimanente
       const elapsed = Date.now() - startTimeRef.current;
       const remaining = Math.max(0, duration - elapsed);
       setRemainingTime(remaining);
@@ -104,25 +99,20 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
       return;
     }
 
-    // RIPRENDE da dove era rimasto
     let startProgress = progress;
     let effectiveDuration = duration;
 
-    // Se c'è un progresso salvato, riprendi da lì
     if (savedProgress > 0 && remainingTime > 0) {
       startProgress = savedProgress;
       effectiveDuration = remainingTime;
     } else {
-      // Nuova storia, inizia da capo
       startProgress = 0;
       effectiveDuration = duration;
       setProgress(0);
     }
 
-    // Segna il tempo di inizio
     startTimeRef.current = Date.now();
 
-    // Progress bar animation
     progressIntervalRef.current = setInterval(() => {
       setProgress(prev => {
         const elapsed = Date.now() - startTimeRef.current;
@@ -131,7 +121,6 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
       });
     }, 50);
 
-    // Auto advance to next story
     storyTimeoutRef.current = setTimeout(() => {
       handleNextStory();
     }, effectiveDuration);
@@ -146,9 +135,8 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
         storyTimeoutRef.current = null;
       }
     };
-  }, [currentStoryIndex, isPaused, isViewersSheetOpen, savedProgress, remainingTime, videoDuration]);
+  }, [currentStoryIndex, isPaused, isViewersSheetOpen, showDeleteConfirm, savedProgress, remainingTime, videoDuration]);
 
-  // Reset del progresso quando cambia storia
   useEffect(() => {
     setSavedProgress(0);
     setRemainingTime(0);
@@ -191,7 +179,8 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
   const loadViewers = async (storyId: string) => {
     const { data } = await supabase
       .from("story_views")
-      .select(`
+      .select(
+        `
         id,
         viewer_id,
         viewed_at,
@@ -201,7 +190,8 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
           business_name,
           profile_image_url
         )
-      `)
+        `
+      )
       .eq("story_id", storyId)
       .order("viewed_at", { ascending: false })
       .limit(3);
@@ -210,7 +200,6 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
   };
 
   const handleNextStory = useCallback(() => {
-    // Reset del progresso per la prossima storia
     setSavedProgress(0);
     setRemainingTime(0);
 
@@ -222,7 +211,6 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
   }, [currentStoryIndex, storyGroup.stories.length, onNext, onClose]);
 
   const handlePrevStory = useCallback(() => {
-    // Reset del progresso per la storia precedente
     setSavedProgress(0);
     setRemainingTime(0);
 
@@ -233,6 +221,41 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
 
   const handleMouseDown = (side: 'left' | 'right') => {
     side === 'left' ? handlePrevStory() : handleNextStory();
+  };
+
+  const handleDeleteStory = async () => {
+    if (!currentStory || !isOwnStory) return;
+
+    setShowDeleteConfirm(false);
+
+    try {
+      const { error } = await supabase
+        .from('stories')
+        .delete()
+        .eq('id', currentStory.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Storia eliminata",
+        description: "La tua storia è stata eliminata con successo.",
+        variant: "default",
+      });
+
+      // Safely call onStoryDeleted if it's a function
+      if (onStoryDeleted && typeof onStoryDeleted === 'function') {
+        onStoryDeleted(currentStory.id);
+      } else {
+        console.warn("onStoryDeleted prop is not a function or is undefined.");
+      }
+      onClose();
+    } catch (error: any) {
+      toast({
+        title: "Errore",
+        description: `Impossibile eliminare la storia: ${error.message}`,
+        variant: "destructive",
+      });
+    }
   };
 
   const getDisplayName = (viewer: any) => {
@@ -291,6 +314,11 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
               <Button variant="ghost" size="sm" onClick={() => setIsPaused(!isPaused)} className="text-white hover:bg-white/20 p-2">
                 {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
               </Button>
+              {isOwnStory && (
+                <Button variant="ghost" size="sm" onClick={() => setShowDeleteConfirm(true)} className="text-white hover:bg-white/20 p-2">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
               <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-white/20 p-2">
                 <X className="h-4 w-4" />
               </Button>
@@ -425,9 +453,16 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
               </div>
             </div>
 
-            <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-white/20 p-2">
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              {isOwnStory && (
+                <Button variant="ghost" size="sm" onClick={() => setShowDeleteConfirm(true)} className="text-white hover:bg-white/20 p-2">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-white/20 p-2">
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           <div className="relative w-full h-full">
@@ -509,6 +544,20 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext }: StoryViewer
           open={isViewersSheetOpen}
           onOpenChange={setIsViewersSheetOpen}
         />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm mx-auto">
+            <h3 className="text-lg font-semibold mb-4">Eliminare questa storia?</h3>
+            <p className="text-sm text-gray-600 mb-6">Questa azione non può essere annullata.</p>
+            <div className="flex justify-center gap-4">
+              <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>Annulla</Button>
+              <Button variant="destructive" onClick={handleDeleteStory}>Elimina</Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

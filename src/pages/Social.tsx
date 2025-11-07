@@ -9,6 +9,7 @@ import { ArrowLeft, Search, X } from "lucide-react";
 import StoriesCarousel from "@/components/social/StoriesCarousel";
 import CreatePost from "@/components/social/CreatePost";
 import PostCard from "@/components/social/PostCard";
+import SettingsSheet from "@/components/partner/SettingsSheet"; // AGGIUNGI QUESTO IMPORT
 
 const Social = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const Social = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
+  const [settingsSheetOpen, setSettingsSheetOpen] = useState(false); // AGGIUNGI QUESTO STATO
 
   // Abilita notifiche web
   useWebNotifications({ userId: user?.id });
@@ -30,7 +32,7 @@ const Social = () => {
 
   const checkAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     if (!user) {
       navigate("/login");
       return;
@@ -75,7 +77,7 @@ const Social = () => {
       if (post.id === postId) {
         return {
           ...post,
-          likes: isLiked 
+          likes: isLiked
             ? [...post.likes, { id: 'temp', user_id: user?.id }]
             : post.likes.filter((l: any) => l.user_id !== user?.id)
         };
@@ -86,7 +88,7 @@ const Social = () => {
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
-    
+
     if (!query.trim()) {
       setSearchResults([]);
       setSearching(false);
@@ -113,127 +115,139 @@ const Social = () => {
 
   if (!user || !profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Caricamento...</p>
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Caricamento...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary pb-20">
+    <div className="min-h-screen bg-gray-50 pb-20">
       <div className="max-w-[470px] mx-auto w-full">
         {/* Header */}
-        <div className="ios-card mx-4 mt-4 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="rounded-full"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-2xl font-bold text-primary">Students Life Social</h1>
-          <div className="w-10" />
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Cerca utenti..."
-            value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
-            className="pl-10 pr-10"
-          />
-          {searchQuery && (
+        <div className="bg-white mx-4 mt-4 p-4 rounded-2xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+            {/* Avatar a sinistra invece del tasto impostazioni */}
             <button
-              onClick={() => handleSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2"
+              onClick={() => setSettingsSheetOpen(true)}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
             >
-              <X className="w-4 h-4 text-muted-foreground" />
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={profile?.profile_image_url} />
+                <AvatarFallback className="bg-blue-500 text-white">
+                  {getDisplayName(profile)[0].toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
             </button>
+
+            <h1 className="text-2xl font-bold text-blue-600">Students Life Social</h1>
+
+            <div className="w-10" />
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Cerca utenti..."
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="pl-10 pr-10 border-gray-200 focus:border-blue-500"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => handleSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+              >
+                <X className="w-4 h-4 text-gray-400" />
+              </button>
+            )}
+          </div>
+
+          {/* Search Results */}
+          {searchQuery && (
+            <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
+              {searching ? (
+                <p className="text-sm text-gray-500 text-center py-4">Ricerca...</p>
+              ) : searchResults.length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-4">Nessun utente trovato</p>
+              ) : (
+                searchResults.map((result) => (
+                  <button
+                    key={result.id}
+                    onClick={() => {
+                      navigate(`/profile/${result.id}`);
+                      setSearchQuery("");
+                      setSearchResults([]);
+                    }}
+                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={result.profile_image_url} />
+                      <AvatarFallback className="bg-blue-500 text-white">
+                        {getDisplayName(result)[0].toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="text-left">
+                      <p className="font-semibold">{getDisplayName(result)}</p>
+                      {result.first_name && result.business_name && (
+                        <p className="text-xs text-gray-500">{result.business_name}</p>
+                      )}
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
           )}
         </div>
 
-        {/* Search Results */}
-        {searchQuery && (
-          <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
-            {searching ? (
-              <p className="text-sm text-muted-foreground text-center py-4">Ricerca...</p>
-            ) : searchResults.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">Nessun utente trovato</p>
-            ) : (
-              searchResults.map((result) => (
-                <button
-                  key={result.id}
-                  onClick={() => {
-                    navigate(`/profile/${result.id}`);
-                    setSearchQuery("");
-                    setSearchResults([]);
-                  }}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
-                >
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={result.profile_image_url} />
-                    <AvatarFallback className="bg-primary text-primary-foreground">
-                      {getDisplayName(result)[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="text-left">
-                    <p className="font-semibold">{getDisplayName(result)}</p>
-                    {result.first_name && result.business_name && (
-                      <p className="text-xs text-muted-foreground">{result.business_name}</p>
-                    )}
-                  </div>
-                </button>
-              ))
-            )}
-          </div>
-        )}
+        {/* Stories */}
+        <div className="mt-4">
+          <StoriesCarousel currentUserId={user.id} />
+        </div>
+
+        {/* Create Post */}
+        <div className="mx-4 mt-4">
+          <CreatePost
+            userId={user.id}
+            userProfile={profile}
+            onPostCreated={handlePostCreated}
+          />
+        </div>
+
+        {/* Posts Feed */}
+        <div className="mx-4 mt-4 space-y-4">
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100">
+              <p className="text-gray-600">Nessun post ancora. Sii il primo a postare!</p>
+            </div>
+          ) : (
+            posts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                currentUserId={user.id}
+                onDelete={handlePostDeleted}
+                onLikeToggle={handleLikeToggle}
+              />
+            ))
+          )}
+        </div>
       </div>
 
-      {/* Stories */}
-      <div className="mt-4">
-        <StoriesCarousel currentUserId={user.id} />
-      </div>
-
-      {/* Create Post */}
-      <div className="mx-4 mt-4">
-        <CreatePost 
-          userId={user.id} 
-          userProfile={profile}
-          onPostCreated={handlePostCreated}
-        />
-      </div>
-
-      {/* Posts Feed */}
-      <div className="mx-4 mt-4 space-y-4">
-        {loading ? (
-          <div className="text-center py-8">
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          </div>
-        ) : posts.length === 0 ? (
-          <div className="text-center py-12 ios-card">
-            <p className="text-muted-foreground">Nessun post ancora. Sii il primo a postare!</p>
-          </div>
-        ) : (
-          posts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              currentUserId={user.id}
-              onDelete={handlePostDeleted}
-              onLikeToggle={handleLikeToggle}
-            />
-          ))
-        )}
-      </div>
-      </div>
+      {/* Settings Sheet */}
+      <SettingsSheet
+        open={settingsSheetOpen}
+        onOpenChange={setSettingsSheetOpen}
+      />
     </div>
   );
 };
