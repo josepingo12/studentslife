@@ -14,6 +14,96 @@ interface NotificationPayload {
   senderId: string;
 }
 
+// Helper function to convert base64url to base64
+function base64urlToBase64(base64url: string): string {
+  return base64url.replace(/-/g, '+').replace(/_/g, '/');
+}
+
+// Helper function to convert base64 to base64url
+function base64ToBase64url(base64: string): string {
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+// Generate JWT for Google OAuth2
+async function generateJWT(serviceAccount: any): Promise<string> {
+  const header = {
+    alg: 'RS256',
+    typ: 'JWT',
+  };
+
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    iss: serviceAccount.client_email,
+    scope: 'https://www.googleapis.com/auth/firebase.messaging',
+    aud: 'https://oauth2.googleapis.com/token',
+    exp: now + 3600,
+    iat: now,
+  };
+
+  const encodedHeader = base64ToBase64url(btoa(JSON.stringify(header)));
+  const encodedPayload = base64ToBase64url(btoa(JSON.stringify(payload)));
+  const unsignedToken = `${encodedHeader}.${encodedPayload}`;
+
+  // Import private key
+  const privateKeyPem = serviceAccount.private_key;
+  const pemContents = privateKeyPem
+    .replace('-----BEGIN PRIVATE KEY-----', '')
+    .replace('-----END PRIVATE KEY-----', '')
+    .replace(/\s/g, '');
+  
+  const binaryDer = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
+
+  const cryptoKey = await crypto.subtle.importKey(
+    'pkcs8',
+    binaryDer,
+    {
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: 'SHA-256',
+    },
+    false,
+    ['sign']
+  );
+
+  // Sign the token
+  const encoder = new TextEncoder();
+  const data = encoder.encode(unsignedToken);
+  const signature = await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5',
+    cryptoKey,
+    data
+  );
+
+  const base64Signature = base64ToBase64url(
+    btoa(String.fromCharCode(...new Uint8Array(signature)))
+  );
+
+  return `${unsignedToken}.${base64Signature}`;
+}
+
+// Get OAuth2 access token from Google
+async function getAccessToken(serviceAccount: any): Promise<string> {
+  const jwt = await generateJWT(serviceAccount);
+
+  const response = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion: jwt,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to get access token: ${error}`);
+  }
+
+  const data = await response.json();
+  return data.access_token;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -48,7 +138,7 @@ serve(async (req) => {
     }
 
     const firebaseConfig = JSON.parse(firebaseServiceAccountJson);
-    const projectId = firebaseConfig.project_info.project_id;
+    const projectId = firebaseConfig.project_id;
     console.log('📱 Firebase project ID:', projectId);
 
     // Parse request body
@@ -108,7 +198,7 @@ serve(async (req) => {
           type: 'chat_message',
         },
         android: {
-          priority: 'high',
+          priority: 'high' as const,
           notification: {
             channelId: 'chat_messages',
             sound: 'default',
@@ -128,47 +218,46 @@ serve(async (req) => {
       },
     };
 
-    // Get OAuth2 access token for FCM
+    // Get OAuth2 access token
     console.log('🔑 Getting OAuth2 access token...');
-    
-    // Use Firebase service account to get access token
-    const jwtHeader = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
-    const now = Math.floor(Date.now() / 1000);
-    const jwtClaimSet = {
-      iss: firebaseConfig.client[0].client_info.email || `firebase-adminsdk@${projectId}.iam.gserviceaccount.com`,
-      scope: 'https://www.googleapis.com/auth/firebase.messaging',
-      aud: 'https://oauth2.googleapis.com/token',
-      exp: now + 3600,
-      iat: now,
-    };
-
-    // For simplicity, we'll use the FCM legacy API with API key
-    // The modern approach requires RSA signing which is complex in Deno
-    const apiKey = firebaseConfig.client[0].api_key[0].current_key;
-    
-    if (!apiKey) {
-      console.error('❌ Firebase API key not found in config');
-      return new Response(
-        JSON.stringify({ error: 'Firebase API key not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    const accessToken = await getAccessToken(firebaseConfig);
+    console.log('✅ Access token obtained');
 
     // Send notification using FCM HTTP v1 API
     const fcmUrl = `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`;
     
     console.log('📤 Sending FCM notification...');
-    console.log('FCM URL:', fcmUrl);
     
-    // Note: For production, you should implement proper OAuth2 token generation
-    // For now, using the simpler legacy FCM approach with server key
-    // The user needs to provide the server key separately or we need to implement JWT signing
-    
+    const fcmResponse = await fetch(fcmUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(fcmMessage),
+    });
+
+    if (!fcmResponse.ok) {
+      const errorText = await fcmResponse.text();
+      console.error('❌ FCM API error:', errorText);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to send FCM notification',
+          details: errorText,
+          status: fcmResponse.status
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const fcmResult = await fcmResponse.json();
+    console.log('✅ FCM notification sent successfully:', fcmResult);
+
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: 'Notification queued',
-        note: 'FCM implementation requires OAuth2 token generation. Please verify Firebase configuration.',
+        message: 'Notification sent successfully',
+        fcmMessageId: fcmResult.name,
         recipientUserId,
         platform: userDevice.platform
       }),
