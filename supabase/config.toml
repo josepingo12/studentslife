@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.notify-new-registration]
 verify_jwt = false
+
+[functions.send-chat-notification]
+verify_jwt = false

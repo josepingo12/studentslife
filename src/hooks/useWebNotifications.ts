@@ -87,7 +87,7 @@ export const useWebNotifications = ({ userId, currentConversationId }: WebNotifi
           if (!sender) return;
 
           const senderName = sender.business_name || `${sender.first_name || ''} ${sender.last_name || ''}`.trim() || 'Utente';
-          
+
           // Determina il contenuto della notifica
           let messageContent = newMessage.content || '';
           if (newMessage.image_url) {
@@ -96,6 +96,23 @@ export const useWebNotifications = ({ userId, currentConversationId }: WebNotifi
             messageContent = '🎥 Video';
           } else if (newMessage.file_url) {
             messageContent = '📎 File';
+          }
+
+          // Invia notifica push FCM tramite edge function
+          try {
+            await supabase.functions.invoke('send-chat-notification', {
+              body: {
+                recipientUserId: userId,
+                senderName: senderName,
+                messageContent: messageContent,
+                conversationId: newMessage.conversation_id,
+                senderId: newMessage.sender_id,
+              }
+            });
+            console.log('📤 FCM notification sent via edge function');
+          } catch (fcmError) {
+            console.error('❌ Error sending FCM notification:', fcmError);
+            // Non blocchiamo l'esecuzione se FCM fallisce
           }
 
           // Mostra notifica
