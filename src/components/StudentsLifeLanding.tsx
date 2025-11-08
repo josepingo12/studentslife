@@ -66,8 +66,8 @@ const StudentsLifeLanding: React.FC = () => {
     { type: 'bot', text: '¡Hola! Soy el asistente de StudentsLife. ¿En qué puedo ayudarte?' }
   ]);
   const [isTyping, setIsTyping] = useState(false);
-
-
+const [clickedPartners, setClickedPartners] = useState<Set<string>>(new Set());
+useState<Set<string>>(new Set());
   // GIUSTO - nome diverso
 const handlePartnerLogoClick = (partnerName: string) => {
   setClickedPartners(prev => {
