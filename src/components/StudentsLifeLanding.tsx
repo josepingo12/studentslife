@@ -924,7 +924,7 @@ useEffect(() => {
         </div>
       </section>
 
-{/* Partners Section - Interattivo */}
+{/* Partners Section - Carosello Animato + Interattivo */}
 <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
   <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
     <div className="animate-fade-in">
@@ -938,11 +938,11 @@ useEffect(() => {
       {/* Istruzioni interattive */}
       <div className="bg-blue-100 rounded-2xl p-4 mb-8 mx-auto max-w-md">
         <p className="text-blue-800 font-semibold text-sm">
-          👆 Clicca sui loghi per scoprire i partner attivi!
+          👆 Passa il mouse sui loghi per scoprire i partner attivi!
         </p>
       </div>
       
-      {/* Partners Carousel */}
+      {/* Partners Carousel ANIMATO */}
       <div className="relative overflow-hidden mb-12">
         <div className="flex animate-scroll-left space-x-8 py-8">
           {/* Duplicamos el array per un loop infinito */}
@@ -950,12 +950,13 @@ useEffect(() => {
             const isClicked = clickedPartners.has(partner.name);
             return (
               <button
-  key={`${partner.name}-${index}`}
-  onClick={() => handlePartnerLogoClick(partner.name)} // 👈 Cambia qui
-  className={`flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-500 p-3 sm:p-4 flex items-center justify-center cursor-pointer ${
-    isClicked ? 'ring-4 ring-blue-400 shadow-blue-200' : ''
-  }`}
->
+                key={`${partner.name}-${index}`}
+                onClick={() => handlePartnerLogoClick(partner.name)}
+                onMouseEnter={() => handlePartnerLogoClick(partner.name)} // Hover per colorare
+                className={`flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-500 p-3 sm:p-4 flex items-center justify-center cursor-pointer ${
+                  isClicked ? 'ring-4 ring-blue-400 shadow-blue-200' : ''
+                }`}
+              >
                 <img 
                   src={partner.logo}
                   alt={partner.name}
