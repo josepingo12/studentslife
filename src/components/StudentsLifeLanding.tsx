@@ -68,18 +68,19 @@ const StudentsLifeLanding: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
 
 
-  // Funzione per gestire il click sui partner
-  const handlePartnerClick = (partnerName: string) => {
-    setClickedPartners(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(partnerName)) {
-        newSet.delete(partnerName); // Se già cliccato, rimuovi (torna grigio)
-      } else {
-        newSet.add(partnerName); // Se non cliccato, aggiungi (diventa colorato)
-      }
-      return newSet;
-    });
-  };
+  // GIUSTO - nome diverso
+const handlePartnerLogoClick = (partnerName: string) => {
+  setClickedPartners(prev => {
+    const newSet = new Set(prev);
+    if (newSet.has(partnerName)) {
+      newSet.delete(partnerName); // Se già cliccato, rimuovi (torna grigio)
+    } else {
+      newSet.add(partnerName); // Se non cliccato, aggiungi (diventa colorato)
+    }
+    return newSet;
+  });
+};
+
   
   // Preguntas predefinidas
   const predefinedQuestions = [
@@ -949,12 +950,12 @@ useEffect(() => {
             const isClicked = clickedPartners.has(partner.name);
             return (
               <button
-                key={`${partner.name}-${index}`}
-                onClick={() => handlePartnerClick(partner.name)}
-                className={`flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-500 p-3 sm:p-4 flex items-center justify-center cursor-pointer ${
-                  isClicked ? 'ring-4 ring-blue-400 shadow-blue-200' : ''
-                }`}
-              >
+  key={`${partner.name}-${index}`}
+  onClick={() => handlePartnerLogoClick(partner.name)} // 👈 Cambia qui
+  className={`flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-500 p-3 sm:p-4 flex items-center justify-center cursor-pointer ${
+    isClicked ? 'ring-4 ring-blue-400 shadow-blue-200' : ''
+  }`}
+>
                 <img 
                   src={partner.logo}
                   alt={partner.name}
