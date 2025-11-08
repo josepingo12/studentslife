@@ -67,6 +67,20 @@ const StudentsLifeLanding: React.FC = () => {
   ]);
   const [isTyping, setIsTyping] = useState(false);
 
+
+  // Funzione per gestire il click sui partner
+  const handlePartnerClick = (partnerName: string) => {
+    setClickedPartners(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(partnerName)) {
+        newSet.delete(partnerName); // Se già cliccato, rimuovi (torna grigio)
+      } else {
+        newSet.add(partnerName); // Se non cliccato, aggiungi (diventa colorato)
+      }
+      return newSet;
+    });
+  };
+  
   // Preguntas predefinidas
   const predefinedQuestions = [
     "¿Qué es StudentsLife?",
@@ -909,44 +923,69 @@ useEffect(() => {
         </div>
       </section>
 
-   {/* Partners Section */}
+{/* Partners Section - Interattivo */}
 <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
   <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
     <div className="animate-fade-in">
       <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
         Partners con Descuentos
       </h3>
-      <p className="text-lg sm:text-xl text-gray-600 mb-12 sm:mb-16 max-w-3xl mx-auto px-4">
+      <p className="text-lg sm:text-xl text-gray-600 mb-8 sm:mb-12 max-w-3xl mx-auto px-4">
         Comercios locales que ofrecen descuentos exclusivos a estudiantes Erasmus
       </p>
       
+      {/* Istruzioni interattive */}
+      <div className="bg-blue-100 rounded-2xl p-4 mb-8 mx-auto max-w-md">
+        <p className="text-blue-800 font-semibold text-sm">
+          👆 Clicca sui loghi per scoprire i partner attivi!
+        </p>
+      </div>
+      
       {/* Partners Carousel */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden mb-12">
         <div className="flex animate-scroll-left space-x-8 py-8">
           {/* Duplicamos el array per un loop infinito */}
-          {[...partners, ...partners].map((partner, index) => (
-            <div
-              key={`${partner.name}-${index}`}
-              className="flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 p-3 sm:p-4 flex items-center justify-center"
-            >
-              <img 
-                src={partner.logo}
-                alt={partner.name}
-                className="w-full h-full object-contain rounded-full"
-              />
-            </div>
-          ))}
+          {[...partners, ...partners].map((partner, index) => {
+            const isClicked = clickedPartners.has(partner.name);
+            return (
+              <button
+                key={`${partner.name}-${index}`}
+                onClick={() => handlePartnerClick(partner.name)}
+                className={`flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-500 p-3 sm:p-4 flex items-center justify-center cursor-pointer ${
+                  isClicked ? 'ring-4 ring-blue-400 shadow-blue-200' : ''
+                }`}
+              >
+                <img 
+                  src={partner.logo}
+                  alt={partner.name}
+                  className={`w-full h-full object-contain rounded-full transition-all duration-500 ${
+                    isClicked ? 'grayscale-0 brightness-100' : 'grayscale brightness-75'
+                  }`}
+                />
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Partners Count */}
-      <div className="mt-8 bg-white rounded-2xl shadow-lg p-6 mx-auto max-w-md">
-        <div className="text-3xl font-bold text-blue-600 mb-2">
-          {partners.length}+
+      {/* Partners Count con stato */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="text-3xl font-bold text-blue-600 mb-2">
+            {partners.length}+
+          </div>
+          <p className="text-gray-600 text-sm">
+            Partners totali
+          </p>
         </div>
-        <p className="text-gray-600">
-          Partners verificados ofreciendo descuentos exclusivos
-        </p>
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="text-3xl font-bold text-green-600 mb-2">
+            {clickedPartners.size}
+          </div>
+          <p className="text-gray-600 text-sm">
+            Partners scoperti
+          </p>
+        </div>
       </div>
     </div>
   </div>
