@@ -224,3 +224,27 @@
     -moz-appearance: none !important;
   }
 }
+
+/* Carousel Animation for Partners */
+@keyframes scroll-left {
+0% {
+transform: translateX(0);
+}
+100% {
+transform: translateX(-50%);
+}
+}
+.animate-scroll-left {
+animation: scroll-left 30s linear infinite;
+}
+.animate-scroll-left:hover {
+animation-play-state: paused;
+}
+/* Partner Logo Hover Effects */
+.partner-logo {
+transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.partner-logo:hover {
+transform: scale(1.1) translateY(-4px);
+box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.15), 0 10px 10px -5px rgb(0 0 0 / 0.1);
+}
