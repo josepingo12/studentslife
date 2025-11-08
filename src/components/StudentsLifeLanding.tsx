@@ -15,7 +15,7 @@ import belinnails from '@/assets/belinnails.jpg';
 import elote from '@/assets/elote.jpg';
 import viajeserasmus from '@/assets/viajeserasmus.jpg';
 import five from '@/assets/five.jpg';
-import barbercomervalladolid from '@/assets/barbercomervalladolid.jpg';
+import barbercornervalladolid from '@/assets/barbercornervalladolid.jpg';
 import marciasburger from '@/assets/marciasburger.jpg';
 import exxencia from '@/assets/exxencia.jpg';
 import totoink from '@/assets/totoink.jpg';
@@ -36,7 +36,7 @@ const partners = [
 { name: "Elote", logo: elote },
 { name: "Viajes Erasmus Valladolid", logo: viajeserasmus },
 { name: "Five", logo: five },
-{ name: "Barber Comer Valladolid", logo: barbercomervalladolid },
+{ name: "Barber Corner Valladolid", logo: barbercornervalladolid },
 { name: "Marcias Burger", logo: marciasburger },
 { name: "Exxencia Ibericos", logo: exxencia },
 { name: "Tato Ink", logo: totoink },
