@@ -8,6 +8,8 @@ import screen2 from '@/assets/screen2.jpeg';
 import headerImage from '@/assets/header.png';
 import headerMobile from '@/assets/header-mobile.png';
 import robotoAvatar from '@/assets/roboto.png';
+import appleStoreIcon from '@/assets/apple_store_icon.png';
+import playstoreIcon from '@/assets/playstore_icon.png';
 
 const StudentsLifeLanding: React.FC = () => {
   const { t } = useTranslation();
@@ -661,7 +663,7 @@ useEffect(() => {
         </div>
       </section>
 
-    {/* App Download Section - Sostituisce la sezione precedente */}
+  {/* App Download Section - Sostituisce la sezione precedente */}
 <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
   <div className="max-w-6xl mx-auto px-4 sm:px-6">
     <div className="text-center mb-12 sm:mb-16 animate-fade-in">
@@ -681,7 +683,7 @@ useEffect(() => {
           className="transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
         >
           <img 
-            src="/src/assets/apple_store_icon.png" 
+            src={appleStoreIcon} 
             alt="Download on the App Store" 
             className="h-16 sm:h-20 w-auto rounded-xl shadow-lg"
           />
@@ -691,7 +693,7 @@ useEffect(() => {
           className="transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
         >
           <img 
-            src="/src/assets/playstore_icon.png" 
+            src={playstoreIcon} 
             alt="Get it on Google Play" 
             className="h-16 sm:h-20 w-auto rounded-xl shadow-lg"
           />
