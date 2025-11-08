@@ -27,16 +27,7 @@ jobs:
           cache: 'npm' # Mantiene la cache per le dipendenze npm
 
       - name: Clean install dependencies # Pulisce e installa le dipendenze in modo pulito
-        run: |
-          rm -rf node_modules package-lock.json # Rimuove vecchie dipendenze e lock file
-          npm ci # Installa le dipendenze in modo pulito e riproducibile (preferito in CI)
-
-      # NUOVO STEP: Esegue patch-package in modo robusto
-      # Questo step è cruciale se 'patch-package' è chiamato da uno script postinstall
-      # o se deve essere eseguito separatamente. 'npx' assicura che il comando
-      # venga trovato anche se non è nel PATH globale.
-      - name: Apply patches with patch-package
-        run: npx patch-package
+        run: npm ci # Installa le dipendenze in modo pulito e riproducibile (preferito in CI)
 
       - name: Build project # Esegue lo script di build del tuo progetto React
         run: npm run build # Assicurati che nel tuo package.json ci sia uno script 'build'
