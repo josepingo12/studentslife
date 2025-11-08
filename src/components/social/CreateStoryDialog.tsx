@@ -18,18 +18,14 @@ const handleUploadComplete = () => {
 onStoryCreated();
 onOpenChange(false); // Close the sheet after upload
 };
-return (
-<UploadSheet
-open={open}
-onOpenChange={onOpenChange}
-userId={userId}
-bucket="stories" // Specify the bucket for stories
-accept="image/,video/" // Allow both images and videos
-maxSizeMB={50} // Maximum file size for stories
-showPreview={true} // Show preview within the UploadSheet
-onUploadComplete={handleUploadComplete}
-uploadType="story" // Indicate that this is for story uploads, if UploadSheet needs specific behavior
-/>
-);
+  return (
+    <UploadSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      userId={userId}
+      onUploadComplete={handleUploadComplete}
+      uploadType="story"
+    />
+  );
 };
 export default CreateStoryDialog;

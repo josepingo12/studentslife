@@ -82,7 +82,7 @@ const App = () => {
           <Routes>
             <Route
               path="/"
-              element={session ? <Navigate to="/client-dashboard" replace /> : <Login />}
+              element={<Index />}
             />
 
             {/* Rotte pubbliche */}

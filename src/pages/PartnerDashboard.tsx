@@ -477,11 +477,7 @@ const PartnerDashboard = () => {
 
           <button
             onClick={() => navigate("/chats")}
-            className={`flex flex-col items-center gap-1 p-2 rounded-full transition-colors relative ${
-              activeTab === "chats"
-                ? "bg-blue-100 text-blue-600"
-                : "text-gray-500 hover:bg-blue-50"
-            }`}
+            className="flex flex-col items-center gap-1 p-2 rounded-full transition-colors relative text-gray-500 hover:bg-blue-50"
           >
             <div className="relative">
               <MessageCircle className="w-6 h-6" />

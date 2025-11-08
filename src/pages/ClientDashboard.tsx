@@ -63,10 +63,10 @@ const ClientDashboard = () => {
     if (!user?.id) return;
     try {
       const { error } = await supabase
-        .from('notifications')
-        .update({ is_read: true })
-        .eq('recipient_id', user.id)
-        .eq('is_read', false);
+        .from('public_profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
 
       if (error) throw error;
       console.log('Tutte le notifiche marcate come lette.');
@@ -495,7 +495,6 @@ const ClientDashboard = () => {
         onOpenChange={setLikesSheetOpen}
         userId={user.id}
         userRole={userRole}
-        onMarkAsRead={markAllNotificationsAsRead}
       />
 
       {/* Wallet Sheet */}

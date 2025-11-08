@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete, uploadType:
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
 
   // Effect to update uploadType if initialUploadType changes
-  useState(() => {
+  useEffect(() => {
     if (initialUploadType !== undefined) {
       setUploadType(initialUploadType);
     }

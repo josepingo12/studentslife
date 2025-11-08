@@ -24,7 +24,7 @@ const trySaveFcmToken = async () => {
       const platform = Capacitor.getPlatform();
       const { error } = await supabase
         .from('user_fcm_tokens')
-        .upsert({ user_id: globalUserId, fcm_token: globalFcmToken, platform: platform, updated_at: new Date().toISOString() }, { onConflict: ['user_id', 'platform'] });
+        .upsert({ user_id: globalUserId, fcm_token: globalFcmToken, platform: platform, updated_at: new Date().toISOString() }, { onConflict: 'user_id,platform' });
 
       if (error) {
         console.error('❌ Error saving FCM token globally to DB:', error);
