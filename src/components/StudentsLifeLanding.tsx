@@ -10,7 +10,47 @@ import headerMobile from '@/assets/header-mobile.png';
 import robotoAvatar from '@/assets/roboto.png';
 import appleStoreIcon from '@/assets/apple_store_icon.png';
 import playstoreIcon from '@/assets/playstore_icon.png';
+// Aggiungi dopo gli import esistenti
+import belinnails from '@/assets/belinnails.jpg';
+import elote from '@/assets/elote.jpg';
+import viajeserasmus from '@/assets/viajeserasmus.jpg';
+import five from '@/assets/five.jpg';
+import barbercomervalladolid from '@/assets/barbercomervalladolid.jpg';
+import marciasburger from '@/assets/marciasburger.jpg';
+import exxencia from '@/assets/exxencia.jpg';
+import totoink from '@/assets/totoink.jpg';
+import amasia from '@/assets/amasia.jpg';
+import purtocanalla from '@/assets/purtocanalla.jpg';
+import secreto from '@/assets/secreto.jpg';
+import aperitivo from '@/assets/aperitivo.jpg';
+import s20 from '@/assets/s20.jpg';
+import juanita from '@/assets/juanita.png';
+import tenTen from '@/assets/10y10.png';
+import malquerida from '@/assets/malquerida.png';
+import unnamed from '@/assets/unnamed.png';
+import bacterio from '@/assets/bacterio.jpg';
 
+// Array dei partner con i loghi
+const partners = [
+{ name: "Belinnails", logo: belinnails },
+{ name: "Elote", logo: elote },
+{ name: "Viajes Erasmus Valladolid", logo: viajeserasmus },
+{ name: "Five", logo: five },
+{ name: "Barber Comer Valladolid", logo: barbercomervalladolid },
+{ name: "Marcias Burger", logo: marciasburger },
+{ name: "Exxencia Ibericos", logo: exxencia },
+{ name: "Tato Ink", logo: totoink },
+{ name: "Amasia Gyros", logo: amasia },
+{ name: "Purto Canalla", logo: purtocanalla },
+{ name: "Secreto", logo: secreto },
+{ name: "Aperitivo", logo: aperitivo },
+{ name: "S20", logo: s20 },
+{ name: "Juanita Calamidad", logo: juanita },
+{ name: "10y10", logo: tenTen },
+{ name: "Malquerida", logo: malquerida },
+{ name: "Unnamed", logo: unnamed },
+{ name: "Bacterio", logo: bacterio }
+];
 const StudentsLifeLanding: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -869,38 +909,48 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* Partners Section */}
-      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
-          <div className="animate-fade-in">
-            <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
-              Partners con Descuentos
-            </h3>
-            <p className="text-lg sm:text-xl text-gray-600 mb-12 sm:mb-16 max-w-3xl mx-auto px-4">
-              Comercios locales que ofrecen descuentos exclusivos a estudiantes Erasmus
-            </p>
-            
-            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-8 sm:p-12 border border-gray-100 floating-element mx-4 sm:mx-0">
-              <div className="text-4xl sm:text-6xl mb-6 sm:mb-8">🎯</div>
-              <h4 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
-                ¡Próximamente!
-              </h4>
-              <p className="text-gray-600 text-base sm:text-lg mb-6 sm:mb-8">
-                Estamos cerrando acuerdos con los mejores comercios de Valladolid para ofrecerte descuentos exclusivos
-              </p>
-              <div className="flex justify-center space-x-3 sm:space-x-4">
-                {[...Array(4)].map((_, i) => (
-                  <div 
-                    key={i}
-                    className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl sm:rounded-2xl animate-pulse"
-                    style={{ animationDelay: `${i * 0.2}s` }}
-                  ></div>
-                ))}
-              </div>
+   {/* Partners Section */}
+<section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+    <div className="animate-fade-in">
+      <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
+        Partners con Descuentos
+      </h3>
+      <p className="text-lg sm:text-xl text-gray-600 mb-12 sm:mb-16 max-w-3xl mx-auto px-4">
+        Comercios locales que ofrecen descuentos exclusivos a estudiantes Erasmus
+      </p>
+      
+      {/* Partners Carousel */}
+      <div className="relative overflow-hidden">
+        <div className="flex animate-scroll-left space-x-8 py-8">
+          {/* Duplicamos el array per un loop infinito */}
+          {[...partners, ...partners].map((partner, index) => (
+            <div
+              key={`${partner.name}-${index}`}
+              className="flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 p-3 sm:p-4 flex items-center justify-center"
+            >
+              <img 
+                src={partner.logo}
+                alt={partner.name}
+                className="w-full h-full object-contain rounded-full"
+              />
             </div>
-          </div>
+          ))}
         </div>
-      </section>
+      </div>
+
+      {/* Partners Count */}
+      <div className="mt-8 bg-white rounded-2xl shadow-lg p-6 mx-auto max-w-md">
+        <div className="text-3xl font-bold text-blue-600 mb-2">
+          {partners.length}+
+        </div>
+        <p className="text-gray-600">
+          Partners verificados ofreciendo descuentos exclusivos
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* Contact Section - Bianco e Azzurro */}
 <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
