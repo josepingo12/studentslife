@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import logo from '@/assets/logo.png';
 import screen1 from '@/assets/screen1.jpeg';
 import screen2 from '@/assets/screen2.jpeg';
-import headerImage from '@/assets/header.png';
+import headerVideo from '@/assets/header_video.mp4';
 import headerMobile from '@/assets/header-mobile.png';
 import robotoAvatar from '@/assets/roboto.png';
 import appleStoreIcon from '@/assets/apple_store_icon.png';
@@ -500,21 +500,24 @@ useEffect(() => {
         </div>
       )}
 
-      {/* Hero Section */}
-      <header className="relative h-screen flex items-center justify-center overflow-hidden" ref={heroRef}>
-        <div className="hero-bg absolute inset-0 w-full h-full">
-          <img 
-            src={headerImage}
-            alt="StudentsLife Header Desktop" 
-            className="hidden sm:block w-full h-full object-cover object-center"
-          />
-          <img 
-            src={headerMobile}
-            alt="StudentsLife Header Mobile" 
-            className="block sm:hidden w-full h-full object-cover object-center"
-          />
-        </div>
-      </header>
+   {/* Hero Section */}
+<header className="relative h-screen flex items-center justify-center overflow-hidden" ref={heroRef}>
+  <div className="hero-bg absolute inset-0 w-full h-full">
+    <video 
+      src={headerVideo}
+      autoPlay
+      muted
+      loop
+      playsInline
+      className="hidden sm:block w-full h-full object-cover object-center"
+    />
+    <img 
+      src={headerMobile}
+      alt="StudentsLife Header Mobile" 
+      className="block sm:hidden w-full h-full object-cover object-center"
+    />
+  </div>
+</header>
 
       {/* Tutorial Modal */}
       {showTutorial && (
