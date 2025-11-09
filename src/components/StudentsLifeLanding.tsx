@@ -66,10 +66,9 @@ const StudentsLifeLanding: React.FC = () => {
     { type: 'bot', text: '¡Hola! Soy el asistente de StudentsLife. ¿En qué puedo ayudarte?' }
   ]);
   const [isTyping, setIsTyping] = useState(false);
-const [clickedPartners, setClickedPartners] = useState<Set<string>>(new Set());
-useState<Set<string>>(new Set());
-  // GIUSTO - nome diverso
-const handlePartnerLogoClick = (partnerName: string) => {
+  const [clickedPartners, setClickedPartners] = useState<Set<string>>(new Set());
+  
+  const handlePartnerLogoClick = (partnerName: string) => {
   setClickedPartners(prev => {
     const newSet = new Set(prev);
     if (newSet.has(partnerName)) {
@@ -723,10 +722,10 @@ useEffect(() => {
   <div className="max-w-6xl mx-auto px-4 sm:px-6">
     <div className="text-center mb-12 sm:mb-16 animate-fade-in">
       <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
-        Scarica l'App StudentsLife
+        Descarga la App StudentsLife
       </h2>
       <p className="text-lg sm:text-xl text-gray-600 px-4">
-        Disponibile su iOS e Android - Accesso rapido dalla tua schermata principale
+        Disponible en iOS y Android - Acceso rápido desde tu pantalla principal
       </p>
     </div>
 
@@ -759,18 +758,18 @@ useEffect(() => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center floating-element">
           <div className="text-3xl mb-4">⚡</div>
-          <h4 className="font-bold text-gray-900 mb-2">Accesso Istantaneo</h4>
-          <p className="text-gray-600 text-sm">Un tocco e sei subito dentro l'app</p>
+          <h4 className="font-bold text-gray-900 mb-2">Acceso Instantáneo</h4>
+          <p className="text-gray-600 text-sm">Un toque y ya estás dentro de la app</p>
         </div>
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center floating-element">
           <div className="text-3xl mb-4">📱</div>
-          <h4 className="font-bold text-gray-900 mb-2">Esperienza Nativa</h4>
-          <p className="text-gray-600 text-sm">Interfaccia ottimizzata per mobile</p>
+          <h4 className="font-bold text-gray-900 mb-2">Experiencia Nativa</h4>
+          <p className="text-gray-600 text-sm">Interfaz optimizada para móvil</p>
         </div>
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center floating-element">
           <div className="text-3xl mb-4">🔔</div>
-          <h4 className="font-bold text-gray-900 mb-2">Notifiche Push</h4>
-          <p className="text-gray-600 text-sm">Ricevi aggiornamenti in tempo reale</p>
+          <h4 className="font-bold text-gray-900 mb-2">Notificaciones Push</h4>
+          <p className="text-gray-600 text-sm">Recibe actualizaciones en tiempo real</p>
         </div>
       </div>
 
@@ -778,19 +777,19 @@ useEffect(() => {
       <div className="mt-12 text-center">
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl shadow-2xl p-8 text-white">
           <h3 className="text-2xl font-bold mb-4">
-            🚀 Scarica Ora e Inizia a Risparmiare!
+            🚀 ¡Descarga Ahora y Empieza a Ahorrar!
           </h3>
           <p className="text-lg opacity-90 mb-6">
-            Unisciti a migliaia di studenti che già risparmiano con StudentsLife
+            Únete a miles de estudiantes que ya ahorran con StudentsLife
           </p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             <div className="flex items-center space-x-2">
               <span className="text-2xl">📱</span>
-              <span>Disponibile su tutti i dispositivi</span>
+              <span>Disponible en todos los dispositivos</span>
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-2xl">🆓</span>
-              <span>Download gratuito</span>
+              <span>Descarga gratuita</span>
             </div>
           </div>
         </div>
@@ -804,10 +803,10 @@ useEffect(() => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16 animate-fade-in">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
-              Anteprima dell'App
+              Vista Previa de la App
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 px-4">
-              Scopri l'interfaccia moderna e intuitiva di StudentsLife
+              Descubre la interfaz moderna e intuitiva de StudentsLife
             </p>
           </div>
 
