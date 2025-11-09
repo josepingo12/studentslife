@@ -10,7 +10,7 @@ import headerMobile from '@assets/header-mobile.png';
 import robotoAvatar from '@assets/roboto.png';
 import appleStoreIcon from '@assets/apple_store_icon.png';
 import playstoreIcon from '@assets/playstore_icon.png';
-// Añadir después de los import existentes
+// Aggiungi dopo gli import esistenti
 import belinnails from '@assets/belinnails.jpg';
 import elote from '@assets/elote.jpg';
 import viajeserasmus from '@assets/viajeserasmus.jpg';
@@ -30,7 +30,7 @@ import malquerida from '@assets/malquerida.png';
 import unnamed from '@assets/unnamed.png';
 import bacterio from '@assets/bacterio.jpg';
 
-// Array de los partners con los logos
+// Array dei partner con i loghi
 const partners = [
 { name: "Belinnails", logo: belinnails },
 { name: "Elote", logo: elote },
@@ -68,14 +68,14 @@ const StudentsLifeLanding: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
 const [clickedPartners, setClickedPartners] = useState<Set<string>>(new Set());
 useState<Set<string>>(new Set());
-  // CORRECTO - nombre diferente
+  // GIUSTO - nome diverso
 const handlePartnerLogoClick = (partnerName: string) => {
   setClickedPartners(prev => {
     const newSet = new Set(prev);
     if (newSet.has(partnerName)) {
-      newSet.delete(partnerName); // Si ya clicado, remover (vuelve gris)
+      newSet.delete(partnerName); // Se già cliccato, rimuovi (torna grigio)
     } else {
-      newSet.add(partnerName); // Si no clicado, añadir (se vuelve de color)
+      newSet.add(partnerName); // Se non cliccato, aggiungi (diventa colorato)
     }
     return newSet;
   });
@@ -110,7 +110,7 @@ const handlePartnerLogoClick = (partnerName: string) => {
     return responses[question] || "¡Excelente pregunta! Nuestro equipo te responderá pronto. Mientras tanto, puedes contactarnos al +34 672 908 898 📞";
   };
 
-  // Array de las capturas de pantalla
+  // Array delle screenshot
   const screenshots = [
     {
       src: screen1,
@@ -182,12 +182,12 @@ const handlePartnerLogoClick = (partnerName: string) => {
   ];
 
   useEffect(() => {
-    // Auto-deslizamiento del carrusel
+    // Auto-slide del carousel
     const slideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % screenshots.length);
     }, 4000);
 
-    // Tutorial avance automático
+    // Tutorial auto-advance
     let tutorialInterval: NodeJS.Timeout;
     if (showTutorial) {
       tutorialInterval = setInterval(() => {
@@ -199,7 +199,7 @@ const handlePartnerLogoClick = (partnerName: string) => {
     }
 
 
-    // Animaciones estilo iOS fluidas
+    // Animazioni iOS-style fluide
     const observerOptions: IntersectionObserverInit = {
       threshold: 0.1,
       rootMargin: '0px 0px -30px 0px'
@@ -255,7 +255,7 @@ const handlePartnerLogoClick = (partnerName: string) => {
     };
   }, [screenshots.length, showTutorial, deviceType]);
 
-// PWA Install Prompt - Añadir después de todos los useEffect existentes
+// PWA Install Prompt - Aggiungi dopo tutti gli useEffect esistenti
 useEffect(() => {
   // PWA Install Logic
   let deferredPrompt;
@@ -267,16 +267,16 @@ useEffect(() => {
     navigator.serviceWorker.register('/sw.js');
   }
 
-  // Android - Prompt automático
+  // Android - Prompt automatico
   const handleBeforeInstallPrompt = (e) => {
     e.preventDefault();
     deferredPrompt = e;
     setTimeout(showInstallPrompt, 3000);
   };
 
-  // iOS - Instrucciones manuales en español
+  // iOS - Istruzioni manuali in spagnolo
   const showIOSInstallInstructions = () => {
-    if (document.querySelector('.ios-install-prompt')) return; // Evita duplicados
+    if (document.querySelector('.ios-install-prompt')) return; // Evita duplicati
 
     const installPrompt = document.createElement('div');
     installPrompt.className = 'ios-install-prompt';
@@ -345,10 +345,10 @@ useEffect(() => {
   // Event listeners
   window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-  // Auto-trigger después de 3 segundos
+  // Auto-trigger dopo 3 secondi
   const installTimer = setTimeout(showInstallPrompt, 3000);
 
-  // Limpieza
+  // Cleanup
   return () => {
     window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     clearTimeout(installTimer);
@@ -590,7 +590,7 @@ useEffect(() => {
         </div>
       )}
 
-      {/* Sección de Precios - Blanco y Azul */}
+      {/* Pricing Section - Bianco e Azzurro */}
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16 animate-fade-in">
@@ -696,7 +696,7 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Banner de Oferta de Lanzamiento - Blanco y Azul */}
+          {/* Launch Offer Banner - Bianco e Azzurro */}
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl shadow-2xl p-8 text-center text-white animate-fade-in">
             <h3 className="text-2xl sm:text-3xl font-bold mb-4">
               🚀 Antes del Lanzamiento Oficial
@@ -718,15 +718,15 @@ useEffect(() => {
         </div>
       </section>
 
-  {/* App Download Section - Sustituye la sección anterior */}
+  {/* App Download Section - Sostituisce la sezione precedente */}
 <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
   <div className="max-w-6xl mx-auto px-4 sm:px-6">
     <div className="text-center mb-12 sm:mb-16 animate-fade-in">
       <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
-        Descarga la App StudentsLife
+        Scarica l'App StudentsLife
       </h2>
       <p className="text-lg sm:text-xl text-gray-600 px-4">
-        Disponible en iOS y Android - Acceso rápido desde tu pantalla principal
+        Disponibile su iOS e Android - Accesso rapido dalla tua schermata principale
       </p>
     </div>
 
@@ -759,18 +759,18 @@ useEffect(() => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center floating-element">
           <div className="text-3xl mb-4">⚡</div>
-          <h4 className="font-bold text-gray-900 mb-2">Acceso Instantáneo</h4>
-          <p className="text-gray-600 text-sm">Un toque y estás dentro de la app</p>
+          <h4 className="font-bold text-gray-900 mb-2">Accesso Istantaneo</h4>
+          <p className="text-gray-600 text-sm">Un tocco e sei subito dentro l'app</p>
         </div>
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center floating-element">
           <div className="text-3xl mb-4">📱</div>
-          <h4 className="font-bold text-gray-900 mb-2">Experiencia Nativa</h4>
-          <p className="text-gray-600 text-sm">Interfaz optimizada para móvil</p>
+          <h4 className="font-bold text-gray-900 mb-2">Esperienza Nativa</h4>
+          <p className="text-gray-600 text-sm">Interfaccia ottimizzata per mobile</p>
         </div>
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center floating-element">
           <div className="text-3xl mb-4">🔔</div>
-          <h4 className="font-bold text-gray-900 mb-2">Notificaciones Push</h4>
-          <p className="text-gray-600 text-sm">Recibe actualizaciones en tiempo real</p>
+          <h4 className="font-bold text-gray-900 mb-2">Notifiche Push</h4>
+          <p className="text-gray-600 text-sm">Ricevi aggiornamenti in tempo reale</p>
         </div>
       </div>
 
@@ -778,19 +778,19 @@ useEffect(() => {
       <div className="mt-12 text-center">
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl shadow-2xl p-8 text-white">
           <h3 className="text-2xl font-bold mb-4">
-            🚀 ¡Descarga Ahora y Empieza a Ahorrar!
+            🚀 Scarica Ora e Inizia a Risparmiare!
           </h3>
           <p className="text-lg opacity-90 mb-6">
-            Únete a miles de estudiantes que ya ahorran con StudentsLife
+            Unisciti a migliaia di studenti che già risparmiano con StudentsLife
           </p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             <div className="flex items-center space-x-2">
               <span className="text-2xl">📱</span>
-              <span>Disponible en todos los dispositivos</span>
+              <span>Disponibile su tutti i dispositivi</span>
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-2xl">🆓</span>
-              <span>Descarga gratuita</span>
+              <span>Download gratuito</span>
             </div>
           </div>
         </div>
@@ -799,15 +799,15 @@ useEffect(() => {
   </div>
 </section>
 
-      {/* Sección de Carrusel de Vista Previa de la App */}
+      {/* App Preview Carousel Section */}
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16 animate-fade-in">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
-              Vista Previa de la App
+              Anteprima dell'App
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 px-4">
-              Descubre la interfaz moderna e intuitiva de StudentsLife
+              Scopri l'interfaccia moderna e intuitiva di StudentsLife
             </p>
           </div>
 
@@ -893,7 +893,7 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* Sección de Características */}
+      {/* Features Section */}
       <section className="py-12 sm:py-16 lg:py-24 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12 sm:mb-16 lg:mb-20 animate-fade-in">
@@ -924,7 +924,7 @@ useEffect(() => {
         </div>
       </section>
 
-{/* Sección de Partners - Carrusel Simple */}
+{/* Partners Section - Carosello Semplice */}
 <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
   <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
     <div className="animate-fade-in">
@@ -935,10 +935,10 @@ useEffect(() => {
         Comercios locales que ofrecen descuentos exclusivos a estudiantes Erasmus
       </p>
       
-      {/* Partners Carousel ANIMADO */}
+      {/* Partners Carousel ANIMATO */}
       <div className="relative overflow-hidden mb-12">
         <div className="flex animate-scroll-left space-x-8 py-8">
-          {/* Duplicamos el array para un bucle infinito */}
+          {/* Duplicamos el array per un loop infinito */}
           {[...partners, ...partners].map((partner, index) => {
             const isClicked = clickedPartners.has(partner.name);
             return (
@@ -961,7 +961,7 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Conteo de Partners - SOLO TOTAL */}
+      {/* Partners Count - SOLO TOTALE */}
       <div className="bg-white rounded-2xl shadow-lg p-6 mx-auto max-w-md">
         <div className="text-3xl font-bold text-blue-600 mb-2">
           {partners.length}+
@@ -974,7 +974,7 @@ useEffect(() => {
   </div>
 </section>
 
-      {/* Sección de Contacto - Blanco y Azul */}
+      {/* Contact Section - Bianco e Azzurro */}
 <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
   <div className="max-w-6xl mx-auto px-4 sm:px-6">
     <div className="text-center mb-12 sm:mb-16 animate-fade-in">
@@ -1097,7 +1097,7 @@ useEffect(() => {
   </div>
 </section>
 
-      {/* Sección CTA */}
+      {/* CTA Section */}
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-r from-blue-500 to-blue-600">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
@@ -1131,7 +1131,7 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* Pie de página */}
+      {/* Footer */}
       <footer className="bg-white py-12 sm:py-16 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
           <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">StudentsLife</h3>
@@ -1154,7 +1154,7 @@ useEffect(() => {
   );
 };
 
-// Componentes de ayuda
+// Componenti helper
 const FeatureCard: React.FC<{
   icon: string;
   title: string;
@@ -1210,7 +1210,7 @@ const AppFeatureItem: React.FC<{
   </div>
 );
 
-// Datos
+// Dati
 const features = [
   {
     icon: "💰",
@@ -1245,7 +1245,7 @@ const features = [
 ];
 
 const categories = [
-  { icon: "💄", name: "Belleza", color: "from-pink-400 to-rose-400" },
+  { icon: "💄", name: "Bellezza", color: "from-pink-400 to-rose-400" },
   { icon: "🎮", name: "Entretenimiento", color: "from-purple-400 to-indigo-400" },
   { icon: "📱", name: "Electrónica", color: "from-blue-400 to-cyan-400" },
   { icon: "💪", name: "Sport & Fitness", color: "from-green-400 to-emerald-400" },
