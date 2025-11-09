@@ -1,36 +1,36 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
-import logo from '@/assets/logo.png';
-import screen1 from '@/assets/screen1.jpeg';
-import screen2 from '@/assets/screen2.jpeg';
-import headerImage from '@/assets/header.png';
-import headerMobile from '@/assets/header-mobile.png';
-import robotoAvatar from '@/assets/roboto.png';
-import appleStoreIcon from '@/assets/apple_store_icon.png';
-import playstoreIcon from '@/assets/playstore_icon.png';
-// Aggiungi dopo gli import esistenti
-import belinnails from '@/assets/belinnails.jpg';
-import elote from '@/assets/elote.jpg';
-import viajeserasmus from '@/assets/viajeserasmus.jpg';
-import five from '@/assets/five.jpg';
-import barbercornervalladolid from '@/assets/barbercornervalladolid.jpg';
-import marciasburger from '@/assets/marciasburger.jpg';
-import exxencia from '@/assets/exxencia.jpg';
-import totoink from '@/assets/totoink.jpg';
-import amasia from '@/assets/amasia.jpg';
-import purtocanalla from '@/assets/purtocanalla.jpg';
-import secreto from '@/assets/secreto.jpg';
-import aperitivo from '@/assets/aperitivo.jpg';
-import s20 from '@/assets/s20.jpg';
-import juanita from '@/assets/juanita.png';
-import tenTen from '@/assets/10y10.png';
-import malquerida from '@/assets/malquerida.png';
-import unnamed from '@/assets/unnamed.png';
-import bacterio from '@/assets/bacterio.jpg';
+import { Button } from '@components/ui/button';
+import logo from '@assets/logo.png';
+import screen1 from '@assets/screen1.jpeg';
+import screen2 from '@assets/screen2.jpeg';
+import headerImage from '@assets/header.png';
+import headerMobile from '@assets/header-mobile.png';
+import robotoAvatar from '@assets/roboto.png';
+import appleStoreIcon from '@assets/apple_store_icon.png';
+import playstoreIcon from '@assets/playstore_icon.png';
+// Añadir después de los import existentes
+import belinnails from '@assets/belinnails.jpg';
+import elote from '@assets/elote.jpg';
+import viajeserasmus from '@assets/viajeserasmus.jpg';
+import five from '@assets/five.jpg';
+import barbercornervalladolid from '@assets/barbercornervalladolid.jpg';
+import marciasburger from '@assets/marciasburger.jpg';
+import exxencia from '@assets/exxencia.jpg';
+import totoink from '@assets/totoink.jpg';
+import amasia from '@assets/amasia.jpg';
+import purtocanalla from '@assets/purtocanalla.jpg';
+import secreto from '@assets/secreto.jpg';
+import aperitivo from '@assets/aperitivo.jpg';
+import s20 from '@assets/s20.jpg';
+import juanita from '@assets/juanita.png';
+import tenTen from '@assets/10y10.png';
+import malquerida from '@assets/malquerida.png';
+import unnamed from '@assets/unnamed.png';
+import bacterio from '@assets/bacterio.jpg';
 
-// Array dei partner con i loghi
+// Array de los partners con los logos
 const partners = [
 { name: "Belinnails", logo: belinnails },
 { name: "Elote", logo: elote },
@@ -68,14 +68,14 @@ const StudentsLifeLanding: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
 const [clickedPartners, setClickedPartners] = useState<Set<string>>(new Set());
 useState<Set<string>>(new Set());
-  // GIUSTO - nome diverso
+  // CORRECTO - nombre diferente
 const handlePartnerLogoClick = (partnerName: string) => {
   setClickedPartners(prev => {
     const newSet = new Set(prev);
     if (newSet.has(partnerName)) {
-      newSet.delete(partnerName); // Se già cliccato, rimuovi (torna grigio)
+      newSet.delete(partnerName); // Si ya clicado, remover (vuelve gris)
     } else {
-      newSet.add(partnerName); // Se non cliccato, aggiungi (diventa colorato)
+      newSet.add(partnerName); // Si no clicado, añadir (se vuelve de color)
     }
     return newSet;
   });
@@ -110,7 +110,7 @@ const handlePartnerLogoClick = (partnerName: string) => {
     return responses[question] || "¡Excelente pregunta! Nuestro equipo te responderá pronto. Mientras tanto, puedes contactarnos al +34 672 908 898 📞";
   };
 
-  // Array delle screenshot
+  // Array de las capturas de pantalla
   const screenshots = [
     {
       src: screen1,
@@ -182,12 +182,12 @@ const handlePartnerLogoClick = (partnerName: string) => {
   ];
 
   useEffect(() => {
-    // Auto-slide del carousel
+    // Auto-deslizamiento del carrusel
     const slideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % screenshots.length);
     }, 4000);
 
-    // Tutorial auto-advance
+    // Tutorial avance automático
     let tutorialInterval: NodeJS.Timeout;
     if (showTutorial) {
       tutorialInterval = setInterval(() => {
@@ -199,7 +199,7 @@ const handlePartnerLogoClick = (partnerName: string) => {
     }
 
 
-    // Animazioni iOS-style fluide
+    // Animaciones estilo iOS fluidas
     const observerOptions: IntersectionObserverInit = {
       threshold: 0.1,
       rootMargin: '0px 0px -30px 0px'
@@ -255,7 +255,7 @@ const handlePartnerLogoClick = (partnerName: string) => {
     };
   }, [screenshots.length, showTutorial, deviceType]);
 
-// PWA Install Prompt - Aggiungi dopo tutti gli useEffect esistenti
+// PWA Install Prompt - Añadir después de todos los useEffect existentes
 useEffect(() => {
   // PWA Install Logic
   let deferredPrompt;
@@ -267,16 +267,16 @@ useEffect(() => {
     navigator.serviceWorker.register('/sw.js');
   }
 
-  // Android - Prompt automatico
+  // Android - Prompt automático
   const handleBeforeInstallPrompt = (e) => {
     e.preventDefault();
     deferredPrompt = e;
     setTimeout(showInstallPrompt, 3000);
   };
 
-  // iOS - Istruzioni manuali in spagnolo
+  // iOS - Instrucciones manuales en español
   const showIOSInstallInstructions = () => {
-    if (document.querySelector('.ios-install-prompt')) return; // Evita duplicati
+    if (document.querySelector('.ios-install-prompt')) return; // Evita duplicados
 
     const installPrompt = document.createElement('div');
     installPrompt.className = 'ios-install-prompt';
@@ -345,10 +345,10 @@ useEffect(() => {
   // Event listeners
   window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-  // Auto-trigger dopo 3 secondi
+  // Auto-trigger después de 3 segundos
   const installTimer = setTimeout(showInstallPrompt, 3000);
 
-  // Cleanup
+  // Limpieza
   return () => {
     window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     clearTimeout(installTimer);
@@ -561,7 +561,7 @@ useEffect(() => {
                   <button
                     key={index}
                     onClick={() => setTutorialStep(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 \${
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
                       index === tutorialStep 
                         ? 'bg-blue-500 w-6' 
                         : 'bg-gray-300 hover:bg-gray-400'
@@ -590,7 +590,7 @@ useEffect(() => {
         </div>
       )}
 
-      {/* Pricing Section - Bianco e Azzurro */}
+      {/* Sección de Precios - Blanco y Azul */}
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16 animate-fade-in">
@@ -696,7 +696,7 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Launch Offer Banner - Bianco e Azzurro */}
+          {/* Banner de Oferta de Lanzamiento - Blanco y Azul */}
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl shadow-2xl p-8 text-center text-white animate-fade-in">
             <h3 className="text-2xl sm:text-3xl font-bold mb-4">
               🚀 Antes del Lanzamiento Oficial
@@ -718,15 +718,15 @@ useEffect(() => {
         </div>
       </section>
 
-  {/* App Download Section - Sostituisce la sezione precedente */}
+  {/* App Download Section - Sustituye la sección anterior */}
 <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
   <div className="max-w-6xl mx-auto px-4 sm:px-6">
     <div className="text-center mb-12 sm:mb-16 animate-fade-in">
       <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
-        Scarica l'App StudentsLife
+        Descarga la App StudentsLife
       </h2>
       <p className="text-lg sm:text-xl text-gray-600 px-4">
-        Disponibile su iOS e Android - Accesso rapido dalla tua schermata principale
+        Disponible en iOS y Android - Acceso rápido desde tu pantalla principal
       </p>
     </div>
 
@@ -759,18 +759,18 @@ useEffect(() => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center floating-element">
           <div className="text-3xl mb-4">⚡</div>
-          <h4 className="font-bold text-gray-900 mb-2">Accesso Istantaneo</h4>
-          <p className="text-gray-600 text-sm">Un tocco e sei subito dentro l'app</p>
+          <h4 className="font-bold text-gray-900 mb-2">Acceso Instantáneo</h4>
+          <p className="text-gray-600 text-sm">Un toque y estás dentro de la app</p>
         </div>
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center floating-element">
           <div className="text-3xl mb-4">📱</div>
-          <h4 className="font-bold text-gray-900 mb-2">Esperienza Nativa</h4>
-          <p className="text-gray-600 text-sm">Interfaccia ottimizzata per mobile</p>
+          <h4 className="font-bold text-gray-900 mb-2">Experiencia Nativa</h4>
+          <p className="text-gray-600 text-sm">Interfaz optimizada para móvil</p>
         </div>
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center floating-element">
           <div className="text-3xl mb-4">🔔</div>
-          <h4 className="font-bold text-gray-900 mb-2">Notifiche Push</h4>
-          <p className="text-gray-600 text-sm">Ricevi aggiornamenti in tempo reale</p>
+          <h4 className="font-bold text-gray-900 mb-2">Notificaciones Push</h4>
+          <p className="text-gray-600 text-sm">Recibe actualizaciones en tiempo real</p>
         </div>
       </div>
 
@@ -778,19 +778,19 @@ useEffect(() => {
       <div className="mt-12 text-center">
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl shadow-2xl p-8 text-white">
           <h3 className="text-2xl font-bold mb-4">
-            🚀 Scarica Ora e Inizia a Risparmiare!
+            🚀 ¡Descarga Ahora y Empieza a Ahorrar!
           </h3>
           <p className="text-lg opacity-90 mb-6">
-            Unisciti a migliaia di studenti che già risparmiano con StudentsLife
+            Únete a miles de estudiantes que ya ahorran con StudentsLife
           </p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             <div className="flex items-center space-x-2">
               <span className="text-2xl">📱</span>
-              <span>Disponibile su tutti i dispositivi</span>
+              <span>Disponible en todos los dispositivos</span>
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-2xl">🆓</span>
-              <span>Download gratuito</span>
+              <span>Descarga gratuita</span>
             </div>
           </div>
         </div>
@@ -799,15 +799,15 @@ useEffect(() => {
   </div>
 </section>
 
-      {/* App Preview Carousel Section */}
+      {/* Sección de Carrusel de Vista Previa de la App */}
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16 animate-fade-in">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
-              Anteprima dell'App
+              Vista Previa de la App
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 px-4">
-              Scopri l'interfaccia moderna e intuitiva di StudentsLife
+              Descubre la interfaz moderna e intuitiva de StudentsLife
             </p>
           </div>
 
@@ -893,7 +893,7 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Sección de Características */}
       <section className="py-12 sm:py-16 lg:py-24 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12 sm:mb-16 lg:mb-20 animate-fade-in">
@@ -924,7 +924,7 @@ useEffect(() => {
         </div>
       </section>
 
-{/* Partners Section - Carosello Semplice */}
+{/* Sección de Partners - Carrusel Simple */}
 <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
   <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
     <div className="animate-fade-in">
@@ -935,10 +935,10 @@ useEffect(() => {
         Comercios locales que ofrecen descuentos exclusivos a estudiantes Erasmus
       </p>
       
-      {/* Partners Carousel ANIMATO */}
+      {/* Partners Carousel ANIMADO */}
       <div className="relative overflow-hidden mb-12">
         <div className="flex animate-scroll-left space-x-8 py-8">
-          {/* Duplicamos el array per un loop infinito */}
+          {/* Duplicamos el array para un bucle infinito */}
           {[...partners, ...partners].map((partner, index) => {
             const isClicked = clickedPartners.has(partner.name);
             return (
@@ -961,7 +961,7 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Partners Count - SOLO TOTALE */}
+      {/* Conteo de Partners - SOLO TOTAL */}
       <div className="bg-white rounded-2xl shadow-lg p-6 mx-auto max-w-md">
         <div className="text-3xl font-bold text-blue-600 mb-2">
           {partners.length}+
@@ -974,7 +974,7 @@ useEffect(() => {
   </div>
 </section>
 
-      {/* Contact Section - Bianco e Azzurro */}
+      {/* Sección de Contacto - Blanco y Azul */}
 <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
   <div className="max-w-6xl mx-auto px-4 sm:px-6">
     <div className="text-center mb-12 sm:mb-16 animate-fade-in">
@@ -1097,7 +1097,7 @@ useEffect(() => {
   </div>
 </section>
 
-      {/* CTA Section */}
+      {/* Sección CTA */}
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-r from-blue-500 to-blue-600">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
@@ -1131,13 +1131,22 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Pie de página */}
       <footer className="bg-white py-12 sm:py-16 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
           <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">StudentsLife</h3>
           <p className="text-gray-600 mb-6 sm:mb-8 px-4">
             Conectando estudiantes en Valladolid con los mejores descuentos y experiencias
           </p>
+          {/* Social Media Icons */}
+          <div className="flex justify-center space-x-6 mb-6">
+            <a href="https://www.instagram.com/students.1ife/" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-600 transition-colors duration-300">
+              <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path fillRule="evenodd" d="M12.315 2c2.43 0 2.715.01 3.655.045.92.035 1.78.18 2.445.42.66.25 1.127.535 1.57.97.443.44.728.91 1.003 1.57.24.665.385 1.525.42 2.445.035.94.045 1.225.045 3.655s-.01 2.715-.045 3.655c-.035.92-.18 1.78-.42 2.445-.25.66-.535 1.127-.97 1.57-.44.443-.91.728-1.57 1.003-.665.24-1.525.385-2.445.42-.94.035-1.225.045-3.655.045s-2.715-.01-3.655-.045c-.92-.035-1.78-.18-2.445-.42-.66-.25-1.127-.535-1.57-.97-.443-.44-.728-.91-1.003-1.57-.24-.665-.385-1.525-.42-2.445-.035-.94-.045-1.225-.045-3.655s.01-2.715.045-3.655c.035-.92.18-1.78.42-2.445.25-.66.535-1.127.97-1.57.44-.443.91-.728 1.57-1.003.665-.24 1.525-.385 2.445-.42.94-.035 1.225-.045 3.655-.045zm0-2c-2.747 0-3.085.01-4.122.05-.99.04-1.7.19-2.31.43-.63.24-1.17.56-1.61.99-.44.44-.76.98-1 .61-.24.63-.43 1.34-.47 2.33-.04 1.03-.05 1.37-.05 4.12s.01 3.08.05 4.12c.04.99.19 1.7.43 2.31.24.63.56 1.17.99 1.61.44.44.98.76 1.61 1 .63.24 1.34.43 2.31.47 1.03.04 1.37.05 4.12.05s3.08-.01 4.12-.05c.99-.04 1.7-.19 2.31-.43.63-.24 1.17-.56 1.61-.99.44-.44.76-.98 1-1.61.24-.63.43-1.34.47-2.31.04-1.03.05-1.37.05-4.12s-.01-3.08-.05-4.12c-.04-.99-.19-1.7-.43-2.31-.24-.63-.56-1.17-.99-1.61-.44-.44-.98-.76-1.61-1-.63-.24-1.34-.43-2.31-.47-1.03-.04-1.37-.05-4.12-.05zM12 7.77a4.23 4.23 0 100 8.46 4.23 4.23 0 000-8.46zM12 9.23a2.77 2.77 0 110 5.54 2.77 2.77 0 010-5.54zm5.725-4.63c0-.79-.64-1.43-1.43-1.43s-1.43.64-1.43 1.43c0 .79.64 1.43 1.43 1.43s1.43-.64 1.43-1.43z" clipRule="evenodd" />
+              </svg>
+            </a>
+            {/* Add other social media icons here if needed */}
+          </div>
           <p className="text-gray-400 text-sm sm:text-base">&copy; 2024 StudentsLife. Todos los derechos reservados.</p>
         </div>
       </footer>
@@ -1145,7 +1154,7 @@ useEffect(() => {
   );
 };
 
-// Componenti helper
+// Componentes de ayuda
 const FeatureCard: React.FC<{
   icon: string;
   title: string;
@@ -1201,7 +1210,7 @@ const AppFeatureItem: React.FC<{
   </div>
 );
 
-// Dati
+// Datos
 const features = [
   {
     icon: "💰",
