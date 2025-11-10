@@ -19,18 +19,8 @@ export const useAuth = () => {
         return;
       }
 
-      // Se la RPC fallisce, usa una query diretta
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userId)
-        .single();
-
-      if (profile && !profileError) {
-        setUserRole(profile.role);
-      } else {
-        setUserRole('client'); // default
-      }
+      // Se la RPC fallisce, imposta ruolo di default
+      setUserRole('client'); // default
     } catch (error) {
       console.error('Error fetching user role:', error);
       setUserRole('client');

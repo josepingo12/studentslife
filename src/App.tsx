@@ -22,72 +22,14 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminSetup from "./pages/AdminSetup";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
-// Importa Supabase Client
-import { createClient } from "@supabase/supabase-js";
-import { useState, useEffect } from "react";
+// Usa il sistema di auth centralizzato
+import { useAuth } from "@/hooks/useAuth";
 
-// CONFIGURA IL TUO CLIENT SUPABASE QUI usando le variabili d'ambiente
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    storage: localStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-    // Aggiungi queste configurazioni per migliorare la persistenza
-    storageKey: 'supabase.auth.token',
-    flowType: 'pkce'
-  },
-});
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const getInitialSession = async () => {
-      try {
-        // Prima controlla se c'è una sessione salvata
-        const { data: { session }, error } = await supabase.auth.getSession();
-
-        if (error) {
-          console.error('Errore nel recuperare la sessione:', error);
-        }
-
-        setSession(session);
-        setLoading(false);
-
-        // Ascolta i cambiamenti di stato dell'autenticazione
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          async (event, newSession) => {
-            console.log('Auth state changed:', event, newSession);
-            setSession(newSession);
-
-            // Salva esplicitamente la sessione nel localStorage
-            if (newSession) {
-              localStorage.setItem('supabase.auth.session', JSON.stringify(newSession));
-            } else {
-              localStorage.removeItem('supabase.auth.session');
-            }
-          }
-        );
-
-        return () => {
-          subscription.unsubscribe();
-        };
-      } catch (error) {
-        console.error('Errore nell\'inizializzazione della sessione:', error);
-        setLoading(false);
-      }
-    };
-
-    getInitialSession();
-  }, []);
-
+  const { session, loading } = useAuth();
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontSize: '24px' }}>
