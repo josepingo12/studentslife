@@ -36,6 +36,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
+    // Aggiungi queste configurazioni per migliorare la persistenza
+    storageKey: 'supabase.auth.token',
+    flowType: 'pkce'
   },
 });
 
@@ -47,17 +50,39 @@ const App = () => {
 
   useEffect(() => {
     const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      setLoading(false);
+      try {
+        // Prima controlla se c'è una sessione salvata
+        const { data: { session }, error } = await supabase.auth.getSession();
 
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
-        setSession(newSession);
-      });
+        if (error) {
+          console.error('Errore nel recuperare la sessione:', error);
+        }
 
-      return () => {
-        subscription.unsubscribe();
-      };
+        setSession(session);
+        setLoading(false);
+
+        // Ascolta i cambiamenti di stato dell'autenticazione
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, newSession) => {
+            console.log('Auth state changed:', event, newSession);
+            setSession(newSession);
+
+            // Salva esplicitamente la sessione nel localStorage
+            if (newSession) {
+              localStorage.setItem('supabase.auth.session', JSON.stringify(newSession));
+            } else {
+              localStorage.removeItem('supabase.auth.session');
+            }
+          }
+        );
+
+        return () => {
+          subscription.unsubscribe();
+        };
+      } catch (error) {
+        console.error('Errore nell\'inizializzazione della sessione:', error);
+        setLoading(false);
+      }
     };
 
     getInitialSession();
@@ -78,17 +103,34 @@ const App = () => {
         <Sonner />
         <HashRouter>
           <Routes>
+            {/* Se l'utente è già loggato, vai alla dashboard appropriata */}
             <Route
               path="/"
-              element={<Index />}
+              element={
+                session ? (
+                  <Navigate to="/client-dashboard" replace />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
             />
 
             {/* Rotte pubbliche */}
             <Route path="/register-client" element={<RegisterClient />} />
             <Route path="/register-partner" element={<RegisterPartner />} />
-            <Route path="/login" element={<Login />} />
+            <Route
+              path="/login"
+              element={
+                session ? (
+                  <Navigate to="/client-dashboard" replace />
+                ) : (
+                  <Login />
+                )
+              }
+            />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/pending-approval" element={<PendingApproval />} />
+            <Route path="/home" element={<Index />} />
 
             {/* Rotte protette */}
             <Route
@@ -165,7 +207,6 @@ const App = () => {
             />
             <Route path="/admin-setup" element={<AdminSetup />} />
 
-            {/* Rotta catch-all per pagine non trovate */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </HashRouter>
