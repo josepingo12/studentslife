@@ -147,10 +147,10 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!code || code.length !== 12) {
+    if (!code) {
       toast({
         title: "Codice non valido",
-        description: "Il codice QR deve essere di 12 caratteri",
+        description: "Inserisci un codice QR",
         variant: "destructive",
       });
       return;
@@ -359,7 +359,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
           <Button
             type="submit"
             className="w-full ios-button h-14 text-lg"
-            disabled={loading || code.length !== 12}
+            disabled={loading || !code}
             size="lg"
           >
             {loading ? "Verifica..." : "Verifica QR Code"}
