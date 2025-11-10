@@ -5,21 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="efedd8c5-21e2-416a-8cc8-6981de5d5c67" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/ios/App/App/AppRelease.entitlements" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ios/App/App/Assets.xcassets/AppIcon.appiconset/Contents.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ios/App/App/Assets.xcassets/AppIcon.appiconset/Progetto senza titolo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ios/App/App/Assets.xcassets/Contents.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ios/App/App/Assets.xcassets/Splash.imageset/Contents.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ios/App/App/Assets.xcassets/Splash.imageset/Progetto senza titolo 1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ios/App/App/Assets.xcassets/Splash.imageset/Progetto senza titolo 2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ios/App/App/Assets.xcassets/Splash.imageset/Progetto senza titolo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ios/App/App/GoogleService-Info.plist" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/client/ClientSettingsSheet.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/client/ClientSettingsSheet.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/partner/SettingsSheet.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/partner/SettingsSheet.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
