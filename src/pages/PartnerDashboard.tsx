@@ -377,18 +377,6 @@ const PartnerDashboard = () => {
         </div>
       ) : (
         <div className="mt-4">
-          {/* Settings Icon */}
-          <div className="px-4 mb-4 flex justify-end">
-            <Button
-              onClick={() => setSettingsSheetOpen(true)}
-              variant="ghost"
-              size="icon"
-              className="rounded-full"
-            >
-              <Settings className="w-5 h-5" />
-            </Button>
-          </div>
-
           {/* Profile Content */}
           {profileView === "social" ? (
             <PartnerSocialProfile
