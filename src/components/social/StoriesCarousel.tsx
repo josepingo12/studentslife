@@ -46,7 +46,16 @@ const StoriesCarousel = ({ currentUserId }: StoriesCarouselProps) => {
       groupedStories[story.user_id].stories.push(story);
     });
 
-    setStories(Object.values(groupedStories));
+    // Sort: unviewed stories first, viewed stories last
+    const allStories = Object.values(groupedStories);
+    const unviewed = allStories.filter((sg: any) => 
+      sg.stories.some((story: any) => !viewedStories.has(story.id))
+    );
+    const viewed = allStories.filter((sg: any) => 
+      sg.stories.every((story: any) => viewedStories.has(story.id))
+    );
+
+    setStories([...unviewed, ...viewed]);
   };
 
   const loadViewedStories = async () => {

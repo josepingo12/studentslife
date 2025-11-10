@@ -73,6 +73,13 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
     }
   }, [currentStory, currentUserId, isOwnStory]);
 
+  // Resume playback when bottom sheet closes
+  useEffect(() => {
+    if (!isViewersSheetOpen && isPaused) {
+      setIsPaused(false);
+    }
+  }, [isViewersSheetOpen]);
+
   useEffect(() => {
     if (!videoRef.current) return;
 
@@ -337,7 +344,7 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
       {isDesktop ? (
         <div className="relative w-full max-w-md h-full max-h-[90vh] bg-black rounded-lg overflow-hidden">
           {/* Progress bars */}
-          <div className="absolute top-4 left-4 right-4 z-20 flex gap-1">
+          <div className="absolute left-4 right-4 z-20 flex gap-1" style={{ top: 'calc(env(safe-area-inset-top) + 0.5rem)' }}>
             {storyGroup.stories.map((_: any, index: number) => (
               <div key={index} className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
                 <div
@@ -352,7 +359,7 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
           </div>
 
           {/* Header */}
-          <div className="absolute top-8 left-4 right-4 z-20 flex items-center justify-between pt-4" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}>
+          <div className="absolute left-4 right-4 z-20 flex items-center justify-between" style={{ top: 'calc(env(safe-area-inset-top) + 2rem)' }}>
             <div className="flex items-center gap-3">
               <Avatar className="h-8 w-8 border border-white">
                 <AvatarImage src={storyGroup.profile?.profile_image_url} />
@@ -444,26 +451,27 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
           {/* Bottom actions - INSTAGRAM STYLE VIEWERS */}
           {isOwnStory && (
             <div className="absolute bottom-8 left-0 right-0 z-20 flex flex-col items-center justify-center">
-              {viewsCount > 0 && (
-                <Button
-                  variant="ghost"
-                  onClick={() => setIsViewersSheetOpen(true)}
-                  className="flex flex-col items-center gap-2 text-white hover:bg-transparent p-3 group"
-                >
-                  <ChevronUp className="h-6 w-6 text-white drop-shadow-lg group-hover:translate-y-[-4px] transition-transform" strokeWidth={2.5} />
-                  <div className="flex items-center gap-2 bg-black/40 backdrop-blur-sm rounded-full px-4 py-2">
-                    <Eye className="h-4 w-4 text-white" />
-                    <span className="text-white text-sm font-medium">{viewsCount}</span>
-                  </div>
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setIsPaused(true);
+                  setIsViewersSheetOpen(true);
+                }}
+                className="flex flex-col items-center gap-2 text-white hover:bg-transparent p-3 group"
+              >
+                <ChevronUp className="h-6 w-6 text-white drop-shadow-lg group-hover:translate-y-[-4px] transition-transform animate-bounce" strokeWidth={2.5} />
+                <div className="flex items-center gap-2 bg-black/40 backdrop-blur-sm rounded-full px-4 py-2">
+                  <Eye className="h-4 w-4 text-white" />
+                  <span className="text-white text-sm font-medium">{viewsCount}</span>
+                </div>
+              </Button>
             </div>
           )}
         </div>
       ) : (
         /* Mobile Layout */
         <div className="relative w-full h-full bg-black">
-          <div className="absolute top-4 left-4 right-4 z-20 flex gap-1">
+          <div className="absolute left-4 right-4 z-20 flex gap-1" style={{ top: 'calc(env(safe-area-inset-top) + 0.5rem)' }}>
             {storyGroup.stories.map((_: any, index: number) => (
               <div key={index} className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
                 <div
@@ -477,7 +485,7 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
             ))}
           </div>
 
-          <div className="absolute top-8 left-4 right-4 z-20 flex items-center justify-between pt-4" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}>
+          <div className="absolute left-4 right-4 z-20 flex items-center justify-between" style={{ top: 'calc(env(safe-area-inset-top) + 2rem)' }}>
             <div className="flex items-center gap-3">
               <Avatar className="h-8 w-8 border border-white">
                 <AvatarImage src={storyGroup.profile?.profile_image_url} />
@@ -551,16 +559,14 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
 
           {/* Bottom viewers indicator for mobile - INSTAGRAM STYLE */}
           {isOwnStory && (
-            <div className="absolute bottom-20 left-0 right-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-              {viewsCount > 0 && (
-                <div className="flex flex-col items-center gap-2 animate-bounce">
-                  <ChevronUp className="h-6 w-6 text-white drop-shadow-lg" strokeWidth={2.5} />
-                  <div className="flex items-center gap-2 bg-black/40 backdrop-blur-sm rounded-full px-4 py-2">
-                    <Eye className="h-4 w-4 text-white" />
-                    <span className="text-white text-sm font-medium">{viewsCount}</span>
-                  </div>
+            <div className="absolute left-0 right-0 z-20 flex flex-col items-center justify-center" style={{ bottom: 'calc(env(safe-area-inset-bottom) + 5rem)' }}>
+              <div className="flex flex-col items-center gap-2 animate-bounce pointer-events-auto">
+                <ChevronUp className="h-6 w-6 text-white drop-shadow-lg" strokeWidth={2.5} />
+                <div className="flex items-center gap-2 bg-black/40 backdrop-blur-sm rounded-full px-4 py-2">
+                  <Eye className="h-4 w-4 text-white" />
+                  <span className="text-white text-sm font-medium">{viewsCount}</span>
                 </div>
-              )}
+              </div>
             </div>
           )}
         </div>
