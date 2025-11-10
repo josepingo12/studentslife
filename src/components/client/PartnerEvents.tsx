@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Calendar, Percent, Download, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import QRCodeModal from "./QRCodeModal";
 
 interface PartnerEventsProps {
@@ -11,6 +12,7 @@ interface PartnerEventsProps {
 
 const PartnerEvents = ({ partnerId }: PartnerEventsProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);

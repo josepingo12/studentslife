@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Star, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 interface PartnerReviewsProps {
   partnerId: string;
@@ -13,6 +14,7 @@ interface PartnerReviewsProps {
 
 const PartnerReviews = ({ partnerId, reviews, onReviewAdded }: PartnerReviewsProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [showForm, setShowForm] = useState(false);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
