@@ -56,9 +56,6 @@ const StudentsLifeLanding: React.FC = () => {
   const navigate = useNavigate();
   const heroRef = useRef<HTMLElement>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [showTutorial, setShowTutorial] = useState(false);
-  const [tutorialStep, setTutorialStep] = useState(0);
-  const [deviceType, setDeviceType] = useState<'ios' | 'android'>('ios');
   
   // Chatbot states
   const [showChatbot, setShowChatbot] = useState(false);
@@ -125,77 +122,11 @@ const StudentsLifeLanding: React.FC = () => {
     }
   ];
 
-  // Tutorial steps
-  const iosSteps = [
-    {
-      title: "Paso 1: Abre Safari",
-      description: "Visita studentslife.es en Safari",
-      icon: "🌐",
-      animation: "bounce"
-    },
-    {
-      title: "Paso 2: Toca el botón Compartir",
-      description: "Presiona el icono de compartir en la parte inferior",
-      icon: "📤",
-      animation: "pulse"
-    },
-    {
-      title: "Paso 3: Añadir a Inicio",
-      description: "Selecciona 'Añadir a pantalla de inicio'",
-      icon: "📱",
-      animation: "bounce"
-    },
-    {
-      title: "¡Listo!",
-      description: "Ya tienes StudentsLife en tu pantalla de inicio",
-      icon: "✅",
-      animation: "tada"
-    }
-  ];
-
-  const androidSteps = [
-    {
-      title: "Paso 1: Abre Chrome",
-      description: "Visita studentslife.es en Google Chrome",
-      icon: "🌐",
-      animation: "bounce"
-    },
-    {
-      title: "Paso 2: Menú de opciones",
-      description: "Toca los tres puntos en la esquina superior derecha",
-      icon: "⋮",
-      animation: "pulse"
-    },
-    {
-      title: "Paso 3: Añadir a Inicio",
-      description: "Selecciona 'Añadir a pantalla de inicio'",
-      icon: "📱",
-      animation: "bounce"
-    },
-    {
-      title: "¡Perfecto!",
-      description: "StudentsLife está ahora en tu pantalla de inicio",
-      icon: "✅",
-      animation: "tada"
-    }
-  ];
-
   useEffect(() => {
     // Auto-slide del carousel
     const slideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % screenshots.length);
     }, 4000);
-
-    // Tutorial auto-advance
-    let tutorialInterval: NodeJS.Timeout;
-    if (showTutorial) {
-      tutorialInterval = setInterval(() => {
-        setTutorialStep((prev) => {
-          const steps = deviceType === 'ios' ? iosSteps : androidSteps;
-          return (prev + 1) % steps.length;
-        });
-      }, 3000);
-    }
 
 
     // Animazioni iOS-style fluide
@@ -250,109 +181,9 @@ const StudentsLifeLanding: React.FC = () => {
       window.removeEventListener('scroll', handleScroll);
       observer.disconnect();
       clearInterval(slideInterval);
-      if (tutorialInterval) clearInterval(tutorialInterval);
     };
-  }, [screenshots.length, showTutorial, deviceType]);
+  }, [screenshots.length]);
 
-// PWA Install Prompt - Aggiungi dopo tutti gli useEffect esistenti
-useEffect(() => {
-  // PWA Install Logic
-  let deferredPrompt;
-  let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  let isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-
-  // Service Worker
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
-  }
-
-  // Android - Prompt automatico
-  const handleBeforeInstallPrompt = (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    setTimeout(showInstallPrompt, 3000);
-  };
-
-  // iOS - Istruzioni manuali in spagnolo
-  const showIOSInstallInstructions = () => {
-    if (document.querySelector('.ios-install-prompt')) return; // Evita duplicati
-
-    const installPrompt = document.createElement('div');
-    installPrompt.className = 'ios-install-prompt';
-    installPrompt.innerHTML = `
-      <div class="install-header">
-        <img src="/logo.png" alt="StudentsLife" class="install-logo">
-        <h3>¡Instala StudentsLife!</h3>
-        <button class="close-btn" onclick="this.closest('.ios-install-prompt').remove()">×</button>
-      </div>
-      <div class="install-steps">
-        <div class="step">
-          <div class="step-number">1</div>
-          <div class="step-content">
-            <p>Toca el botón <strong>Compartir</strong></p>
-            <div class="share-icon">📤</div>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-number">2</div>
-          <div class="step-content">
-            <p>Selecciona <strong>"Añadir a pantalla de inicio"</strong></p>
-            <div class="home-icon">📱</div>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-number">3</div>
-          <div class="step-content">
-            <p>Confirma tocando <strong>"Añadir"</strong></p>
-            <div class="check-icon">✅</div>
-          </div>
-        </div>
-      </div>
-      <div class="install-benefits">
-        <p>🚀 Acceso rápido • 📱 Como app nativa • 🔔 Notificaciones</p>
-      </div>
-      <div class="install-footer">
-        <button class="install-later" onclick="this.closest('.ios-install-prompt').remove()">
-          Más tarde
-        </button>
-      </div>
-    `;
-    document.body.appendChild(installPrompt);
-  };
-
-  // Android - Prompt nativo
-  const showAndroidInstallPrompt = () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult) => {
-        deferredPrompt = null;
-      });
-    }
-  };
-
-  // Función principal
-  const showInstallPrompt = () => {
-    if (isStandalone) return; // Ya está instalada
-
-    if (isIOS) {
-      showIOSInstallInstructions();
-    } else if (deferredPrompt) {
-      showAndroidInstallPrompt();
-    }
-  };
-
-  // Event listeners
-  window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-  // Auto-trigger dopo 3 secondi
-  const installTimer = setTimeout(showInstallPrompt, 3000);
-
-  // Cleanup
-  return () => {
-    window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    clearTimeout(installTimer);
-  };
-}, []);
 
 
   const handleRegisterClick = () => navigate('/register-client');
@@ -367,16 +198,6 @@ useEffect(() => {
     setCurrentSlide((prev) => (prev - 1 + screenshots.length) % screenshots.length);
   };
 
-  const openTutorial = (type: 'ios' | 'android') => {
-    setDeviceType(type);
-    setTutorialStep(0);
-    setShowTutorial(true);
-  };
-
-  const closeTutorial = () => {
-    setShowTutorial(false);
-    setTutorialStep(0);
-  };
 
   const handleQuestionClick = (question: string) => {
     setChatMessages(prev => [...prev, { type: 'user', text: question }]);
@@ -518,79 +339,6 @@ useEffect(() => {
     />
   </div>
 </header>
-
-      {/* Tutorial Modal */}
-      {showTutorial && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white text-center">
-              <h3 className="text-2xl font-bold mb-2">
-                Añadir a Pantalla de Inicio
-              </h3>
-              <p className="opacity-90">
-                {deviceType === 'ios' ? 'Para iPhone/iPad' : 'Para Android'}
-              </p>
-            </div>
-            
-            <div className="p-6">
-              <div className="text-center mb-6">
-                <div className={`text-6xl mb-4 animate-${(deviceType === 'ios' ? iosSteps : androidSteps)[tutorialStep].animation}`}>
-                  {(deviceType === 'ios' ? iosSteps : androidSteps)[tutorialStep].icon}
-                </div>
-                <h4 className="text-xl font-bold text-gray-900 mb-2">
-                  {(deviceType === 'ios' ? iosSteps : androidSteps)[tutorialStep].title}
-                </h4>
-                <p className="text-gray-600">
-                  {(deviceType === 'ios' ? iosSteps : androidSteps)[tutorialStep].description}
-                </p>
-              </div>
-
-              <div className="mb-6">
-                <div className="flex justify-between text-xs text-gray-500 mb-2">
-                  <span>Progreso</span>
-                  <span>{tutorialStep + 1}/{(deviceType === 'ios' ? iosSteps : androidSteps).length}</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-blue-500 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${((tutorialStep + 1) / (deviceType === 'ios' ? iosSteps : androidSteps).length) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              <div className="flex justify-center space-x-2 mb-6">
-                {(deviceType === 'ios' ? iosSteps : androidSteps).map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setTutorialStep(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      index === tutorialStep 
-                        ? 'bg-blue-500 w-6' 
-                        : 'bg-gray-300 hover:bg-gray-400'
-                    }`}
-                  />
-                ))}
-              </div>
-
-              <div className="flex gap-3">
-                <Button
-                  onClick={closeTutorial}
-                  variant="outline"
-                  className="flex-1 rounded-full"
-                >
-                  Cerrar
-                </Button>
-                <Button
-                  onClick={() => setTutorialStep((prev) => (prev + 1) % (deviceType === 'ios' ? iosSteps : androidSteps).length)}
-                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white rounded-full"
-                >
-                  {tutorialStep === (deviceType === 'ios' ? iosSteps : androidSteps).length - 1 ? 'Reiniciar' : 'Siguiente'}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Pricing Section - Bianco e Azzurro */}
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-blue-50 to-white">
