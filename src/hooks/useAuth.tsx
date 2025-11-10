@@ -30,19 +30,22 @@ export const useAuth = () => {
   useEffect(() => {
     // PRIMA imposta il listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
 
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          await fetchUserRole(session.user.id);
+          // Defer async calls to avoid deadlocks on native (iOS)
+          setTimeout(() => {
+            fetchUserRole(session.user!.id);
+          }, 0);
         } else {
           setUserRole(null);
         }
 
-        // IMPORTANTE: imposta loading a false solo DOPO aver processato tutto
+        // Set loading to false immediately after processing sync updates
         setLoading(false);
       }
     );
@@ -60,11 +63,11 @@ export const useAuth = () => {
 
         console.log('Initial session:', session?.user?.id);
 
-        // Se c'è già una sessione, aggiorna lo stato
+        // Se c'è già una sessione, aggiorna lo stato senza bloccare il rendering
         if (session) {
           setSession(session);
           setUser(session.user);
-          await fetchUserRole(session.user.id);
+          setTimeout(() => { fetchUserRole(session.user.id); }, 0);
         }
 
         setLoading(false);
