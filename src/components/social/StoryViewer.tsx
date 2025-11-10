@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { X, ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX, Eye, MoreHorizontal, Trash2 } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX, Eye, MoreHorizontal, Trash2, ChevronUp } from "lucide-react";
 import StoryViewers from "./StoryViewers";
 import { useToast } from "@/hooks/use-toast";
 
@@ -29,6 +29,8 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
   const [viewers, setViewers] = useState<any[]>([]);
   const [isDesktop, setIsDesktop] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
   const [savedProgress, setSavedProgress] = useState(0);
   const [remainingTime, setRemainingTime] = useState(0);
@@ -223,6 +225,29 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
     side === 'left' ? handlePrevStory() : handleNextStory();
   };
 
+  // Handle swipe up gesture to open viewers (Instagram style)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientY);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isUpSwipe = distance > 50; // Minimum swipe distance
+    
+    if (isUpSwipe && isOwnStory && viewsCount > 0) {
+      setIsViewersSheetOpen(true);
+    }
+    
+    setTouchStart(0);
+    setTouchEnd(0);
+  };
+
   const handleDeleteStory = async () => {
     if (!currentStory || !isOwnStory) return;
 
@@ -303,7 +328,7 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
               <div className="text-white">
                 <p className="text-sm font-medium">{displayName}</p>
                 <p className="text-xs opacity-70">
-                  {new Date(currentStory.created_at).toLocaleTimeString('it-IT', {
+                  {new Date(currentStory.created_at).toLocaleTimeString('es-ES', {
                     hour: '2-digit', minute: '2-digit'
                   })}
                 </p>
@@ -382,39 +407,21 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
           )}
 
           {/* Bottom actions - INSTAGRAM STYLE VIEWERS */}
-          {isOwnStory && viewsCount > 0 && (
-            <div className="absolute bottom-4 left-4 right-4 z-20">
-              <Button
-                variant="ghost"
-                onClick={() => setIsViewersSheetOpen(true)}
-                className="w-full text-white hover:bg-white/20 flex items-center justify-start gap-3 p-3"
-              >
-                <div className="flex items-center -space-x-2">
-                  {viewers.slice(0, 3).map((viewer, index) => (
-                    <Avatar
-                      key={viewer.id}
-                      className="h-6 w-6 border-2 border-white"
-                      style={{ zIndex: 3 - index }}
-                    >
-                      <AvatarImage src={viewer.profiles?.profile_image_url} />
-                      <AvatarFallback className="text-xs bg-gradient-to-br from-primary to-secondary">
-                        {getDisplayName(viewer)[0]?.toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  ))}
-                </div>
-
-                <div className="flex flex-col items-start">
-                  <span className="text-sm font-medium">
-                    {viewsCount} {viewsCount === 1 ? 'visualizzazione' : 'visualizzazioni'}
-                  </span>
-                  {viewers.length > 0 && (
-                    <span className="text-xs opacity-70">
-                      {getDisplayName(viewers[0])} {viewsCount > 1 && `e altri ${viewsCount - 1}`}
-                    </span>
-                  )}
-                </div>
-              </Button>
+          {isOwnStory && (
+            <div className="absolute bottom-8 left-0 right-0 z-20 flex flex-col items-center justify-center">
+              {viewsCount > 0 && (
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsViewersSheetOpen(true)}
+                  className="flex flex-col items-center gap-2 text-white hover:bg-transparent p-3 group"
+                >
+                  <ChevronUp className="h-6 w-6 text-white drop-shadow-lg group-hover:translate-y-[-4px] transition-transform" strokeWidth={2.5} />
+                  <div className="flex items-center gap-2 bg-black/40 backdrop-blur-sm rounded-full px-4 py-2">
+                    <Eye className="h-4 w-4 text-white" />
+                    <span className="text-white text-sm font-medium">{viewsCount}</span>
+                  </div>
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -446,7 +453,7 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
               <div className="text-white">
                 <p className="text-sm font-medium">{displayName}</p>
                 <p className="text-xs opacity-70">
-                  {new Date(currentStory.created_at).toLocaleTimeString('it-IT', {
+                  {new Date(currentStory.created_at).toLocaleTimeString('es-ES', {
                     hour: '2-digit', minute: '2-digit'
                   })}
                 </p>
@@ -465,7 +472,12 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
             </div>
           </div>
 
-          <div className="relative w-full h-full">
+          <div 
+            className="relative w-full h-full"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             {isVideo ? (
               <video
                 ref={videoRef}
@@ -505,33 +517,18 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
             )}
           </div>
 
-          {/* Bottom viewers for mobile - INSTAGRAM STYLE */}
-          {isOwnStory && viewsCount > 0 && (
-            <div className="absolute bottom-4 left-4 right-4 z-20">
-              <Button
-                variant="ghost"
-                onClick={() => setIsViewersSheetOpen(true)}
-                className="w-full text-white hover:bg-white/20 flex items-center justify-center gap-2 p-3 rounded-full bg-black/20 backdrop-blur-sm"
-              >
-                <div className="flex items-center -space-x-1.5">
-                  {viewers.slice(0, 2).map((viewer, index) => (
-                    <Avatar
-                      key={viewer.id}
-                      className="h-5 w-5 border-2 border-white"
-                      style={{ zIndex: 2 - index }}
-                    >
-                      <AvatarImage src={viewer.profiles?.profile_image_url} />
-                      <AvatarFallback className="text-xs bg-gradient-to-br from-primary to-secondary">
-                        {getDisplayName(viewer)[0]?.toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  ))}
+          {/* Bottom viewers indicator for mobile - INSTAGRAM STYLE */}
+          {isOwnStory && (
+            <div className="absolute bottom-20 left-0 right-0 z-20 flex flex-col items-center justify-center pointer-events-none">
+              {viewsCount > 0 && (
+                <div className="flex flex-col items-center gap-2 animate-bounce">
+                  <ChevronUp className="h-6 w-6 text-white drop-shadow-lg" strokeWidth={2.5} />
+                  <div className="flex items-center gap-2 bg-black/40 backdrop-blur-sm rounded-full px-4 py-2">
+                    <Eye className="h-4 w-4 text-white" />
+                    <span className="text-white text-sm font-medium">{viewsCount}</span>
+                  </div>
                 </div>
-
-                <span className="text-sm font-medium">
-                  {viewsCount}
-                </span>
-              </Button>
+              )}
             </div>
           )}
         </div>
@@ -549,12 +546,12 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
       {/* Delete Confirmation Dialog */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm mx-auto">
-            <h3 className="text-lg font-semibold mb-4">Eliminare questa storia?</h3>
-            <p className="text-sm text-gray-600 mb-6">Questa azione non può essere annullata.</p>
+          <div className="bg-background p-6 rounded-lg shadow-xl text-center max-w-sm mx-auto">
+            <h3 className="text-lg font-semibold mb-4">¿Eliminar esta historia?</h3>
+            <p className="text-sm text-muted-foreground mb-6">Esta acción no se puede deshacer.</p>
             <div className="flex justify-center gap-4">
-              <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>Annulla</Button>
-              <Button variant="destructive" onClick={handleDeleteStory}>Elimina</Button>
+              <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>Cancelar</Button>
+              <Button variant="destructive" onClick={handleDeleteStory}>Eliminar</Button>
             </div>
           </div>
         </div>
