@@ -12,6 +12,7 @@ import BlockUserButton from "@/components/moderation/BlockUserButton";
 import ReportContentDialog from "@/components/moderation/ReportContentDialog";
 import MediaUploadSheet from "@/components/chat/MediaUploadSheet";
 import VoiceRecorder from "@/components/chat/VoiceRecorder";
+import VoiceMessagePlayer from "@/components/chat/VoiceMessagePlayer";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
 
@@ -449,7 +450,10 @@ const ChatConversation = () => {
                     ) : message.media_type === 'video' ? (
                       <video src={message.media_url} controls className="rounded-lg max-w-full" />
                     ) : message.media_type === 'audio' ? (
-                      <audio src={message.media_url} controls className="w-64" />
+                      <VoiceMessagePlayer 
+                        audioUrl={message.media_url} 
+                        isOwn={isOwn}
+                      />
                     ) : (
                       <a 
                         href={message.media_url} 
