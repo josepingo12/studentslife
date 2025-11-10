@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { Mic, X } from "lucide-react";
+import { Mic, X, Send, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 
 interface VoiceRecorderButtonProps {
@@ -11,11 +11,10 @@ interface VoiceRecorderButtonProps {
 
 const VoiceRecorderButton = ({ onRecordingComplete, disabled }: VoiceRecorderButtonProps) => {
   const { toast } = useToast();
+  const [isOpen, setIsOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioLevels, setAudioLevels] = useState<number[]>(new Array(40).fill(0));
-  const [touchStartY, setTouchStartY] = useState(0);
-  const [isCancelling, setIsCancelling] = useState(false);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -26,9 +25,27 @@ const VoiceRecorderButton = ({ onRecordingComplete, disabled }: VoiceRecorderBut
 
   useEffect(() => {
     return () => {
-      stopRecording();
+      cleanup();
     };
   }, []);
+
+  const cleanup = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+    }
+
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+  };
 
   const startRecording = async () => {
     try {
@@ -72,15 +89,6 @@ const VoiceRecorderButton = ({ onRecordingComplete, disabled }: VoiceRecorderBut
 
       mediaRecorder.onstop = () => {
         stream.getTracks().forEach(track => track.stop());
-        
-        if (!isCancelling && audioChunksRef.current.length > 0) {
-          const audioBlob = new Blob(audioChunksRef.current, { type: supportedMimeType });
-          onRecordingComplete(audioBlob);
-        }
-        
-        setIsRecording(false);
-        setRecordingTime(0);
-        setIsCancelling(false);
       };
 
       mediaRecorder.start();
@@ -96,8 +104,8 @@ const VoiceRecorderButton = ({ onRecordingComplete, disabled }: VoiceRecorderBut
       visualizeAudio();
     } catch (error: any) {
       toast({
-        title: "Errore",
-        description: "Impossibile accedere al microfono. Verifica i permessi.",
+        title: "Error",
+        description: "No se pudo acceder al micrófono. Verifica los permisos.",
         variant: "destructive",
       });
     }
@@ -134,11 +142,8 @@ const VoiceRecorderButton = ({ onRecordingComplete, disabled }: VoiceRecorderBut
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
     }
-
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-    }
-
+    setIsRecording(false);
+    
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
@@ -148,49 +153,44 @@ const VoiceRecorderButton = ({ onRecordingComplete, disabled }: VoiceRecorderBut
     }
   };
 
-  const cancelRecording = () => {
-    setIsCancelling(true);
+  const handleSend = async () => {
     stopRecording();
-  };
-
-  const handleMouseDown = () => {
-    if (disabled) return;
-    startRecording();
-  };
-
-  const handleMouseUp = () => {
-    if (!isRecording) return;
-    stopRecording();
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (disabled) return;
-    const touch = e.touches[0];
-    setTouchStartY(touch.clientY);
-    startRecording();
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isRecording) return;
-    const touch = e.touches[0];
-    const deltaY = touchStartY - touch.clientY;
     
-    // Se scorri verso l'alto di più di 50px, cancella
-    if (deltaY > 50) {
-      setIsCancelling(true);
-    } else {
-      setIsCancelling(false);
-    }
+    // Wait a bit for the recording to finalize
+    setTimeout(() => {
+      if (audioChunksRef.current.length > 0) {
+        const mimeTypes = [
+          'audio/webm;codecs=opus',
+          'audio/webm',
+          'audio/mp4;codecs=mp4a.40.2',
+          'audio/mp4',
+          'audio/ogg;codecs=opus',
+          'audio/ogg',
+          'audio/wav',
+        ];
+        
+        const supportedMimeType = mimeTypes.find(type => MediaRecorder.isTypeSupported(type)) || 'audio/webm';
+        const audioBlob = new Blob(audioChunksRef.current, { type: supportedMimeType });
+        onRecordingComplete(audioBlob);
+      }
+      handleClose();
+    }, 100);
   };
 
-  const handleTouchEnd = () => {
-    if (!isRecording) return;
-    
-    if (isCancelling) {
-      cancelRecording();
-    } else {
+  const handleClose = () => {
+    if (isRecording) {
       stopRecording();
     }
+    cleanup();
+    setIsOpen(false);
+    setRecordingTime(0);
+    setAudioLevels(new Array(40).fill(0));
+    audioChunksRef.current = [];
+  };
+
+  const handleOpen = () => {
+    if (disabled) return;
+    setIsOpen(true);
   };
 
   const formatTime = (seconds: number) => {
@@ -205,41 +205,29 @@ const VoiceRecorderButton = ({ onRecordingComplete, disabled }: VoiceRecorderBut
         type="button"
         variant="ghost"
         size="icon"
-        className="rounded-full flex-shrink-0 touch-none"
+        className="rounded-full flex-shrink-0"
         disabled={disabled}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        onClick={handleOpen}
       >
-        <Mic className={`w-5 h-5 ${isRecording ? 'text-red-500' : ''}`} />
+        <Mic className="w-5 h-5" />
       </Button>
 
-      <Sheet open={isRecording} onOpenChange={() => {}}>
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent 
           side="bottom" 
-          className="h-[300px] border-none"
-          onInteractOutside={(e) => e.preventDefault()}
+          className="h-[400px] border-none"
         >
-          <div className="flex flex-col items-center justify-center h-full gap-6">
-            {/* Cancel indicator */}
-            {isCancelling && (
-              <div className="absolute top-8 left-0 right-0 flex items-center justify-center gap-2 text-red-500 animate-pulse">
-                <X className="w-5 h-5" />
-                <span className="text-sm font-medium">Scorri su per annullare</span>
-              </div>
-            )}
-
+          <SheetHeader>
+            <SheetTitle className="text-center">Mensaje de voz</SheetTitle>
+          </SheetHeader>
+          
+          <div className="flex flex-col items-center justify-center h-full gap-6 pb-8">
             {/* Waveform visualization */}
             <div className="flex items-center justify-center gap-1 h-32">
               {audioLevels.map((level, index) => (
                 <div
                   key={index}
-                  className={`w-1 rounded-full transition-all duration-100 ${
-                    isCancelling ? 'bg-red-500' : 'bg-primary'
-                  }`}
+                  className="w-1 rounded-full transition-all duration-100 bg-primary"
                   style={{
                     height: `${Math.max(4, level * 100)}px`,
                   }}
@@ -248,21 +236,59 @@ const VoiceRecorderButton = ({ onRecordingComplete, disabled }: VoiceRecorderBut
             </div>
 
             {/* Timer */}
-            <div className={`text-2xl font-mono font-bold ${isCancelling ? 'text-red-500' : ''}`}>
+            <div className="text-2xl font-mono font-bold">
               {formatTime(recordingTime)}
+            </div>
+
+            {/* Controls */}
+            <div className="flex items-center gap-4">
+              {!isRecording ? (
+                <Button
+                  onClick={startRecording}
+                  size="lg"
+                  className="rounded-full w-16 h-16 bg-primary hover:bg-primary/90"
+                >
+                  <Mic className="w-6 h-6" />
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    onClick={stopRecording}
+                    size="lg"
+                    variant="destructive"
+                    className="rounded-full w-16 h-16"
+                  >
+                    <Square className="w-6 h-6" />
+                  </Button>
+                  <Button
+                    onClick={handleSend}
+                    size="lg"
+                    className="rounded-full w-16 h-16 bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/90"
+                  >
+                    <Send className="w-6 h-6" />
+                  </Button>
+                </>
+              )}
             </div>
 
             {/* Instructions */}
             <div className="text-sm text-muted-foreground text-center">
-              {isCancelling ? (
-                <span className="text-red-500">Rilascia per annullare</span>
+              {!isRecording ? (
+                <p>Toca el micrófono para comenzar a grabar</p>
               ) : (
-                <>
-                  <p>Rilascia per inviare</p>
-                  <p className="text-xs mt-1">Scorri su per annullare</p>
-                </>
+                <p>Toca el botón azul para enviar</p>
               )}
             </div>
+
+            {/* Close button */}
+            <Button
+              onClick={handleClose}
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4"
+            >
+              <X className="w-5 h-5" />
+            </Button>
           </div>
         </SheetContent>
       </Sheet>
