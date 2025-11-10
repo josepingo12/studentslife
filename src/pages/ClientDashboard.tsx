@@ -279,7 +279,7 @@ const ClientDashboard = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400 z-10" />
                 <Input
                   type="text"
-                  placeholder="Cerca utenti, luoghi, hashtag..."
+                  placeholder={t('search.placeholder')}
                   value={searchQuery}
                   onChange={(e) => handleSearch(e.target.value)}
                   className="w-full pl-10 pr-10 py-2.5 rounded-full border-none bg-blue-50 text-blue-800 placeholder:text-blue-400 focus-visible:ring-0 text-base font-medium transition-all duration-200"
@@ -301,7 +301,7 @@ const ClientDashboard = () => {
                 {searching ? (
                   <p className="text-sm text-gray-500 text-center py-8">{t('common.loading')}</p>
                 ) : searchResults.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-8">Nessun utente trovato</p>
+                  <p className="text-sm text-gray-500 text-center py-8">{t('search.noUsersFound')}</p>
                 ) : (
                   <div className="py-3">
                     {searchResults.map((result) => (

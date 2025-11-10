@@ -71,14 +71,14 @@ const PartnerReviews = ({ partnerId, reviews, onReviewAdded }: PartnerReviewsPro
           variant="outline"
         >
           <MessageSquare className="w-5 h-5 mr-2" />
-          Lascia una recensione
+          {t('partner.leaveReview')}
         </Button>
       )}
 
       {/* Review Form */}
       {showForm && (
         <div className="ios-card p-4 space-y-4">
-          <h3 className="font-bold">Lascia la tua recensione</h3>
+          <h3 className="font-bold">{t('partner.leaveYourReview')}</h3>
           
           {/* Star Rating */}
           <div className="flex gap-2">

@@ -170,7 +170,7 @@ const PartnerEvents = ({ partnerId }: PartnerEventsProps) => {
                   className="w-full ios-button h-12 mb-2"
                 >
                   <ExternalLink className="w-5 h-5 mr-2" />
-                  Visita Sito Ufficiale
+                  {t('partner.visitWebsite')}
                 </Button>
               )}
               
@@ -180,7 +180,7 @@ const PartnerEvents = ({ partnerId }: PartnerEventsProps) => {
                   className="w-full ios-button h-12"
                 >
                   <Download className="w-5 h-5 mr-2" />
-                  Scarica QR Code
+                  {t('partner.downloadQR')}
                 </Button>
               )}
             </div>

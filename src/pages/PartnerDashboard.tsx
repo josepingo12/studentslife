@@ -263,7 +263,7 @@ const PartnerDashboard = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
               <Input
                 type="text"
-                placeholder="Cerca utenti..."
+                placeholder={t('search.users')}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="w-full pl-10 pr-10 rounded-full border-muted-foreground/20 bg-muted/50"
@@ -284,7 +284,7 @@ const PartnerDashboard = () => {
                 {searching ? (
                   <p className="text-sm text-muted-foreground text-center py-8">{t('common.loading')}</p>
                 ) : searchResults.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">Nessun utente trovato</p>
+                  <p className="text-sm text-muted-foreground text-center py-8">{t('search.noUsersFound')}</p>
                 ) : (
                   <div className="py-2">
                     {searchResults.map((result) => (

@@ -7,7 +7,16 @@
     "chat": "Chat",
     "profile": "Profile",
     "partners": "Partners",
-    "home": "Home"
+    "home": "Home",
+    "gallery": "Gallery",
+    "qr": "QR",
+    "notifications": "Notifications",
+    "notif": "Notif"
+  },
+  "search": {
+    "placeholder": "Search users, places, hashtags...",
+    "users": "Search users...",
+    "noUsersFound": "No users found"
   },
   "settings": {
     "title": "Settings",
@@ -112,7 +121,11 @@
     "upcomingEvents": "Upcoming Events",
     "openInMaps": "Open in Maps",
     "back": "Back",
-    "avgRating": "Average rating"
+    "avgRating": "Average rating",
+    "visitWebsite": "Visit Official Website",
+    "downloadQR": "Download QR Code",
+    "leaveReview": "Leave a review",
+    "leaveYourReview": "Leave your review"
   },
   "events": {
     "title": "Events",
@@ -263,5 +276,60 @@
     "postCreated": "Post created successfully",
     "postDeleted": "Post deleted successfully",
     "loggedOut": "Logged out successfully"
+  },
+  "qrScanner": {
+    "title": "QR Code Scanner",
+    "description": "Scan or enter the customer's QR code",
+    "frameQR": "📷 Frame the QR Code",
+    "rearCamera": "Rear camera active",
+    "keepStable": "Keep the QR code well lit and stable",
+    "closeCamera": "Close Camera",
+    "openCamera": "Open Rear Camera",
+    "orManual": "or enter manually",
+    "orOther": "or",
+    "enterManually": "Enter code manually",
+    "verifying": "Verifying...",
+    "verify": "Verify QR Code",
+    "invalidCode": "Invalid code",
+    "enterCode": "Enter a QR code",
+    "notValid": "QR code not valid",
+    "notYours": "QR code does not belong to this partner",
+    "alreadyUsed": "QR code already used",
+    "usedOn": "Used on",
+    "expired": "Event expired",
+    "validationError": "Error during validation",
+    "valid": "Valid QR code!",
+    "event": "Event:",
+    "discount": "Discount:",
+    "validated": "QR code validated",
+    "discountApplied": "{percent}% discount applied",
+    "verificationError": "Error during QR code verification"
+  },
+  "stats": {
+    "title": "Partner Statistics",
+    "description": "Monitor your business performance",
+    "activeEvents": "Active Events",
+    "qrDownloaded": "QR Downloaded",
+    "qrUsed": "QR Used",
+    "averageRating": "Average Rating",
+    "usageRate": "Usage Rate"
+  },
+  "profileEdit": {
+    "title": "Edit Profile",
+    "businessName": "Business Name",
+    "description": "Description",
+    "address": "Address",
+    "city": "City",
+    "category": "Category",
+    "selectCategory": "Select a category",
+    "phone": "Phone",
+    "profilePhoto": "Profile Photo",
+    "coverPhoto": "Cover Photo",
+    "coverDescription": "This image will be displayed on the partner card in the clients section",
+    "cover": "Cover",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "galleryPhotos": "Photo Gallery",
+    "galleryDescription": "Gallery photos will be displayed on your profile details page"
   }
 }

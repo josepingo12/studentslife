@@ -7,7 +7,16 @@
     "chat": "Chat",
     "profile": "Profil",
     "partners": "Partner",
-    "home": "Startseite"
+    "home": "Startseite",
+    "gallery": "Galerie",
+    "qr": "QR",
+    "notifications": "Benachrichtigungen",
+    "notif": "Benach"
+  },
+  "search": {
+    "placeholder": "Benutzer, Orte, Hashtags suchen...",
+    "users": "Benutzer suchen...",
+    "noUsersFound": "Keine Benutzer gefunden"
   },
   "settings": {
     "title": "Einstellungen",
@@ -112,7 +121,11 @@
     "upcomingEvents": "Kommende Veranstaltungen",
     "openInMaps": "In Karten öffnen",
     "back": "Zurück",
-    "avgRating": "Durchschnittliche Bewertung"
+    "avgRating": "Durchschnittliche Bewertung",
+    "visitWebsite": "Offizielle Website Besuchen",
+    "downloadQR": "QR-Code Herunterladen",
+    "leaveReview": "Eine Bewertung Hinterlassen",
+    "leaveYourReview": "Hinterlassen Sie Ihre Bewertung"
   },
   "events": {
     "title": "Veranstaltungen",
@@ -263,5 +276,60 @@
     "postCreated": "Beitrag erfolgreich erstellt",
     "postDeleted": "Beitrag erfolgreich gelöscht",
     "loggedOut": "Erfolgreich abgemeldet"
+  },
+  "qrScanner": {
+    "title": "QR-Code-Scanner",
+    "description": "Scannen oder geben Sie den QR-Code des Kunden ein",
+    "frameQR": "📷 Rahmen Sie den QR-Code ein",
+    "rearCamera": "Rückkamera aktiv",
+    "keepStable": "Halten Sie den QR-Code gut beleuchtet und stabil",
+    "closeCamera": "Kamera Schließen",
+    "openCamera": "Rückkamera Öffnen",
+    "orManual": "oder manuell eingeben",
+    "orOther": "oder",
+    "enterManually": "Code manuell eingeben",
+    "verifying": "Wird überprüft...",
+    "verify": "QR-Code Überprüfen",
+    "invalidCode": "Ungültiger Code",
+    "enterCode": "Geben Sie einen QR-Code ein",
+    "notValid": "QR-Code nicht gültig",
+    "notYours": "QR-Code gehört nicht zu diesem Partner",
+    "alreadyUsed": "QR-Code bereits verwendet",
+    "usedOn": "Verwendet am",
+    "expired": "Veranstaltung abgelaufen",
+    "validationError": "Fehler bei der Validierung",
+    "valid": "Gültiger QR-Code!",
+    "event": "Veranstaltung:",
+    "discount": "Rabatt:",
+    "validated": "QR-Code validiert",
+    "discountApplied": "{percent}% Rabatt angewendet",
+    "verificationError": "Fehler bei der Überprüfung des QR-Codes"
+  },
+  "stats": {
+    "title": "Partner-Statistiken",
+    "description": "Überwachen Sie die Leistung Ihres Unternehmens",
+    "activeEvents": "Aktive Veranstaltungen",
+    "qrDownloaded": "QR Heruntergeladen",
+    "qrUsed": "QR Verwendet",
+    "averageRating": "Durchschnittliche Bewertung",
+    "usageRate": "Nutzungsrate"
+  },
+  "profileEdit": {
+    "title": "Profil Bearbeiten",
+    "businessName": "Geschäftsname",
+    "description": "Beschreibung",
+    "address": "Adresse",
+    "city": "Stadt",
+    "category": "Kategorie",
+    "selectCategory": "Wählen Sie eine Kategorie",
+    "phone": "Telefon",
+    "profilePhoto": "Profilfoto",
+    "coverPhoto": "Titelbild",
+    "coverDescription": "Dieses Bild wird auf der Partnerkarte im Kundenbereich angezeigt",
+    "cover": "Titelbild",
+    "saving": "Wird gespeichert...",
+    "saveChanges": "Änderungen Speichern",
+    "galleryPhotos": "Foto-Galerie",
+    "galleryDescription": "Galeriefotos werden auf Ihrer Profildetailseite angezeigt"
   }
 }
