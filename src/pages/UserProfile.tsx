@@ -307,7 +307,10 @@ const UserProfile = () => {
 
       const { data: newConv, error: convError } = await supabase
         .from("conversations")
-        .insert({})
+        .insert({
+          user1_id: currentUser.id,
+          user2_id: userId
+        })
         .select()
         .single();
 
@@ -583,10 +586,10 @@ const UserProfile = () => {
                               muted
                               playsInline
                               preload="metadata"
-                              onLoadedData={(e) => {
-                                // Genera thumbnail automaticamente al secondo 1
+                              poster=""
+                              onLoadedMetadata={(e) => {
                                 const video = e.currentTarget;
-                                video.currentTime = 1;
+                                video.currentTime = 0.1;
                               }}
                             />
                             <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -607,10 +610,10 @@ const UserProfile = () => {
                                 muted
                                 playsInline
                                 preload="metadata"
-                                onLoadedData={(e) => {
-                                  // Genera thumbnail automaticamente al secondo 1
+                                poster=""
+                                onLoadedMetadata={(e) => {
                                   const video = e.currentTarget;
-                                  video.currentTime = 1;
+                                  video.currentTime = 0.1;
                                 }}
                               />
                               <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -680,10 +683,10 @@ const UserProfile = () => {
                                 muted
                                 playsInline
                                 preload="metadata"
-                                onLoadedData={(e) => {
-                                  // Genera thumbnail automaticamente al secondo 1
+                                poster=""
+                                onLoadedMetadata={(e) => {
                                   const video = e.currentTarget;
-                                  video.currentTime = 1;
+                                  video.currentTime = 0.1;
                                 }}
                               />
                               <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -704,10 +707,10 @@ const UserProfile = () => {
                                   muted
                                   playsInline
                                   preload="metadata"
-                                  onLoadedData={(e) => {
-                                    // Genera thumbnail automaticamente al secondo 1
+                                  poster=""
+                                  onLoadedMetadata={(e) => {
                                     const video = e.currentTarget;
-                                    video.currentTime = 1;
+                                    video.currentTime = 0.1;
                                   }}
                                 />
                                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

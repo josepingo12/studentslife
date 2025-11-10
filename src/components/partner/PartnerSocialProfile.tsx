@@ -339,25 +339,82 @@ const PartnerSocialProfile = ({ profile, userId, onUpdate, onSwitchToBusiness }:
                 {posts.map((post) => (
                   <div
                     key={post.id}
-                    className="aspect-square bg-card rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                    className="aspect-square bg-card rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity relative group"
                     onClick={() => {
                       setSelectedPost(post);
                       setPostDetailOpen(true);
                     }}
                   >
-                    {post.image_url ? (
-                      <img
-                        src={post.image_url}
-                        alt="Post"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-muted p-2">
-                        <p className="text-xs text-muted-foreground line-clamp-3 text-center">
-                          {post.content}
-                        </p>
-                      </div>
-                    )}
+                    {(() => {
+                      const isVideoUrl = (url?: string) => !!url && /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
+                      if (post.media_type === 'video' && (post.video_url || post.image_url)) {
+                        const videoSrc = post.video_url || post.image_url;
+                        return (
+                          <>
+                            <video
+                              src={videoSrc}
+                              className="w-full h-full object-cover"
+                              muted
+                              playsInline
+                              preload="metadata"
+                              poster=""
+                              onLoadedMetadata={(e) => {
+                                const video = e.currentTarget;
+                                video.currentTime = 0.1;
+                              }}
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <div className="bg-background/80 rounded-full p-3 backdrop-blur-sm">
+                                <svg className="w-6 h-6 text-foreground" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M8 5v14l11-7z"/>
+                                </svg>
+                              </div>
+                            </div>
+                          </>
+                        );
+                      }
+                      if (post.image_url) {
+                        if (isVideoUrl(post.image_url)) {
+                          return (
+                            <>
+                              <video
+                                src={post.image_url}
+                                className="w-full h-full object-cover"
+                                muted
+                                playsInline
+                                preload="metadata"
+                                poster=""
+                                onLoadedMetadata={(e) => {
+                                  const video = e.currentTarget;
+                                  video.currentTime = 0.1;
+                                }}
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div className="bg-background/80 rounded-full p-3 backdrop-blur-sm">
+                                  <svg className="w-6 h-6 text-foreground" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M8 5v14l11-7z"/>
+                                  </svg>
+                                </div>
+                              </div>
+                            </>
+                          );
+                        }
+                        return (
+                          <img
+                            src={post.image_url}
+                            alt="Post"
+                            className="w-full h-full object-cover"
+                          />
+                        );
+                      }
+                      return (
+                        <div className="w-full h-full flex items-center justify-center bg-muted p-2">
+                          <p className="text-xs text-muted-foreground line-clamp-3 text-center">
+                            {post.content}
+                          </p>
+                        </div>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>
@@ -374,25 +431,82 @@ const PartnerSocialProfile = ({ profile, userId, onUpdate, onSwitchToBusiness }:
                 {savedPosts.map((post: any) => (
                   <div
                     key={post.id}
-                    className="aspect-square bg-card rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                    className="aspect-square bg-card rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity relative group"
                     onClick={() => {
                       setSelectedPost(post);
                       setPostDetailOpen(true);
                     }}
                   >
-                    {post.image_url ? (
-                      <img
-                        src={post.image_url}
-                        alt="Post"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-muted p-2">
-                        <p className="text-xs text-muted-foreground line-clamp-3 text-center">
-                          {post.content}
-                        </p>
-                      </div>
-                    )}
+                    {(() => {
+                      const isVideoUrl = (url?: string) => !!url && /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
+                      if (post.media_type === 'video' && (post.video_url || post.image_url)) {
+                        const videoSrc = post.video_url || post.image_url;
+                        return (
+                          <>
+                            <video
+                              src={videoSrc}
+                              className="w-full h-full object-cover"
+                              muted
+                              playsInline
+                              preload="metadata"
+                              poster=""
+                              onLoadedMetadata={(e) => {
+                                const video = e.currentTarget;
+                                video.currentTime = 0.1;
+                              }}
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <div className="bg-background/80 rounded-full p-3 backdrop-blur-sm">
+                                <svg className="w-6 h-6 text-foreground" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M8 5v14l11-7z"/>
+                                </svg>
+                              </div>
+                            </div>
+                          </>
+                        );
+                      }
+                      if (post.image_url) {
+                        if (isVideoUrl(post.image_url)) {
+                          return (
+                            <>
+                              <video
+                                src={post.image_url}
+                                className="w-full h-full object-cover"
+                                muted
+                                playsInline
+                                preload="metadata"
+                                poster=""
+                                onLoadedMetadata={(e) => {
+                                  const video = e.currentTarget;
+                                  video.currentTime = 0.1;
+                                }}
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div className="bg-background/80 rounded-full p-3 backdrop-blur-sm">
+                                  <svg className="w-6 h-6 text-foreground" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M8 5v14l11-7z"/>
+                                  </svg>
+                              </div>
+                              </div>
+                            </>
+                          );
+                        }
+                        return (
+                          <img
+                            src={post.image_url}
+                            alt="Post"
+                            className="w-full h-full object-cover"
+                          />
+                        );
+                      }
+                      return (
+                        <div className="w-full h-full flex items-center justify-center bg-muted p-2">
+                          <p className="text-xs text-muted-foreground line-clamp-3 text-center">
+                            {post.content}
+                          </p>
+                        </div>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>
