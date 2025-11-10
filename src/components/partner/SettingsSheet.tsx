@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Globe, Lock, LogOut } from "lucide-react";
+import { Globe, Lock, LogOut, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
   AlertDialog,
@@ -34,6 +34,8 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     setLanguage(i18n.language);
@@ -119,6 +121,55 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
       description: t('success.loggedOut'),
     });
     navigate("/login");
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: t('common.error'),
+          description: "No active session",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase.functions.invoke('delete-own-account', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) {
+        console.error('Delete account error:', error);
+        toast({
+          title: t('common.error'),
+          description: "Error al eliminar la cuenta",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: t('common.success'),
+        description: "Cuenta eliminada correctamente",
+      });
+      await supabase.auth.signOut();
+      navigate("/login");
+    } catch (error) {
+      console.error('Delete account error:', error);
+      toast({
+        title: t('common.error'),
+        description: "Error al eliminar la cuenta",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
   };
 
   return (
@@ -207,6 +258,18 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
               {t('auth.logout')}
             </Button>
           </div>
+
+          {/* Delete Account Button */}
+          <div className="pt-2">
+            <Button
+              onClick={() => setShowDeleteDialog(true)}
+              variant="outline"
+              className="w-full gap-2 text-destructive hover:text-destructive border-destructive hover:bg-destructive/10"
+            >
+              <Trash2 className="w-4 h-4" />
+              Eliminar cuenta
+            </Button>
+          </div>
         </div>
       </SheetContent>
     </Sheet>
@@ -222,6 +285,27 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
         <AlertDialogFooter>
           <AlertDialogCancel>Annulla</AlertDialogCancel>
           <AlertDialogAction onClick={handleLogout}>Logout</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
+    <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>¿Eliminar cuenta?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Esta acción no se puede deshacer. Se eliminarán permanentemente tu cuenta y todos tus datos.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={handleDeleteAccount}
+            disabled={isDeleting}
+            className="bg-destructive hover:bg-destructive/90"
+          >
+            {isDeleting ? "Eliminando..." : "Confirmar"}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
