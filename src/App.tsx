@@ -21,7 +21,6 @@ import PendingApproval from "./pages/PendingApproval";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminSetup from "./pages/AdminSetup";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
-import { InstallPWA } from "./components/shared/InstallPWA";
 
 // Importa Supabase Client
 import { createClient } from "@supabase/supabase-js";
@@ -77,7 +76,6 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <InstallPWA />
         <HashRouter>
           <Routes>
             <Route
