@@ -5,12 +5,13 @@ import { useWebNotifications } from "@/hooks/useWebNotifications";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ArrowLeft, Send, Check, CheckCheck, Paperclip, Image as ImageIcon, Video, File, MoreVertical } from "lucide-react";
+import { ArrowLeft, Send, Check, CheckCheck, Paperclip, MoreVertical } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import BlockUserButton from "@/components/moderation/BlockUserButton";
 import ReportContentDialog from "@/components/moderation/ReportContentDialog";
+import MediaUploadSheet from "@/components/chat/MediaUploadSheet";
+import VoiceRecorder from "@/components/chat/VoiceRecorder";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
 
@@ -28,6 +29,7 @@ const ChatConversation = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
+  const [voiceRecorderOpen, setVoiceRecorderOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -314,8 +316,34 @@ const ChatConversation = () => {
         .getPublicUrl(filePath);
 
       await handleSendMessage(new Event('submit') as any, publicUrl, type);
-      setUploadSheetOpen(false);
       toast({ title: "File inviato" });
+    } catch (error: any) {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleVoiceRecording = async (audioBlob: Blob) => {
+    if (!user) return;
+
+    setUploading(true);
+    try {
+      const filePath = `${user.id}/${Date.now()}.webm`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('posts')
+        .upload(filePath, audioBlob);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('posts')
+        .getPublicUrl(filePath);
+
+      await handleSendMessage(new Event('submit') as any, publicUrl, 'audio');
+      setVoiceRecorderOpen(false);
+      toast({ title: "Messaggio vocale inviato" });
     } catch (error: any) {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
     } finally {
@@ -420,9 +448,10 @@ const ChatConversation = () => {
                       <img src={message.media_url} alt="Media" className="rounded-lg max-w-full" />
                     ) : message.media_type === 'video' ? (
                       <video src={message.media_url} controls className="rounded-lg max-w-full" />
+                    ) : message.media_type === 'audio' ? (
+                      <audio src={message.media_url} controls className="w-64" />
                     ) : (
                       <a href={message.media_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm underline break-all">
-                        <File className="w-4 h-4 flex-shrink-0" />
                         <span className="break-all">File allegato</span>
                       </a>
                     )}
@@ -497,77 +526,58 @@ const ChatConversation = () => {
       {/* Input */}
       <div className="ios-card mx-4 mb-4 p-4">
         <form onSubmit={handleSendMessage} className="flex gap-2">
-          <Sheet open={uploadSheetOpen} onOpenChange={setUploadSheetOpen}>
-            <SheetTrigger asChild>
-              <Button type="button" variant="ghost" size="icon" className="rounded-full flex-shrink-0">
-                <Paperclip className="w-5 h-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="rounded-t-3xl">
-              <SheetHeader>
-                <SheetTitle>Allega file</SheetTitle>
-              </SheetHeader>
-              <div className="grid grid-cols-3 gap-4 mt-6">
-                <label className="flex flex-col items-center gap-2 cursor-pointer p-4 rounded-lg hover:bg-muted transition-colors">
-                  <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-                    <ImageIcon className="w-6 h-6 text-blue-500" />
-                  </div>
-                  <span className="text-sm font-medium">Immagine</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    disabled={uploading}
-                    onChange={(e) => e.target.files?.[0] && handleMediaUpload(e.target.files[0], 'image')}
-                  />
-                </label>
-
-                <label className="flex flex-col items-center gap-2 cursor-pointer p-4 rounded-lg hover:bg-muted transition-colors">
-                  <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center">
-                    <Video className="w-6 h-6 text-purple-500" />
-                  </div>
-                  <span className="text-sm font-medium">Video</span>
-                  <input
-                    type="file"
-                    accept="video/*"
-                    className="hidden"
-                    disabled={uploading}
-                    onChange={(e) => e.target.files?.[0] && handleMediaUpload(e.target.files[0], 'video')}
-                  />
-                </label>
-
-                <label className="flex flex-col items-center gap-2 cursor-pointer p-4 rounded-lg hover:bg-muted transition-colors">
-                  <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                    <File className="w-6 h-6 text-green-500" />
-                  </div>
-                  <span className="text-sm font-medium">File</span>
-                  <input
-                    type="file"
-                    className="hidden"
-                    disabled={uploading}
-                    onChange={(e) => e.target.files?.[0] && handleMediaUpload(e.target.files[0], 'file')}
-                  />
-                </label>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <Button 
+            type="button" 
+            variant="ghost" 
+            size="icon" 
+            className="rounded-full flex-shrink-0"
+            onClick={() => setUploadSheetOpen(true)}
+          >
+            <Paperclip className="w-5 h-5" />
+          </Button>
 
           <Input
-            placeholder="Scrivi un messaggio..."
             value={newMessage}
             onChange={handleInputChange}
-            className="flex-1 ios-input"
+            placeholder="Scrivi un messaggio..."
+            className="flex-1 rounded-full"
+            disabled={uploading}
           />
+
           <Button
             type="submit"
             size="icon"
-            disabled={!newMessage.trim()}
             className="rounded-full flex-shrink-0"
+            disabled={!newMessage.trim() || uploading}
           >
-            <Send className="w-5 h-5" />
+            {uploading ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Send className="w-5 h-5" />
+            )}
           </Button>
         </form>
       </div>
+
+      {/* Media Upload Sheet */}
+      <MediaUploadSheet
+        open={uploadSheetOpen}
+        onOpenChange={setUploadSheetOpen}
+        onMediaSelect={handleMediaUpload}
+        onCameraCapture={(imageUrl) => {
+          // Handle camera capture if needed
+        }}
+        onVoiceRecord={() => setVoiceRecorderOpen(true)}
+        uploading={uploading}
+      />
+
+      {/* Voice Recorder */}
+      {voiceRecorderOpen && (
+        <VoiceRecorder
+          onRecordingComplete={handleVoiceRecording}
+          onCancel={() => setVoiceRecorderOpen(false)}
+        />
+      )}
     </div>
   );
 };
