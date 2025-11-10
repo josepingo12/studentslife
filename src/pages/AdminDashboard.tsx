@@ -94,51 +94,54 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-          <Button onClick={handleLogout} variant="outline" className="ios-button">
-            <LogOut className="w-4 h-4 mr-2" />
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Modern iOS-style header */}
+      <header className="sticky top-0 z-10 bg-background border-b" style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))' }}>
+        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+          <h1 className="text-xl font-semibold">Admin</h1>
+          <Button onClick={handleLogout} variant="ghost" size="sm" className="ios-button">
+            <LogOut className="w-4 h-4 mr-1" />
             Esci
           </Button>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-8">
-            <TabsTrigger value="users">
-              <Users className="w-4 h-4 mr-2" />
-              Utenti
+      <main className="flex-1 container mx-auto px-4 py-4">
+        <Tabs defaultValue="users" className="w-full h-full flex flex-col">
+          <TabsList className="grid w-full grid-cols-6 mb-4 h-auto bg-muted/30 p-1">
+            <TabsTrigger value="users" className="flex-col gap-1 py-2 px-1 text-xs">
+              <Users className="w-5 h-5" />
+              <span>Utenti</span>
             </TabsTrigger>
-            <TabsTrigger value="stats">
-              <BarChart3 className="w-4 h-4 mr-2" />
-              Statistiche
+            <TabsTrigger value="stats" className="flex-col gap-1 py-2 px-1 text-xs">
+              <BarChart3 className="w-5 h-5" />
+              <span>Statist</span>
             </TabsTrigger>
-            <TabsTrigger value="categories">
-              <FolderOpen className="w-4 h-4 mr-2" />
-              Categorie
+            <TabsTrigger value="categories" className="flex-col gap-1 py-2 px-1 text-xs">
+              <FolderOpen className="w-5 h-5" />
+              <span>Categorie</span>
             </TabsTrigger>
-            <TabsTrigger value="moderation" className="relative">
-              <Flag className="w-4 h-4 mr-2" />
-              Moderazione
-              {pendingFlags > 0 && (
-                <Badge 
-                  variant="destructive" 
-                  className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-                >
-                  {pendingFlags}
-                </Badge>
-              )}
+            <TabsTrigger value="moderation" className="relative flex-col gap-1 py-2 px-1 text-xs">
+              <div className="relative">
+                <Flag className="w-5 h-5" />
+                {pendingFlags > 0 && (
+                  <Badge 
+                    variant="destructive" 
+                    className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0 flex items-center justify-center text-[10px]"
+                  >
+                    {pendingFlags}
+                  </Badge>
+                )}
+              </div>
+              <span>Mod</span>
             </TabsTrigger>
-            <TabsTrigger value="profile">
-              <UserCircle className="w-4 h-4 mr-2" />
-              Profilo
+            <TabsTrigger value="profile" className="flex-col gap-1 py-2 px-1 text-xs">
+              <UserCircle className="w-5 h-5" />
+              <span>Profilo</span>
             </TabsTrigger>
-            <TabsTrigger value="chat">
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Chat
+            <TabsTrigger value="chat" className="flex-col gap-1 py-2 px-1 text-xs">
+              <MessageCircle className="w-5 h-5" />
+              <span>Chat</span>
             </TabsTrigger>
           </TabsList>
 
