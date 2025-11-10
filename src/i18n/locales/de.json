@@ -213,7 +213,9 @@
     "close": "Schließen",
     "view": "Ansehen",
     "send": "Senden",
-    "message": "Nachricht"
+    "message": "Nachricht",
+    "code": "Code",
+    "tip": "Tipp"
   },
   "moderation": {
     "blockUser": "Benutzer blockieren",

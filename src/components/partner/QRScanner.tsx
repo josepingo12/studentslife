@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { CheckCircle2, XCircle, ScanLine, Camera, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import QrScanner from 'qr-scanner';
+import { useTranslation } from "react-i18next";
 
 interface QRScannerProps {
   partnerId: string;
@@ -13,6 +14,7 @@ interface QRScannerProps {
 
 const QRScanner = ({ partnerId }: QRScannerProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [code, setCode] = useState("");
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -85,8 +87,8 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
           // Auto-submit se è 12 caratteri
           if (result.data.length === 12) {
             toast({
-              title: "QR Code rilevato!",
-              description: `Codice: ${result.data}`,
+              title: t("qrScanner.valid"),
+              description: `${t("common.code")}: ${result.data}`,
               duration: 2000
             });
 
@@ -149,8 +151,8 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
 
     if (!code) {
       toast({
-        title: "Codice non valido",
-        description: "Inserisci un codice QR",
+        title: t("qrScanner.invalidCode"),
+        description: t("qrScanner.enterCode"),
         variant: "destructive",
       });
       return;
@@ -173,20 +175,20 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         .single();
 
       if (qrError || !qrData) {
-        setResult({ valid: false, message: "QR code non valido" });
+        setResult({ valid: false, message: t("qrScanner.notValid") });
         return;
       }
 
       if (qrData.events.profiles.id !== partnerId) {
-        setResult({ valid: false, message: "QR code non appartiene a questo partner" });
+        setResult({ valid: false, message: t("qrScanner.notYours") });
         return;
       }
 
       if (qrData.is_used) {
         setResult({
           valid: false,
-          message: "QR code già utilizzato",
-          details: `Utilizzato il ${new Date(qrData.used_at).toLocaleString("it-IT")}`,
+          message: t("qrScanner.alreadyUsed"),
+          details: `${t("qrScanner.usedOn")} ${new Date(qrData.used_at).toLocaleString()}`,
         });
         return;
       }
@@ -195,7 +197,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
       const endDate = new Date(qrData.events.end_date);
 
       if (now > endDate) {
-        setResult({ valid: false, message: "Evento scaduto" });
+        setResult({ valid: false, message: t("qrScanner.expired") });
         return;
       }
 
@@ -208,13 +210,13 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         .eq("id", qrData.id);
 
       if (updateError) {
-        setResult({ valid: false, message: "Errore durante la validazione" });
+        setResult({ valid: false, message: t("qrScanner.validationError") });
         return;
       }
 
       setResult({
         valid: true,
-        message: "QR code valido!",
+        message: t("qrScanner.valid"),
         details: {
           event: qrData.events.title,
           discount: qrData.events.discount_percentage,
@@ -222,15 +224,15 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
       });
 
       toast({
-        title: "QR code validato",
-        description: `Sconto del ${qrData.events.discount_percentage}% applicato`,
+        title: t("qrScanner.validated"),
+        description: t("qrScanner.discountApplied", { percent: qrData.events.discount_percentage }),
       });
 
       setCode("");
 
     } catch (error) {
       console.error("Errore verifica:", error);
-      setResult({ valid: false, message: "Errore durante la verifica del QR code" });
+      setResult({ valid: false, message: t("qrScanner.verificationError") });
     } finally {
       setLoading(false);
     }
@@ -241,9 +243,9 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
       <div className="ios-card p-6">
         <div className="text-center mb-6">
           <ScanLine className="w-16 h-16 mx-auto mb-4 text-primary animate-pulse" />
-          <h2 className="text-xl font-bold mb-2">Scanner QR Code</h2>
+          <h2 className="text-xl font-bold mb-2">{t("qrScanner.title")}</h2>
           <p className="text-muted-foreground text-sm">
-            Scansiona o inserisci il codice QR del cliente
+            {t("qrScanner.description")}
           </p>
         </div>
 
@@ -270,8 +272,8 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="border-4 border-white border-dashed w-64 h-64 rounded-lg flex items-center justify-center animate-pulse">
                   <div className="text-white text-sm bg-black/70 px-3 py-2 rounded-lg text-center">
-                    <div className="font-semibold">📷 Inquadra il QR Code</div>
-                    <div className="text-xs mt-1">Fotocamera posteriore attiva</div>
+                    <div className="font-semibold">{t("qrScanner.frameQR")}</div>
+                    <div className="text-xs mt-1">{t("qrScanner.rearCamera")}</div>
                   </div>
                 </div>
               </div>
@@ -279,7 +281,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
 
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-sm">
               <p className="text-center text-blue-600 dark:text-blue-400">
-                💡 <strong>Suggerimento:</strong> Mantieni il QR code ben illuminato e stabile
+                💡 <strong>{t("common.tip")}:</strong> {t("qrScanner.keepStable")}
               </p>
             </div>
 
@@ -290,7 +292,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
               size="lg"
             >
               <X className="w-4 h-4 mr-2" />
-              Chiudi Fotocamera
+              {t("qrScanner.closeCamera")}
             </Button>
           </div>
         ) : (
@@ -327,7 +329,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
               type="button"
             >
               <Camera className="w-5 h-5 mr-2" />
-              Apri Fotocamera Posteriore
+              {t("qrScanner.openCamera")}
             </Button>
           </div>
         )}
@@ -338,14 +340,14 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-card px-2 text-muted-foreground">
-              {scanning ? "o inserisci manualmente" : "oppure"}
+              {scanning ? t("qrScanner.orManual") : t("qrScanner.orOther")}
             </span>
           </div>
         </div>
 
         <form onSubmit={handleScan} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="qr-code-input">Inserisci codice manualmente</Label>
+            <Label htmlFor="qr-code-input">{t("qrScanner.enterManually")}</Label>
             <Input
               id="qr-code-input"
               value={code}
@@ -362,7 +364,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
             disabled={loading || !code}
             size="lg"
           >
-            {loading ? "Verifica..." : "Verifica QR Code"}
+            {loading ? t("qrScanner.verifying") : t("qrScanner.verify")}
           </Button>
         </form>
       </div>
@@ -394,10 +396,10 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
               {result.details && typeof result.details === "object" && (
                 <div className="space-y-1 text-sm">
                   <p>
-                    <span className="font-semibold">Evento:</span> {result.details.event}
+                    <span className="font-semibold">{t("qrScanner.event")}</span> {result.details.event}
                   </p>
                   <p>
-                    <span className="font-semibold">Sconto:</span> {result.details.discount}%
+                    <span className="font-semibold">{t("qrScanner.discount")}</span> {result.details.discount}%
                   </p>
                 </div>
               )}

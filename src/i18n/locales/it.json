@@ -213,7 +213,9 @@
     "close": "Chiudi",
     "view": "Visualizza",
     "send": "Invia",
-    "message": "Messaggio"
+    "message": "Messaggio",
+    "code": "Codice",
+    "tip": "Suggerimento"
   },
   "moderation": {
     "blockUser": "Blocca utente",
