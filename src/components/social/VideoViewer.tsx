@@ -195,9 +195,9 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
   const videoSrc = post.video_url || post.image_url;
 
   return (
-    <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black z-50 flex items-center justify-center" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
      {/* Header */}
-         <div className="absolute top-0 left-0 right-0 z-10 p-4 bg-gradient-to-b from-black/50 to-transparent">
+         <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/50 to-transparent" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 1rem)', paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem' }}>
            <div className="flex items-center justify-between text-white">
              <Button
                variant="ghost"
