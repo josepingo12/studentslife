@@ -29,8 +29,11 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
   const [viewers, setViewers] = useState<any[]>([]);
   const [isDesktop, setIsDesktop] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
+  const [touchStartX, setTouchStartX] = useState(0);
+  const [touchStartY, setTouchStartY] = useState(0);
+  const [touchEndX, setTouchEndX] = useState(0);
+  const [touchEndY, setTouchEndY] = useState(0);
+  const touchStartTimeRef = useRef<number>(0);
 
   const [savedProgress, setSavedProgress] = useState(0);
   const [remainingTime, setRemainingTime] = useState(0);
@@ -227,25 +230,57 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
 
   // Handle swipe up gesture to open viewers (Instagram style)
   const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientY);
+    const touch = e.targetTouches[0];
+    setTouchStartX(touch.clientX);
+    setTouchStartY(touch.clientY);
+    setTouchEndX(touch.clientX);
+    setTouchEndY(touch.clientY);
+    touchStartTimeRef.current = Date.now();
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientY);
+    const touch = e.targetTouches[0];
+    setTouchEndX(touch.clientX);
+    setTouchEndY(touch.clientY);
   };
 
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isUpSwipe = distance > 50; // Minimum swipe distance
-    
-    if (isUpSwipe && isOwnStory && viewsCount > 0) {
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchStartY - touchEndY; // positivo quando swipe-up
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+    const swipeUp = deltaY > 50 && absY > absX;
+    const swipeHorizontal = absX > 40 && absX > absY;
+
+    // reset stato touch
+    setTouchStartX(0);
+    setTouchStartY(0);
+    setTouchEndX(0);
+    setTouchEndY(0);
+
+    if (swipeUp && isOwnStory) {
+      setIsPaused(true);
       setIsViewersSheetOpen(true);
+      return;
     }
-    
-    setTouchStart(0);
-    setTouchEnd(0);
+
+    if (swipeHorizontal) {
+      if (deltaX < 0) {
+        handleNextStory();
+      } else {
+        handlePrevStory();
+      }
+      return;
+    }
+
+    // Tap: sinistra = precedente, destra = successiva
+    const width = (e.currentTarget as HTMLElement).clientWidth;
+    const tapX = e.changedTouches[0]?.clientX ?? touchStartX;
+    if (tapX < width / 2) {
+      handlePrevStory();
+    } else {
+      handleNextStory();
+    }
   };
 
   const handleDeleteStory = async () => {
@@ -317,7 +352,7 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
           </div>
 
           {/* Header */}
-          <div className="absolute top-8 left-4 right-4 z-20 flex items-center justify-between pt-4">
+          <div className="absolute top-8 left-4 right-4 z-20 flex items-center justify-between pt-4" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}>
             <div className="flex items-center gap-3">
               <Avatar className="h-8 w-8 border border-white">
                 <AvatarImage src={storyGroup.profile?.profile_image_url} />
@@ -442,7 +477,7 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
             ))}
           </div>
 
-          <div className="absolute top-8 left-4 right-4 z-20 flex items-center justify-between pt-4">
+          <div className="absolute top-8 left-4 right-4 z-20 flex items-center justify-between pt-4" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}>
             <div className="flex items-center gap-3">
               <Avatar className="h-8 w-8 border border-white">
                 <AvatarImage src={storyGroup.profile?.profile_image_url} />
@@ -499,10 +534,7 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
               />
             )}
 
-            <div className="absolute inset-0 flex">
-              <div className="flex-1" onTouchStart={() => handleMouseDown('left')} />
-              <div className="flex-1" onTouchStart={() => handleMouseDown('right')} />
-            </div>
+            <div className="absolute inset-0" />
 
             {/* Controllo volume per video */}
             {isVideo && (
