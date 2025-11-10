@@ -16,7 +16,8 @@
   "search": {
     "placeholder": "Rechercher utilisateurs, lieux, hashtags...",
     "users": "Rechercher utilisateurs...",
-    "noUsersFound": "Aucun utilisateur trouvé"
+    "noUsersFound": "Aucun utilisateur trouvé",
+    "searching": "Recherche..."
   },
   "settings": {
     "title": "Paramètres",
@@ -92,11 +93,13 @@
     "delete": "Supprimer",
     "comment": "Commenter",
     "like": "J'aime",
+    "likes": "J'aime",
     "share": "Partager",
     "comments": "Commentaires",
     "writeComment": "Écrire un commentaire...",
     "noComments": "Pas encore de commentaires",
-    "noPosts": "Pas encore de publications. Soyez le premier à publier!"
+    "noPosts": "Pas encore de publications. Soyez le premier à publier!",
+    "noLikesYet": "Aucun j'aime pour le moment"
   },
   "chat": {
     "chats": "Discussions",
@@ -312,7 +315,8 @@
     "qrDownloaded": "QR Téléchargés",
     "qrUsed": "QR Utilisés",
     "averageRating": "Note Moyenne",
-    "usageRate": "Taux d'Utilisation"
+    "usageRate": "Taux d'Utilisation",
+    "totalReviews": "avis"
   },
   "profileEdit": {
     "title": "Modifier le Profil",
@@ -330,6 +334,10 @@
     "saving": "Enregistrement...",
     "saveChanges": "Enregistrer les Modifications",
     "galleryPhotos": "Galerie de Photos",
-    "galleryDescription": "Les photos de la galerie seront affichées sur la page de détails de votre profil"
+    "galleryDescription": "Les photos de la galerie seront affichées sur la page de détails de votre profil",
+    "error": "Erreur",
+    "errorUpdating": "Impossible de mettre à jour le profil",
+    "success": "Profil mis à jour !",
+    "successDescription": "Vos modifications ont été enregistrées"
   }
 }

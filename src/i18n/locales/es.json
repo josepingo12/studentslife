@@ -16,7 +16,8 @@
   "search": {
     "placeholder": "Buscar usuarios, lugares, hashtags...",
     "users": "Buscar usuarios...",
-    "noUsersFound": "Ningún usuario encontrado"
+    "noUsersFound": "Ningún usuario encontrado",
+    "searching": "Buscando..."
   },
   "settings": {
     "title": "Configuración",
@@ -92,11 +93,13 @@
     "delete": "Eliminar",
     "comment": "Comentar",
     "like": "Me gusta",
+    "likes": "Me gusta",
     "share": "Compartir",
     "comments": "Comentarios",
     "writeComment": "Escribe un comentario...",
     "noComments": "Sin comentarios aún",
-    "noPosts": "¡No hay publicaciones aún. Sé el primero en publicar!"
+    "noPosts": "¡No hay publicaciones aún. Sé el primero en publicar!",
+    "noLikesYet": "Aún no hay me gusta"
   },
   "chat": {
     "chats": "Chats",
@@ -312,7 +315,8 @@
     "qrDownloaded": "QR Descargados",
     "qrUsed": "QR Utilizados",
     "averageRating": "Calificación Promedio",
-    "usageRate": "Tasa de Uso"
+    "usageRate": "Tasa de Uso",
+    "totalReviews": "reseñas"
   },
   "profileEdit": {
     "title": "Editar Perfil",
@@ -330,6 +334,10 @@
     "saving": "Guardando...",
     "saveChanges": "Guardar Cambios",
     "galleryPhotos": "Galería de Fotos",
-    "galleryDescription": "Las fotos de la galería se mostrarán en la página de detalles de tu perfil"
+    "galleryDescription": "Las fotos de la galería se mostrarán en la página de detalles de tu perfil",
+    "error": "Error",
+    "errorUpdating": "No se pudo actualizar el perfil",
+    "success": "¡Perfil actualizado!",
+    "successDescription": "Tus cambios han sido guardados"
   }
 }

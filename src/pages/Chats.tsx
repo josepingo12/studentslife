@@ -3,17 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useWebNotifications } from "@/hooks/useWebNotifications";
 import { Input } from "@/components/ui/input";
-import { Search, Users, Home, MessageCircle, UserCircle, Plus, ArrowLeft, X } from "lucide-react"; // Added X for clear button
+import { Search, Users, Home, MessageCircle, UserCircle, Plus, ArrowLeft, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import FavoritesCarousel from "@/components/chat/FavoritesCarousel";
 import UserListItem from "@/components/chat/UserListItem";
 import UploadSheet from "@/components/shared/UploadSheet";
 import NotificationBadge from "@/components/chat/NotificationBadge";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { useTranslation } from "react-i18next";
 
 const Chats = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [favorites, setFavorites] = useState<any[]>([]);
@@ -246,7 +248,7 @@ const Chats = () => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400 z-10" />
           <Input
             type="text"
-            placeholder="Cerca utenti..."
+            placeholder={t("search.users")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-10 py-2.5 rounded-full border-none bg-transparent text-gray-800 placeholder:text-gray-400 focus-visible:ring-0 text-base font-medium transition-all duration-200"

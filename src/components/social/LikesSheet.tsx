@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface LikesSheetProps {
   open: boolean;
@@ -17,6 +18,7 @@ interface LikesSheetProps {
 
 const LikesSheet = ({ open, onOpenChange, postId, postIds, onMarkAsRead }: LikesSheetProps) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [likes, setLikes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -92,7 +94,7 @@ const LikesSheet = ({ open, onOpenChange, postId, postIds, onMarkAsRead }: Likes
         <SheetHeader className="pb-4 border-b">
           <SheetTitle className="flex items-center gap-2 justify-center">
             <Heart className="w-5 h-5 text-primary fill-primary" />
-            <span className="text-lg font-bold">{likes.length} Mi piace</span>
+            <span className="text-lg font-bold">{likes.length} {t("post.likes")}</span>
           </SheetTitle>
         </SheetHeader>
 
@@ -103,7 +105,7 @@ const LikesSheet = ({ open, onOpenChange, postId, postIds, onMarkAsRead }: Likes
             </div>
           ) : likes.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">Nessun mi piace ancora</p>
+              <p className="text-muted-foreground">{t("post.noLikesYet")}</p>
             </div>
           ) : (
             <div className="space-y-3 pb-4">

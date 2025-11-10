@@ -9,6 +9,7 @@ import ImageUploader from "@/components/shared/ImageUploader";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import PartnerGalleryManager from "@/components/partner/PartnerGalleryManager";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
 
 interface PartnerProfileEditProps {
   profile: any;
@@ -17,6 +18,7 @@ interface PartnerProfileEditProps {
 
 const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [formData, setFormData] = useState({
@@ -56,14 +58,14 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
 
     if (error) {
       toast({
-        title: "Errore",
-        description: "Impossibile aggiornare il profilo",
+        title: t("profileEdit.error"),
+        description: t("profileEdit.errorUpdating"),
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Profilo aggiornato!",
-        description: "Le tue modifiche sono state salvate",
+        title: t("profileEdit.success"),
+        description: t("profileEdit.successDescription"),
       });
       onUpdate();
     }
@@ -73,11 +75,11 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
 
   return (
     <div className="ios-card p-6">
-      <h2 className="text-xl font-bold mb-6">Modifica Profilo</h2>
+      <h2 className="text-xl font-bold mb-6">{t("profileEdit.title")}</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label>Nome Attività</Label>
+          <Label>{t("profileEdit.businessName")}</Label>
           <Input
             className="ios-input"
             value={formData.business_name}
@@ -86,7 +88,7 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
         </div>
 
         <div className="space-y-2">
-          <Label>Descrizione</Label>
+          <Label>{t("profileEdit.description")}</Label>
           <Textarea
             className="ios-input"
             value={formData.business_description}
@@ -96,7 +98,7 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
         </div>
 
         <div className="space-y-2">
-          <Label>Indirizzo</Label>
+          <Label>{t("profileEdit.address")}</Label>
           <Input
             className="ios-input"
             value={formData.business_address}
@@ -105,7 +107,7 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
         </div>
 
         <div className="space-y-2">
-          <Label>Città</Label>
+          <Label>{t("profileEdit.city")}</Label>
           <Input
             className="ios-input"
             value={formData.business_city}
@@ -114,13 +116,13 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
         </div>
 
         <div className="space-y-2">
-          <Label>Categoria</Label>
+          <Label>{t("profileEdit.category")}</Label>
           <Select
             value={formData.business_category}
             onValueChange={(value) => setFormData({ ...formData, business_category: value })}
           >
             <SelectTrigger className="ios-input">
-              <SelectValue placeholder="Seleziona una categoria" />
+              <SelectValue placeholder={t("profileEdit.selectCategory")} />
             </SelectTrigger>
             <SelectContent>
               {categories.map((category) => (
@@ -133,7 +135,7 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
         </div>
 
         <div className="space-y-2">
-          <Label>Telefono</Label>
+          <Label>{t("profileEdit.phone")}</Label>
           <Input
             type="tel"
             className="ios-input"
@@ -143,7 +145,7 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
         </div>
 
         <div className="space-y-2">
-          <Label>Foto Profilo</Label>
+          <Label>{t("profileEdit.profilePhoto")}</Label>
           {formData.profile_image_url && (
             <div className="flex justify-center mb-3">
               <Avatar className="h-24 w-24">
@@ -162,9 +164,9 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
         </div>
 
         <div className="space-y-2">
-          <Label>Foto Copertina</Label>
+          <Label>{t("profileEdit.coverPhoto")}</Label>
           <p className="text-sm text-muted-foreground mb-2">
-            Questa immagine verrà mostrata sulla card del partner nella sezione clienti
+            {t("profileEdit.coverDescription")}
           </p>
           {formData.cover_image_url && (
             <div className="mb-3 rounded-lg overflow-hidden">
@@ -187,15 +189,15 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
           disabled={loading}
           className="w-full ios-button h-12"
         >
-          {loading ? "Salvataggio..." : "Salva Modifiche"}
+          {loading ? t("profileEdit.saving") : t("profileEdit.saveChanges")}
         </Button>
       </form>
 
       {/* Gallery Section */}
       <div className="mt-8">
-        <h2 className="text-xl font-bold mb-4">Galleria Foto</h2>
+        <h2 className="text-xl font-bold mb-4">{t("profileEdit.galleryPhotos")}</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          Le foto della galleria verranno mostrate nella pagina dettagli del tuo profilo
+          {t("profileEdit.galleryDescription")}
         </p>
         <PartnerGalleryManager partnerId={profile.id} />
       </div>

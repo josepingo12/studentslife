@@ -9,10 +9,12 @@ import { ArrowLeft, Search, X } from "lucide-react";
 import StoriesCarousel from "@/components/social/StoriesCarousel";
 import CreatePost from "@/components/social/CreatePost";
 import PostCard from "@/components/social/PostCard";
-import SettingsSheet from "@/components/partner/SettingsSheet"; // AGGIUNGI QUESTO IMPORT
+import SettingsSheet from "@/components/partner/SettingsSheet";
+import { useTranslation } from "react-i18next";
 
 const Social = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [posts, setPosts] = useState<any[]>([]);
@@ -153,7 +155,7 @@ const Social = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
               type="text"
-              placeholder="Cerca utenti..."
+              placeholder={t("search.users")}
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
               className="pl-10 pr-10 border-gray-200 focus:border-blue-500"
@@ -172,9 +174,9 @@ const Social = () => {
           {searchQuery && (
             <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
               {searching ? (
-                <p className="text-sm text-gray-500 text-center py-4">Ricerca...</p>
+                <p className="text-sm text-gray-500 text-center py-4">{t("search.searching")}</p>
               ) : searchResults.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-4">Nessun utente trovato</p>
+                <p className="text-sm text-gray-500 text-center py-4">{t("search.noUsersFound")}</p>
               ) : (
                 searchResults.map((result) => (
                   <button

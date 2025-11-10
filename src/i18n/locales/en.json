@@ -16,7 +16,8 @@
   "search": {
     "placeholder": "Search users, places, hashtags...",
     "users": "Search users...",
-    "noUsersFound": "No users found"
+    "noUsersFound": "No users found",
+    "searching": "Searching..."
   },
   "settings": {
     "title": "Settings",
@@ -92,11 +93,13 @@
     "delete": "Delete",
     "comment": "Comment",
     "like": "Like",
+    "likes": "Likes",
     "share": "Share",
     "comments": "Comments",
     "writeComment": "Write a comment...",
     "noComments": "No comments yet",
-    "noPosts": "No posts yet. Be the first to post!"
+    "noPosts": "No posts yet. Be the first to post!",
+    "noLikesYet": "No likes yet"
   },
   "chat": {
     "chats": "Chats",
@@ -312,7 +315,8 @@
     "qrDownloaded": "QR Downloaded",
     "qrUsed": "QR Used",
     "averageRating": "Average Rating",
-    "usageRate": "Usage Rate"
+    "usageRate": "Usage Rate",
+    "totalReviews": "reviews"
   },
   "profileEdit": {
     "title": "Edit Profile",
@@ -330,6 +334,10 @@
     "saving": "Saving...",
     "saveChanges": "Save Changes",
     "galleryPhotos": "Photo Gallery",
-    "galleryDescription": "Gallery photos will be displayed on your profile details page"
+    "galleryDescription": "Gallery photos will be displayed on your profile details page",
+    "error": "Error",
+    "errorUpdating": "Unable to update profile",
+    "success": "Profile updated!",
+    "successDescription": "Your changes have been saved"
   }
 }

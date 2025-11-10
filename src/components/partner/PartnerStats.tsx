@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart3, Download, Calendar, Star } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface PartnerStatsProps {
   partnerId: string;
 }
 
 const PartnerStats = ({ partnerId }: PartnerStatsProps) => {
+  const { t } = useTranslation();
   const [stats, setStats] = useState({
     totalEvents: 0,
     activeEvents: 0,
@@ -86,28 +88,28 @@ const PartnerStats = ({ partnerId }: PartnerStatsProps) => {
   const statCards = [
     {
       icon: Calendar,
-      label: "Eventi Attivi",
+      label: t("stats.activeEvents"),
       value: `${stats.activeEvents}/${stats.totalEvents}`,
       color: "text-primary",
       bgColor: "bg-primary/10",
     },
     {
       icon: Download,
-      label: "QR Scaricati",
+      label: t("stats.qrDownloaded"),
       value: stats.totalQRDownloads,
       color: "text-blue-500",
       bgColor: "bg-blue-500/10",
     },
     {
       icon: BarChart3,
-      label: "QR Utilizzati",
+      label: t("stats.qrUsed"),
       value: stats.totalQRUsed,
       color: "text-green-500",
       bgColor: "bg-green-500/10",
     },
     {
       icon: Star,
-      label: "Valutazione Media",
+      label: t("stats.averageRating"),
       value: `${stats.averageRating} (${stats.totalReviews})`,
       color: "text-yellow-500",
       bgColor: "bg-yellow-500/10",
@@ -117,9 +119,9 @@ const PartnerStats = ({ partnerId }: PartnerStatsProps) => {
   return (
     <div className="space-y-6">
       <div className="ios-card p-6 text-center">
-        <h2 className="text-2xl font-bold mb-2">Statistiche Partner</h2>
+        <h2 className="text-2xl font-bold mb-2">{t("stats.title")}</h2>
         <p className="text-muted-foreground">
-          Monitora le performance della tua attività
+          {t("stats.description")}
         </p>
       </div>
 
@@ -136,11 +138,11 @@ const PartnerStats = ({ partnerId }: PartnerStatsProps) => {
       </div>
 
       <div className="ios-card p-6">
-        <h3 className="font-bold mb-4">Tasso di Utilizzo</h3>
+        <h3 className="font-bold mb-4">{t("stats.usageRate")}</h3>
         <div className="space-y-3">
           <div>
             <div className="flex justify-between text-sm mb-2">
-              <span>QR Utilizzati</span>
+              <span>{t("stats.qrUsed")}</span>
               <span className="font-semibold">
                 {stats.totalQRDownloads > 0
                   ? Math.round((stats.totalQRUsed / stats.totalQRDownloads) * 100)
