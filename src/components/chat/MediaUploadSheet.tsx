@@ -5,6 +5,7 @@ import { ImageIcon, Video, File, Camera, Mic } from "lucide-react";
 import { Camera as CapacitorCamera } from '@capacitor/camera';
 import { CameraResultType, CameraSource } from '@capacitor/camera';
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface MediaUploadSheetProps {
   open: boolean;
@@ -24,6 +25,7 @@ const MediaUploadSheet = ({
   uploading
 }: MediaUploadSheetProps) => {
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   const handleCameraCapture = async () => {
     try {
@@ -52,7 +54,7 @@ const MediaUploadSheet = ({
     } catch (error: any) {
       console.error('Camera error:', error);
       if (error.message !== 'User cancelled photos app') {
-        toast.error('Error al capturar la foto');
+        toast.error(t('chatMedia.errorCapture'));
       }
     } finally {
       setLoading(false);
@@ -85,7 +87,7 @@ const MediaUploadSheet = ({
     } catch (error: any) {
       console.error('Gallery error:', error);
       if (error.message !== 'User cancelled photos app') {
-        toast.error('Error al seleccionar la foto');
+        toast.error(t('chatMedia.errorSelect'));
       }
     } finally {
       setLoading(false);
@@ -101,7 +103,7 @@ const MediaUploadSheet = ({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="rounded-t-3xl">
         <SheetHeader>
-          <SheetTitle>Allega contenuto</SheetTitle>
+          <SheetTitle>{t('chatMedia.attachContent')}</SheetTitle>
         </SheetHeader>
         <div className="grid grid-cols-3 gap-4 mt-6 pb-4">
           <button
@@ -112,7 +114,7 @@ const MediaUploadSheet = ({
             <div className="w-14 h-14 rounded-full bg-blue-500/10 flex items-center justify-center">
               <Camera className="w-7 h-7 text-blue-500" />
             </div>
-            <span className="text-sm font-medium">Fotocamera</span>
+            <span className="text-sm font-medium">{t('chatMedia.camera')}</span>
           </button>
 
           <button
@@ -123,7 +125,7 @@ const MediaUploadSheet = ({
             <div className="w-14 h-14 rounded-full bg-green-500/10 flex items-center justify-center">
               <ImageIcon className="w-7 h-7 text-green-500" />
             </div>
-            <span className="text-sm font-medium">Galleria</span>
+            <span className="text-sm font-medium">{t('chatMedia.gallery')}</span>
           </button>
 
           <button
@@ -134,14 +136,14 @@ const MediaUploadSheet = ({
             <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center">
               <Mic className="w-7 h-7 text-red-500" />
             </div>
-            <span className="text-sm font-medium">Audio</span>
+            <span className="text-sm font-medium">{t('chatMedia.audio')}</span>
           </button>
 
           <label className="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-muted transition-colors cursor-pointer">
             <div className="w-14 h-14 rounded-full bg-purple-500/10 flex items-center justify-center">
               <Video className="w-7 h-7 text-purple-500" />
             </div>
-            <span className="text-sm font-medium">Video</span>
+            <span className="text-sm font-medium">{t('chatMedia.video')}</span>
             <input
               type="file"
               accept="video/*"
@@ -161,7 +163,7 @@ const MediaUploadSheet = ({
             <div className="w-14 h-14 rounded-full bg-orange-500/10 flex items-center justify-center">
               <File className="w-7 h-7 text-orange-500" />
             </div>
-            <span className="text-sm font-medium">File</span>
+            <span className="text-sm font-medium">{t('chatMedia.file')}</span>
             <input
               type="file"
               className="hidden"

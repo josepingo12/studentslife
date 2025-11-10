@@ -15,11 +15,13 @@ import VoiceRecorder from "@/components/chat/VoiceRecorder";
 import VoiceMessagePlayer from "@/components/chat/VoiceMessagePlayer";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 
 const ChatConversation = () => {
   const navigate = useNavigate();
   const { conversationId } = useParams();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [otherUser, setOtherUser] = useState<any>(null);
@@ -319,9 +321,9 @@ const ChatConversation = () => {
         .getPublicUrl(filePath);
 
       await handleSendMessage(new Event('submit') as any, publicUrl, type);
-      toast({ title: "File inviato" });
+      toast({ title: t('chatMedia.fileSent') });
     } catch (error: any) {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
+      toast({ title: t('common.error'), description: error.message, variant: "destructive" });
     } finally {
       setUploading(false);
     }
@@ -346,9 +348,9 @@ const ChatConversation = () => {
 
       await handleSendMessage(new Event('submit') as any, publicUrl, 'audio');
       setVoiceRecorderOpen(false);
-      toast({ title: "Messaggio vocale inviato" });
+      toast({ title: t('chatMedia.voiceSent') });
     } catch (error: any) {
-      toast({ title: "Errore", description: error.message, variant: "destructive" });
+      toast({ title: t('common.error'), description: error.message, variant: "destructive" });
     } finally {
       setUploading(false);
     }
@@ -406,9 +408,9 @@ const ChatConversation = () => {
                   userId={otherUserId}
                   userName={getDisplayName()}
                   trigger={
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                      Blocca utente
-                    </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    {t('moderation.blockUser')}
+                  </DropdownMenuItem>
                   }
                   onBlocked={() => navigate("/chats")}
                 />
@@ -474,8 +476,8 @@ const ChatConversation = () => {
                       >
                         <File className="w-5 h-5 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">File allegato</p>
-                          <p className="text-xs opacity-70">Tocca per aprire</p>
+                          <p className="text-sm font-medium truncate">{t('chatMedia.fileAttached')}</p>
+                          <p className="text-xs opacity-70">{t('chatMedia.tapToOpen')}</p>
                         </div>
                       </a>
                     )}
@@ -563,7 +565,7 @@ const ChatConversation = () => {
           <Input
             value={newMessage}
             onChange={handleInputChange}
-            placeholder="Scrivi un messaggio..."
+            placeholder={t('chatMedia.typeMessage')}
             className="flex-1 rounded-full"
             disabled={uploading}
           />

@@ -16,7 +16,7 @@ const resources = {
 };
 
 // Get saved language from localStorage with error handling
-let savedLanguage = 'it';
+let savedLanguage = 'es';
 try {
   const storedLang = localStorage.getItem('appLanguage');
   if (storedLang) {
@@ -31,7 +31,7 @@ i18n
   .init({
     resources,
     lng: savedLanguage,
-    fallbackLng: 'it',
+    fallbackLng: 'es',
     interpolation: {
       escapeValue: false,
     },

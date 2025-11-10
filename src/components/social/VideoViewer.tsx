@@ -248,18 +248,18 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
                       contentId={post.id}
                       contentType="video"
                       trigger={
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-white focus:text-white focus:bg-white/20">
-                          Segnala video
-                        </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-white focus:text-white focus:bg-white/20">
+                        {t('moderation.reportVideo')}
+                      </DropdownMenuItem>
                       }
                     />
                     <BlockUserButton
                       userId={post.user_id}
                       userName={displayName}
                       trigger={
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-white focus:text-white focus:bg-white/20">
-                          Blocca utente
-                        </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-white focus:text-white focus:bg-white/20">
+                        {t('moderation.blockUser')}
+                      </DropdownMenuItem>
                       }
                     />
                   </DropdownMenuContent>

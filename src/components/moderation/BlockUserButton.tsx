@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Ban } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface BlockUserButtonProps {
   userId: string;
@@ -29,6 +30,7 @@ const BlockUserButton = ({
   onBlocked,
 }: BlockUserButtonProps) => {
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   const handleBlock = async () => {
     setLoading(true);
@@ -43,14 +45,14 @@ const BlockUserButton = ({
 
       if (error) throw error;
 
-      toast.success(`Has bloqueado a ${userName}`);
+      toast.success(t('moderation.userBlocked', { userName }));
       onBlocked?.();
     } catch (error: any) {
       console.error("Error blocking user:", error);
       if (error.code === "23505") {
-        toast.error("Ya has bloqueado a este usuario");
+        toast.error(t('moderation.alreadyBlocked'));
       } else {
-        toast.error("Error al bloquear usuario");
+        toast.error(t('moderation.errorBlocking'));
       }
     } finally {
       setLoading(false);
@@ -63,22 +65,21 @@ const BlockUserButton = ({
         {trigger || (
           <Button variant="ghost" size="sm">
             <Ban className="w-4 h-4 mr-2" />
-            Bloquear
+            {t('moderation.blockUser')}
           </Button>
         )}
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Bloquear a {userName}?</AlertDialogTitle>
+          <AlertDialogTitle>{t('moderation.blockUserTitle', { userName })}</AlertDialogTitle>
           <AlertDialogDescription>
-            No podrás ver el contenido de este usuario y no podrá interactuar contigo.
-            Podrás desbloquearlo más tarde desde tu perfil.
+            {t('moderation.blockUserMessage')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
           <AlertDialogAction onClick={handleBlock} disabled={loading}>
-            {loading ? "Bloqueando..." : "Bloquear usuario"}
+            {loading ? t('moderation.blocking') : t('moderation.blockUser')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -263,18 +263,18 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
                 contentId={post.id}
                 contentType="post"
                 trigger={
-                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    Segnala post
-                  </DropdownMenuItem>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  {t('moderation.reportPost')}
+                </DropdownMenuItem>
                 }
               />
               <BlockUserButton
                 userId={post.user_id}
                 userName={displayName}
                 trigger={
-                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    Blocca utente
-                  </DropdownMenuItem>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  {t('moderation.blockUser')}
+                </DropdownMenuItem>
                 }
               />
             </DropdownMenuContent>

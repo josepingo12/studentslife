@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Flag } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface ReportContentDialogProps {
   contentId: string;
@@ -30,14 +31,15 @@ const ReportContentDialog = ({
   const [reason, setReason] = useState<string>("spam");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   const reasons = [
-    { value: "spam", label: "Spam" },
-    { value: "hate_speech", label: "Discurso de odio" },
-    { value: "harassment", label: "Acoso" },
-    { value: "violence", label: "Violencia" },
-    { value: "inappropriate", label: "Contenido inapropiado" },
-    { value: "other", label: "Otro" },
+    { value: "spam", label: t('moderation.reportReasons.spam') },
+    { value: "hate_speech", label: t('moderation.reportReasons.hate_speech') },
+    { value: "harassment", label: t('moderation.reportReasons.harassment') },
+    { value: "violence", label: t('moderation.reportReasons.violence') },
+    { value: "inappropriate", label: t('moderation.reportReasons.inappropriate') },
+    { value: "other", label: t('moderation.reportReasons.other') },
   ];
 
   const handleSubmit = async () => {
@@ -56,13 +58,13 @@ const ReportContentDialog = ({
 
       if (error) throw error;
 
-      toast.success("Contenido reportado correctamente");
+      toast.success(t('moderation.reportSuccess'));
       setOpen(false);
       setDescription("");
       setReason("spam");
     } catch (error: any) {
       console.error("Error reporting content:", error);
-      toast.error("Error al reportar el contenido");
+      toast.error(t('moderation.reportError'));
     } finally {
       setLoading(false);
     }
@@ -74,21 +76,21 @@ const ReportContentDialog = ({
         {trigger || (
           <Button variant="ghost" size="sm">
             <Flag className="w-4 h-4 mr-2" />
-            Reportar
+            {t('moderation.reportContent')}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Reportar contenido</DialogTitle>
+          <DialogTitle>{t('moderation.reportTitle')}</DialogTitle>
           <DialogDescription>
-            Ayúdanos a mantener la comunidad segura reportando contenido inapropiado.
+            {t('moderation.reportDescription')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div>
-            <Label>Motivo del reporte</Label>
+            <Label>{t('moderation.reportReason')}</Label>
             <RadioGroup value={reason} onValueChange={setReason} className="mt-2">
               {reasons.map((r) => (
                 <div key={r.value} className="flex items-center space-x-2">
@@ -102,10 +104,10 @@ const ReportContentDialog = ({
           </div>
 
           <div>
-            <Label htmlFor="description">Descripción (opcional)</Label>
+            <Label htmlFor="description">{t('moderation.reportDescription2')}</Label>
             <Textarea
               id="description"
-              placeholder="Proporciona detalles adicionales..."
+              placeholder={t('moderation.reportDescriptionPlaceholder')}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="mt-2"
@@ -115,10 +117,10 @@ const ReportContentDialog = ({
 
           <div className="flex gap-2 justify-end">
             <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={loading}>
-              {loading ? "Enviando..." : "Enviar reporte"}
+              {loading ? t('moderation.reportSubmitting') : t('moderation.reportSubmit')}
             </Button>
           </div>
         </div>

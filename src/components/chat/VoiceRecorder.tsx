@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, Square, Send, X } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface VoiceRecorderProps {
   onRecordingComplete: (audioBlob: Blob) => void;
@@ -20,6 +21,7 @@ const VoiceRecorder = ({ onRecordingComplete, onCancel }: VoiceRecorderProps) =>
   const animationFrameRef = useRef<number | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     return () => {
@@ -83,7 +85,7 @@ const VoiceRecorder = ({ onRecordingComplete, onCancel }: VoiceRecorderProps) =>
 
     } catch (error) {
       console.error('Error accessing microphone:', error);
-      toast.error('No se pudo acceder al micrófono');
+      toast.error(t('chatMedia.errorCapture'));
     }
   };
 
@@ -154,7 +156,7 @@ const VoiceRecorder = ({ onRecordingComplete, onCancel }: VoiceRecorderProps) =>
         <Button variant="ghost" size="icon" onClick={handleCancel}>
           <X className="w-5 h-5" />
         </Button>
-        <span className="font-semibold">Messaggio vocale</span>
+        <span className="font-semibold">{t('chatMedia.voiceMessage')}</span>
         <div className="w-10" />
       </div>
 
@@ -186,7 +188,7 @@ const VoiceRecorder = ({ onRecordingComplete, onCancel }: VoiceRecorderProps) =>
         </div>
 
         <p className="text-sm text-muted-foreground mt-4">
-          {isRecording ? "Registrando..." : audioBlob ? "Registrazione completata" : "Premi per iniziare"}
+          {isRecording ? t('chatMedia.recording') : audioBlob ? t('chatMedia.recordingComplete') : t('chatMedia.pressToStart')}
         </p>
       </div>
 
