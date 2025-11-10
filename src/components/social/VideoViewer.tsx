@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Bookmark, ArrowLeft, VolumeX, Volume2 } from "lucide-react";
+import { Heart, MessageCircle, Bookmark, ArrowLeft, VolumeX, Volume2, MoreVertical } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import ReportContentDialog from "@/components/moderation/ReportContentDialog";
+import BlockUserButton from "@/components/moderation/BlockUserButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { formatDistanceToNow } from "date-fns";
@@ -220,16 +223,50 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
                </div>
              </div>
 
-             <Button
-               variant="ghost"
-               size="icon"
-               onClick={handleToggleMute}
-               className="text-white hover:bg-white/20 rounded-full"
-             >
-               {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-             </Button>
-           </div>
-         </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleToggleMute}
+                  className="text-white hover:bg-white/20 rounded-full"
+                >
+                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                </Button>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-white hover:bg-white/20 rounded-full"
+                    >
+                      <MoreVertical className="w-5 h-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-black/90 text-white border-white/20">
+                    <ReportContentDialog
+                      contentId={post.id}
+                      contentType="video"
+                      trigger={
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-white focus:text-white focus:bg-white/20">
+                          Segnala video
+                        </DropdownMenuItem>
+                      }
+                    />
+                    <BlockUserButton
+                      userId={post.user_id}
+                      userName={displayName}
+                      trigger={
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-white focus:text-white focus:bg-white/20">
+                          Blocca utente
+                        </DropdownMenuItem>
+                      }
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          </div>
 
          {/* Video */}
          <video

@@ -6,8 +6,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ArrowLeft, Send, Check, CheckCheck, Paperclip, Image as ImageIcon, Video, File } from "lucide-react";
+import { ArrowLeft, Send, Check, CheckCheck, Paperclip, Image as ImageIcon, Video, File, MoreVertical } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import BlockUserButton from "@/components/moderation/BlockUserButton";
+import ReportContentDialog from "@/components/moderation/ReportContentDialog";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
 
@@ -18,6 +21,7 @@ const ChatConversation = () => {
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [otherUser, setOtherUser] = useState<any>(null);
+  const [otherUserId, setOtherUserId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -152,6 +156,8 @@ const ChatConversation = () => {
       : conversation.user1_id;
 
     if (!otherUserId) return;
+
+    setOtherUserId(otherUserId);
 
     // Get other user's profile
     const { data: profile } = await supabase
@@ -355,6 +361,30 @@ const ChatConversation = () => {
         <div className="flex-1 min-w-0">
           <p className="font-semibold truncate">{getDisplayName()}</p>
         </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <MoreVertical className="w-5 h-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {otherUserId && (
+              <>
+                <BlockUserButton
+                  userId={otherUserId}
+                  userName={getDisplayName()}
+                  trigger={
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                      Blocca utente
+                    </DropdownMenuItem>
+                  }
+                  onBlocked={() => navigate("/chats")}
+                />
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Messages */}
@@ -376,13 +406,14 @@ const ChatConversation = () => {
                 </Avatar>
               )}
               
-              <div
-                className={`max-w-[75%] rounded-2xl px-4 py-2 ${
-                  isOwn
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-card"
-                }`}
-              >
+              <div className="relative group max-w-[75%]">
+                <div
+                  className={`rounded-2xl px-4 py-2 ${
+                    isOwn
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-card"
+                  }`}
+                >
                 {message.media_url && (
                   <div className="mb-2">
                     {message.media_type === 'image' ? (
@@ -413,6 +444,20 @@ const ChatConversation = () => {
                     )
                   )}
                 </div>
+                </div>
+                {!isOwn && (
+                  <div className="absolute -right-8 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ReportContentDialog
+                      contentId={message.id}
+                      contentType="message"
+                      trigger={
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      }
+                    />
+                  </div>
+                )}
               </div>
               
               {isOwn && (

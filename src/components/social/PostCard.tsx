@@ -3,8 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client"; // Percorso corretto
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Bookmark, Trash2, VolumeX, Volume2, Maximize } from "lucide-react";
+import { Heart, MessageCircle, Bookmark, Trash2, VolumeX, Volume2, Maximize, MoreVertical } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import ReportContentDialog from "@/components/moderation/ReportContentDialog";
+import BlockUserButton from "@/components/moderation/BlockUserButton";
 import { formatDistanceToNow } from "date-fns";
 import { it, enUS, es, fr, de } from "date-fns/locale";
 import CommentsSheet from "./CommentsSheet";
@@ -238,7 +241,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
             </p>
           </div>
         </button>
-        {isOwner && (
+        {isOwner ? (
           <Button
             variant="ghost"
             size="icon"
@@ -248,6 +251,34 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
           >
             <Trash2 className="w-4 h-4" />
           </Button>
+        ) : (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <MoreVertical className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <ReportContentDialog
+                contentId={post.id}
+                contentType="post"
+                trigger={
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    Segnala post
+                  </DropdownMenuItem>
+                }
+              />
+              <BlockUserButton
+                userId={post.user_id}
+                userName={displayName}
+                trigger={
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    Blocca utente
+                  </DropdownMenuItem>
+                }
+              />
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
 

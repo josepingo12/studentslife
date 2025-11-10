@@ -18,6 +18,8 @@ interface ContentFlag {
   reporter_user_id: string;
   created_at: string;
   moderation_notes: string | null;
+  content?: any;
+  reporter?: any;
 }
 
 const ModerationPanel = () => {
@@ -59,7 +61,50 @@ const ModerationPanel = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setFlags(data || []);
+
+      // Load content and reporter details for each flag
+      const flagsWithDetails = await Promise.all(
+        (data || []).map(async (flag) => {
+          let content = null;
+          let reporter = null;
+
+          // Load content based on type
+          if (flag.content_type === "post" || flag.content_type === "video") {
+            const { data: postData } = await supabase
+              .from("posts")
+              .select("*, public_profiles(*)")
+              .eq("id", flag.content_id)
+              .single();
+            content = postData;
+          } else if (flag.content_type === "message") {
+            const { data: messageData } = await supabase
+              .from("messages")
+              .select("*")
+              .eq("id", flag.content_id)
+              .single();
+            content = messageData;
+          } else if (flag.content_type === "comment") {
+            const { data: commentData } = await supabase
+              .from("comments")
+              .select("*")
+              .eq("id", flag.content_id)
+              .single();
+            content = commentData;
+          }
+
+          // Load reporter profile
+          const { data: reporterData } = await supabase
+            .from("profiles")
+            .select("first_name, last_name, business_name")
+            .eq("id", flag.reporter_user_id)
+            .single();
+          reporter = reporterData;
+
+          return { ...flag, content, reporter };
+        })
+      );
+
+      setFlags(flagsWithDetails);
     } catch (error) {
       console.error("Error loading flags:", error);
       toast.error("Error al cargar reportes");
@@ -127,26 +172,64 @@ const ModerationPanel = () => {
     return flags.filter((flag) => flag.status === status);
   };
 
-  const FlagCard = ({ flag }: { flag: ContentFlag }) => (
-    <Card key={flag.id} className="mb-4">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm">
-            {flag.content_type.toUpperCase()} - {getReasonLabel(flag.reason)}
-          </CardTitle>
-          {getStatusBadge(flag.status)}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          <div>
-            <p className="text-sm text-muted-foreground">
-              Content ID: <code className="text-xs">{flag.content_id}</code>
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Reportado: {new Date(flag.created_at).toLocaleString("es-ES")}
-            </p>
+  const FlagCard = ({ flag }: { flag: ContentFlag }) => {
+    const reporterName = flag.reporter?.first_name 
+      ? `${flag.reporter.first_name} ${flag.reporter.last_name || ""}`.trim()
+      : flag.reporter?.business_name || "Usuario desconocido";
+
+    const contentAuthor = flag.content?.public_profiles?.first_name
+      ? `${flag.content.public_profiles.first_name} ${flag.content.public_profiles.last_name || ""}`.trim()
+      : flag.content?.public_profiles?.business_name || "Usuario desconocido";
+
+    return (
+      <Card key={flag.id} className="mb-4">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm">
+              {flag.content_type.toUpperCase()} - {getReasonLabel(flag.reason)}
+            </CardTitle>
+            {getStatusBadge(flag.status)}
           </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="bg-muted p-3 rounded-lg">
+              <p className="text-sm font-medium mb-1">Reportado por:</p>
+              <p className="text-sm">{reporterName}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {new Date(flag.created_at).toLocaleString("es-ES")}
+              </p>
+            </div>
+
+            {flag.content && (
+              <div className="bg-accent/10 p-3 rounded-lg border">
+                <p className="text-sm font-medium mb-2">Contenido segnalato:</p>
+                {flag.content_type === "post" || flag.content_type === "video" ? (
+                  <>
+                    <p className="text-xs text-muted-foreground mb-1">Autor: {contentAuthor}</p>
+                    {flag.content.content && (
+                      <p className="text-sm mb-2">{flag.content.content}</p>
+                    )}
+                    {flag.content.image_url && (
+                      <img src={flag.content.image_url} alt="Content" className="w-full max-h-48 object-cover rounded mt-2" />
+                    )}
+                    {flag.content.video_url && (
+                      <video src={flag.content.video_url} controls className="w-full max-h-48 rounded mt-2" />
+                    )}
+                  </>
+                ) : flag.content_type === "message" ? (
+                  <p className="text-sm">{flag.content.content}</p>
+                ) : flag.content_type === "comment" ? (
+                  <p className="text-sm">{flag.content.content}</p>
+                ) : null}
+              </div>
+            )}
+
+            {!flag.content && (
+              <div className="bg-destructive/10 p-3 rounded-lg border border-destructive/20">
+                <p className="text-sm text-destructive">Il contenuto è stato eliminato o non è più disponibile</p>
+              </div>
+            )}
 
           {flag.description && (
             <div>
@@ -217,7 +300,8 @@ const ModerationPanel = () => {
         </div>
       </CardContent>
     </Card>
-  );
+    );
+  };
 
   if (loading) {
     return (

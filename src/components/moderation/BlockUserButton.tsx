@@ -33,7 +33,11 @@ const BlockUserButton = ({
   const handleBlock = async () => {
     setLoading(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
       const { error } = await supabase.from("user_blocks").insert({
+        blocker_user_id: user.id,
         blocked_user_id: userId,
       });
 

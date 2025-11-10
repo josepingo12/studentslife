@@ -43,11 +43,15 @@ const ReportContentDialog = ({
   const handleSubmit = async () => {
     setLoading(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
       const { error } = await supabase.from("content_flags").insert({
         content_id: contentId,
         content_type: contentType,
         reason,
         description: description.trim() || null,
+        reporter_user_id: user.id,
       });
 
       if (error) throw error;
