@@ -448,9 +448,18 @@ const ChatConversation = () => {
                 {message.media_url && (
                   <div className="mb-2">
                     {message.media_type === 'image' ? (
-                      <img src={message.media_url} alt="Media" className="rounded-lg max-w-full" />
+                      <img 
+                        src={message.media_url} 
+                        alt="Media" 
+                        className="rounded-lg max-w-[250px] max-h-[350px] object-cover cursor-pointer" 
+                        onClick={() => window.open(message.media_url, '_blank')}
+                      />
                     ) : message.media_type === 'video' ? (
-                      <video src={message.media_url} controls className="rounded-lg max-w-full" />
+                      <video 
+                        src={message.media_url} 
+                        controls 
+                        className="rounded-lg max-w-[250px] max-h-[350px]"
+                      />
                     ) : message.media_type === 'audio' ? (
                       <VoiceMessagePlayer 
                         audioUrl={message.media_url} 
