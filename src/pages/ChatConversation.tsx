@@ -5,7 +5,7 @@ import { useWebNotifications } from "@/hooks/useWebNotifications";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Send, Check, CheckCheck, Paperclip, MoreVertical } from "lucide-react";
+import { ArrowLeft, Send, Check, CheckCheck, Paperclip, MoreVertical, File } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import BlockUserButton from "@/components/moderation/BlockUserButton";
@@ -451,8 +451,17 @@ const ChatConversation = () => {
                     ) : message.media_type === 'audio' ? (
                       <audio src={message.media_url} controls className="w-64" />
                     ) : (
-                      <a href={message.media_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm underline break-all">
-                        <span className="break-all">File allegato</span>
+                      <a 
+                        href={message.media_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className={`flex items-center gap-2 p-3 rounded-lg border ${isOwn ? 'bg-primary-foreground/10 border-primary-foreground/20' : 'bg-muted border-border'}`}
+                      >
+                        <File className="w-5 h-5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">File allegato</p>
+                          <p className="text-xs opacity-70">Tocca per aprire</p>
+                        </div>
                       </a>
                     )}
                   </div>
