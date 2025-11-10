@@ -377,7 +377,7 @@ const ChatConversation = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary flex flex-col">
       {/* Header */}
-      <div className="sticky top-0 z-10 ios-card mx-4 mt-4 p-4 flex items-center gap-3 bg-background shadow-sm">
+      <div className="sticky top-0 z-10 ios-card mx-4 p-4 flex items-center gap-3 bg-background shadow-sm" style={{ marginTop: 'max(1rem, env(safe-area-inset-top, 0px))' }}>
         <Button
           variant="ghost"
           size="icon"

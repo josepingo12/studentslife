@@ -128,17 +128,6 @@ const MediaUploadSheet = ({
             <span className="text-sm font-medium">{t('chatMedia.gallery')}</span>
           </button>
 
-          <button
-            onClick={handleVoiceRecord}
-            disabled={loading || uploading}
-            className="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
-          >
-            <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center">
-              <Mic className="w-7 h-7 text-red-500" />
-            </div>
-            <span className="text-sm font-medium">{t('chatMedia.audio')}</span>
-          </button>
-
           <label className="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-muted transition-colors cursor-pointer">
             <div className="w-14 h-14 rounded-full bg-purple-500/10 flex items-center justify-center">
               <Video className="w-7 h-7 text-purple-500" />

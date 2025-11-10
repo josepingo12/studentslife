@@ -171,11 +171,7 @@ const VoiceRecorder = ({ onRecordingComplete, onCancel }: VoiceRecorderProps) =>
     <div className="fixed inset-0 bg-background z-50 flex flex-col">
       {/* Header */}
       <div className="p-4 border-b flex items-center justify-between">
-        <Button variant="ghost" size="icon" onClick={handleCancel}>
-          <X className="w-5 h-5" />
-        </Button>
         <span className="font-semibold">{t('chatMedia.voiceMessage')}</span>
-        <div className="w-10" />
       </div>
 
       {/* Visualization */}
