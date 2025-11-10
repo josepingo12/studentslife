@@ -203,10 +203,12 @@ const ChatConversation = () => {
     if ((!newMessage.trim() && !mediaUrl) || !user) return;
 
     try {
+      const hasMedia = !!mediaUrl;
       const messageData: any = {
         conversation_id: conversationId,
         sender_id: user.id,
-        content: newMessage.trim() || null,
+        // content must be non-null per DB schema
+        content: newMessage.trim() || (hasMedia ? "" : ""),
       };
 
       if (mediaUrl) {
