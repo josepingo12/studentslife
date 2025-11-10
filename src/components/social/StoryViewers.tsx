@@ -97,13 +97,13 @@ const StoryViewers = ({ storyId, open, onOpenChange }: StoryViewersProps) => {
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerOverlay className="bg-black/20" />
-      <DrawerContent className="h-[70vh] bg-background border-t-0 rounded-t-[20px]" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <DrawerOverlay className="bg-black/40 backdrop-blur-sm" />
+      <DrawerContent className="h-[70vh] bg-card rounded-t-[24px] shadow-2xl border border-border/50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <DrawerHeader className="border-b border-border/50">
           <DrawerTitle className="text-center font-semibold">Visualizaciones</DrawerTitle>
         </DrawerHeader>
 
-        <div className="flex-1 overflow-y-auto px-4 pb-4 bg-background">
+        <div className="flex-1 overflow-y-auto px-4 pb-4 bg-card">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

@@ -73,11 +73,23 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
     }
   }, [currentStory, currentUserId, isOwnStory]);
 
-  // Resume playback when bottom sheet closes
+  // Pause when opening sheet; resume and restart timers when closing
   useEffect(() => {
-    if (!isViewersSheetOpen && isPaused) {
-      setIsPaused(false);
+    if (isViewersSheetOpen) {
+      if (!isPaused) setIsPaused(true);
+      const duration = getStoryDuration();
+      const elapsed = Date.now() - startTimeRef.current;
+      const remaining = Math.max(0, duration - elapsed);
+      setSavedProgress(progress);
+      setRemainingTime(remaining);
+      return;
     }
+    // Closed: recompute remaining based on current progress and continue
+    const duration = getStoryDuration();
+    const remaining = Math.max(0, Math.round(duration * (1 - progress / 100)));
+    setSavedProgress(progress);
+    setRemainingTime(remaining);
+    if (isPaused) setIsPaused(false);
   }, [isViewersSheetOpen]);
 
   useEffect(() => {
@@ -340,7 +352,7 @@ const StoryViewer = ({ storyGroup, currentUserId, onClose, onNext, onStoryDelete
   if (!currentStory) return null;
 
   return (
-    <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black z-50 flex items-center justify-center" style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}>
       {isDesktop ? (
         <div className="relative w-full max-w-md h-full max-h-[90vh] bg-black rounded-lg overflow-hidden">
           {/* Progress bars */}

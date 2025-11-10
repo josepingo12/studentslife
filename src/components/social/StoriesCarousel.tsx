@@ -133,10 +133,10 @@ const StoriesCarousel = ({ currentUserId }: StoriesCarouselProps) => {
               >
                 <div className={`p-[3px] rounded-full ${
                   isViewed 
-                    ? 'bg-gradient-to-tr from-muted to-muted-foreground/30' 
+                    ? 'bg-gradient-to-tr from-muted to-muted-foreground/30 opacity-60' 
                     : 'bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500'
                 }`}>
-                  <Avatar className="h-16 w-16 border-2 border-background">
+                  <Avatar className={`h-16 w-16 border-2 border-background ${isViewed ? 'grayscale opacity-80' : ''}`}>
                     <AvatarImage src={storyGroup.profile?.profile_image_url} />
                     <AvatarFallback className="bg-primary text-primary-foreground">
                       {storyGroup.profile?.first_name?.[0] || storyGroup.profile?.business_name?.[0]}
