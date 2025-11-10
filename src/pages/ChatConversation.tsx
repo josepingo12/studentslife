@@ -334,11 +334,16 @@ const ChatConversation = () => {
 
     setUploading(true);
     try {
-      const filePath = `${user.id}/${Date.now()}.webm`;
+      const type = audioBlob.type || 'audio/webm';
+      const ext = type.includes('mp4') ? 'm4a'
+                : type.includes('ogg') ? 'ogg'
+                : type.includes('wav') ? 'wav'
+                : 'webm';
+      const filePath = `${user.id}/${Date.now()}.${ext}`;
       
       const { error: uploadError } = await supabase.storage
         .from('posts')
-        .upload(filePath, audioBlob);
+        .upload(filePath, audioBlob, { contentType: type });
 
       if (uploadError) throw uploadError;
 

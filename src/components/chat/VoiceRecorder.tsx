@@ -21,6 +21,7 @@ const VoiceRecorder = ({ onRecordingComplete, onCancel }: VoiceRecorderProps) =>
   const animationFrameRef = useRef<number | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const selectedMimeTypeRef = useRef<string>("");
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -51,10 +52,26 @@ const VoiceRecorder = ({ onRecordingComplete, onCancel }: VoiceRecorderProps) =>
       // Start visualization
       visualizeAudio();
 
-      // Setup media recorder
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
+      // Setup media recorder with best supported mime type
+      const candidates = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4;codecs=mp4a.40.2',
+        'audio/mp4',
+        'audio/ogg;codecs=opus',
+        'audio/ogg',
+        'audio/wav'
+      ];
+      const supported = candidates.filter((type) => {
+        // Some browsers don't expose isTypeSupported
+        // @ts-ignore
+        return typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported ? MediaRecorder.isTypeSupported(type) : true;
       });
+      const chosenMime = supported[0] || '';
+
+      const options: MediaRecorderOptions | undefined = chosenMime ? { mimeType: chosenMime } : undefined;
+      const mediaRecorder = new MediaRecorder(stream, options);
+      selectedMimeTypeRef.current = mediaRecorder.mimeType || chosenMime || '';
       
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
@@ -66,7 +83,8 @@ const VoiceRecorder = ({ onRecordingComplete, onCancel }: VoiceRecorderProps) =>
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm;codecs=opus' });
+        const blobType = selectedMimeTypeRef.current || mediaRecorderRef.current?.mimeType || 'audio/webm';
+        const blob = new Blob(chunksRef.current, { type: blobType });
         setAudioBlob(blob);
         stream.getTracks().forEach(track => track.stop());
         if (audioContextRef.current) {
