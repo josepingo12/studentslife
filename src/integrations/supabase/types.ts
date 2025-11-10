@@ -100,7 +100,9 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          moderation_score: number | null
           post_id: string
+          status: string | null
           updated_at: string
           user_id: string
         }
@@ -108,7 +110,9 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          moderation_score?: number | null
           post_id: string
+          status?: string | null
           updated_at?: string
           user_id: string
         }
@@ -116,7 +120,9 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          moderation_score?: number | null
           post_id?: string
+          status?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -143,6 +149,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      content_flags: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string | null
+          description: string | null
+          id: string
+          moderation_notes: string | null
+          moderator_id: string | null
+          reason: string
+          reporter_user_id: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          moderation_notes?: string | null
+          moderator_id?: string | null
+          reason: string
+          reporter_user_id: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          moderation_notes?: string | null
+          moderator_id?: string | null
+          reason?: string
+          reporter_user_id?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       conversation_participants: {
         Row: {
@@ -390,8 +438,10 @@ export type Database = {
           is_read: boolean
           media_type: string | null
           media_url: string | null
+          moderation_score: number | null
           read_at: string | null
           sender_id: string
+          status: string | null
         }
         Insert: {
           content: string
@@ -401,8 +451,10 @@ export type Database = {
           is_read?: boolean
           media_type?: string | null
           media_url?: string | null
+          moderation_score?: number | null
           read_at?: string | null
           sender_id: string
+          status?: string | null
         }
         Update: {
           content?: string
@@ -412,8 +464,10 @@ export type Database = {
           is_read?: boolean
           media_type?: string | null
           media_url?: string | null
+          moderation_score?: number | null
           read_at?: string | null
           sender_id?: string
+          status?: string | null
         }
         Relationships: [
           {
@@ -500,6 +554,8 @@ export type Database = {
           id: string
           image_url: string | null
           media_type: string | null
+          moderation_score: number | null
+          status: string | null
           updated_at: string
           user_id: string
           video_url: string | null
@@ -510,6 +566,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           media_type?: string | null
+          moderation_score?: number | null
+          status?: string | null
           updated_at?: string
           user_id: string
           video_url?: string | null
@@ -520,6 +578,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           media_type?: string | null
+          moderation_score?: number | null
+          status?: string | null
           updated_at?: string
           user_id?: string
           video_url?: string | null
@@ -563,6 +623,7 @@ export type Database = {
           phone: string | null
           phone_number: string | null
           profile_image_url: string | null
+          terms_accepted_at: string | null
           university: string | null
           updated_at: string | null
         }
@@ -587,6 +648,7 @@ export type Database = {
           phone?: string | null
           phone_number?: string | null
           profile_image_url?: string | null
+          terms_accepted_at?: string | null
           university?: string | null
           updated_at?: string | null
         }
@@ -611,6 +673,7 @@ export type Database = {
           phone?: string | null
           phone_number?: string | null
           profile_image_url?: string | null
+          terms_accepted_at?: string | null
           university?: string | null
           updated_at?: string | null
         }
@@ -921,6 +984,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_blocks: {
+        Row: {
+          blocked_user_id: string
+          blocker_user_id: string
+          created_at: string | null
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          blocked_user_id: string
+          blocker_user_id: string
+          created_at?: string | null
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          blocked_user_id?: string
+          blocker_user_id?: string
+          created_at?: string | null
+          id?: string
+          reason?: string | null
+        }
+        Relationships: []
       }
       user_fcm_tokens: {
         Row: {
