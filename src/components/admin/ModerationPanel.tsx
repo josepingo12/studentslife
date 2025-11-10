@@ -131,9 +131,44 @@ const ModerationPanel = () => {
       toast.success("Estado actualizado correctamente");
       setNotes("");
       setSelectedFlag(null);
+      loadFlags();
     } catch (error) {
       console.error("Error updating flag:", error);
       toast.error("Error al actualizar estado");
+    }
+  };
+
+  const deleteContent = async (contentId: string, contentType: string) => {
+    try {
+      let error;
+      
+      if (contentType === "post" || contentType === "video") {
+        const result = await supabase
+          .from("posts")
+          .delete()
+          .eq("id", contentId);
+        error = result.error;
+      } else if (contentType === "message") {
+        const result = await supabase
+          .from("messages")
+          .delete()
+          .eq("id", contentId);
+        error = result.error;
+      } else if (contentType === "comment") {
+        const result = await supabase
+          .from("comments")
+          .delete()
+          .eq("id", contentId);
+        error = result.error;
+      }
+
+      if (error) throw error;
+
+      toast.success("Contenido eliminado correctamente");
+      loadFlags();
+    } catch (error) {
+      console.error("Error deleting content:", error);
+      toast.error("Error al eliminar contenido");
     }
   };
 
@@ -253,7 +288,7 @@ const ModerationPanel = () => {
                 onChange={(e) => setNotes(e.target.value)}
                 rows={2}
               />
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button
                   size="sm"
                   onClick={() => updateFlagStatus(flag.id, "resolved")}
@@ -274,6 +309,19 @@ const ModerationPanel = () => {
                 >
                   Descartar
                 </Button>
+                {flag.content && (
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => {
+                      if (confirm("¿Estás seguro de que quieres eliminar este contenido? Esta acción no se puede deshacer.")) {
+                        deleteContent(flag.content_id, flag.content_type);
+                      }
+                    }}
+                  >
+                    Eliminar Contenido
+                  </Button>
+                )}
                 <Button
                   size="sm"
                   variant="ghost"
