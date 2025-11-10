@@ -5,14 +5,16 @@ import { useWebNotifications } from "@/hooks/useWebNotifications";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Send, Check, CheckCheck, Paperclip, MoreVertical, File } from "lucide-react";
+import { ArrowLeft, Send, Check, CheckCheck, Paperclip, MoreVertical, File, Download } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import BlockUserButton from "@/components/moderation/BlockUserButton";
 import ReportContentDialog from "@/components/moderation/ReportContentDialog";
 import MediaUploadSheet from "@/components/chat/MediaUploadSheet";
 import VoiceRecorderButton from "@/components/chat/VoiceRecorderButton";
 import VoiceMessagePlayer from "@/components/chat/VoiceMessagePlayer";
+import ImageViewer from "@/components/social/ImageViewer";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
@@ -32,6 +34,10 @@ const ChatConversation = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
+  const [imageViewerOpen, setImageViewerOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string>("");
+  const [videoViewerOpen, setVideoViewerOpen] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -457,32 +463,52 @@ const ChatConversation = () => {
                         src={message.media_url} 
                         alt="Media" 
                         className="rounded-lg max-w-[250px] max-h-[350px] object-cover cursor-pointer" 
-                        onClick={() => window.open(message.media_url, '_blank')}
+                        onClick={() => {
+                          setSelectedImage(message.media_url);
+                          setImageViewerOpen(true);
+                        }}
                       />
                     ) : message.media_type === 'video' ? (
-                      <video 
-                        src={message.media_url} 
-                        controls 
-                        className="rounded-lg max-w-[250px] max-h-[350px]"
-                      />
+                      <div 
+                        className="relative rounded-lg max-w-[250px] max-h-[350px] overflow-hidden cursor-pointer"
+                        onClick={() => {
+                          setSelectedVideo(message.media_url);
+                          setVideoViewerOpen(true);
+                        }}
+                      >
+                        <video 
+                          src={message.media_url} 
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <div className="w-12 h-12 rounded-full bg-white/80 flex items-center justify-center">
+                            <div className="w-0 h-0 border-t-[8px] border-t-transparent border-l-[14px] border-l-primary border-b-[8px] border-b-transparent ml-1" />
+                          </div>
+                        </div>
+                      </div>
                     ) : message.media_type === 'audio' ? (
                       <VoiceMessagePlayer 
                         audioUrl={message.media_url} 
                         isOwn={isOwn}
                       />
                     ) : (
-                      <a 
-                        href={message.media_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
+                      <button 
+                        onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = message.media_url;
+                          link.download = 'file';
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
                         className={`flex items-center gap-2 p-3 rounded-lg border ${isOwn ? 'bg-primary-foreground/10 border-primary-foreground/20' : 'bg-muted border-border'}`}
                       >
-                        <File className="w-5 h-5 flex-shrink-0" />
+                        <Download className="w-5 h-5 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{t('chatMedia.fileAttached')}</p>
-                          <p className="text-xs opacity-70">{t('chatMedia.tapToOpen')}</p>
+                          <p className="text-xs opacity-70">{t('chatMedia.tapToDownload')}</p>
                         </div>
-                      </a>
+                      </button>
                     )}
                   </div>
                 )}
@@ -604,6 +630,27 @@ const ChatConversation = () => {
         onVoiceRecord={() => {}}
         uploading={uploading}
       />
+
+      {/* Image Viewer */}
+      <ImageViewer
+        open={imageViewerOpen}
+        onOpenChange={setImageViewerOpen}
+        imageUrl={selectedImage}
+      />
+
+      {/* Video Viewer */}
+      <Dialog open={videoViewerOpen} onOpenChange={setVideoViewerOpen}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black border-0">
+          <div className="flex items-center justify-center w-full h-full">
+            <video
+              src={selectedVideo}
+              controls
+              autoPlay
+              className="max-w-full max-h-[95vh] object-contain"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

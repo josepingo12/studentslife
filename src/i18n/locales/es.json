@@ -246,6 +246,7 @@
     "errorSelect": "Error al seleccionar la foto",
     "fileAttached": "Archivo adjunto",
     "tapToOpen": "Toca para abrir",
+    "tapToDownload": "Toca para descargar",
     "typeMessage": "Escribe un mensaje..."
   },
   "errors": {

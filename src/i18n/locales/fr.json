@@ -246,6 +246,7 @@
     "errorSelect": "Erreur lors de la sélection",
     "fileAttached": "Fichier joint",
     "tapToOpen": "Toucher pour ouvrir",
+    "tapToDownload": "Toucher pour télécharger",
     "typeMessage": "Écrivez un message..."
   },
   "errors": {

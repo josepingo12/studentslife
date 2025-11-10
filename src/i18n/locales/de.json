@@ -246,6 +246,7 @@
     "errorSelect": "Fehler bei der Auswahl",
     "fileAttached": "Datei angehängt",
     "tapToOpen": "Zum Öffnen antippen",
+    "tapToDownload": "Zum Herunterladen antippen",
     "typeMessage": "Schreibe eine Nachricht..."
   },
   "errors": {
