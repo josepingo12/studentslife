@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import BlockUserButton from "@/components/moderation/BlockUserButton";
 import ReportContentDialog from "@/components/moderation/ReportContentDialog";
 import MediaUploadSheet from "@/components/chat/MediaUploadSheet";
-import VoiceRecorder from "@/components/chat/VoiceRecorder";
+import VoiceRecorderButton from "@/components/chat/VoiceRecorderButton";
 import VoiceMessagePlayer from "@/components/chat/VoiceMessagePlayer";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
@@ -32,7 +32,6 @@ const ChatConversation = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
-  const [voiceRecorderOpen, setVoiceRecorderOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -352,7 +351,6 @@ const ChatConversation = () => {
         .getPublicUrl(filePath);
 
       await handleSendMessage(new Event('submit') as any, publicUrl, 'audio');
-      setVoiceRecorderOpen(false);
       toast({ title: t('chatMedia.voiceSent') });
     } catch (error: any) {
       toast({ title: t('common.error'), description: error.message, variant: "destructive" });
@@ -567,6 +565,11 @@ const ChatConversation = () => {
             <Paperclip className="w-5 h-5" />
           </Button>
 
+          <VoiceRecorderButton 
+            onRecordingComplete={handleVoiceRecording}
+            disabled={uploading}
+          />
+
           <Input
             value={newMessage}
             onChange={handleInputChange}
@@ -598,17 +601,9 @@ const ChatConversation = () => {
         onCameraCapture={(imageUrl) => {
           // Handle camera capture if needed
         }}
-        onVoiceRecord={() => setVoiceRecorderOpen(true)}
+        onVoiceRecord={() => {}}
         uploading={uploading}
       />
-
-      {/* Voice Recorder */}
-      {voiceRecorderOpen && (
-        <VoiceRecorder
-          onRecordingComplete={handleVoiceRecording}
-          onCancel={() => setVoiceRecorderOpen(false)}
-        />
-      )}
     </div>
   );
 };
