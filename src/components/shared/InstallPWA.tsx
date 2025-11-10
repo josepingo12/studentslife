@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Download, Share } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Capacitor } from "@capacitor/core";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -14,6 +15,12 @@ export const InstallPWA = () => {
 
   useEffect(() => {
     console.log('InstallPWA: Component mounted');
+    
+    // Non mostrare il prompt se l'app è nativa (Capacitor)
+    if (Capacitor.isNativePlatform()) {
+      console.log('App is running as native app, not showing PWA prompt');
+      return;
+    }
     
     // Verifica se è già installata come PWA
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
