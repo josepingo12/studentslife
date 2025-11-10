@@ -34,8 +34,8 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   useEffect(() => {
     setLanguage(i18n.language);
@@ -124,14 +124,14 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
   };
 
   const handleDeleteAccount = async () => {
-    setIsDeleting(true);
+    setIsDeletingAccount(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session) {
         toast({
           title: t('common.error'),
-          description: "No active session",
+          description: t('errors.noActiveSession'),
           variant: "destructive",
         });
         return;
@@ -147,7 +147,7 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
         console.error('Delete account error:', error);
         toast({
           title: t('common.error'),
-          description: "Error al eliminar la cuenta",
+          description: t('errors.deleteAccountFailed'),
           variant: "destructive",
         });
         return;
@@ -155,7 +155,7 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
 
       toast({
         title: t('common.success'),
-        description: "Cuenta eliminada correctamente",
+        description: t('success.accountDeleted'),
       });
       await supabase.auth.signOut();
       navigate("/login");
@@ -163,12 +163,12 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
       console.error('Delete account error:', error);
       toast({
         title: t('common.error'),
-        description: "Error al eliminar la cuenta",
+        description: t('errors.deleteAccountFailed'),
         variant: "destructive",
       });
     } finally {
-      setIsDeleting(false);
-      setShowDeleteDialog(false);
+      setIsDeletingAccount(false);
+      setShowDeleteAccountDialog(false);
     }
   };
 
@@ -259,10 +259,10 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
             </Button>
           </div>
 
-          {/* Delete Account Button */}
+          {/* Delete Account Button - Updated to match ClientSettingsSheet */}
           <div className="pt-2">
             <Button
-              onClick={() => setShowDeleteDialog(true)}
+              onClick={() => setShowDeleteAccountDialog(true)}
               variant="outline"
               className="w-full gap-2 text-destructive hover:text-destructive border-destructive hover:bg-destructive/10"
             >
@@ -277,19 +277,20 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
     <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Conferma Logout</AlertDialogTitle>
+          <AlertDialogTitle>{t('dialog.confirmLogoutTitle')}</AlertDialogTitle>
           <AlertDialogDescription>
-            Sei sicuro di voler uscire dal tuo account?
+            {t('dialog.confirmLogoutDescription')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Annulla</AlertDialogCancel>
-          <AlertDialogAction onClick={handleLogout}>Logout</AlertDialogAction>
+          <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+          <AlertDialogAction onClick={handleLogout}>{t('auth.logout')}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
 
-    <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+    {/* Delete Account AlertDialog - Updated to match ClientSettingsSheet */}
+    <AlertDialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>¿Eliminar cuenta?</AlertDialogTitle>
@@ -299,12 +300,12 @@ const SettingsSheet = ({ open, onOpenChange }: SettingsSheetProps) => {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction 
+          <AlertDialogAction
             onClick={handleDeleteAccount}
-            disabled={isDeleting}
+            disabled={isDeletingAccount}
             className="bg-destructive hover:bg-destructive/90"
           >
-            {isDeleting ? "Eliminando..." : "Confirmar"}
+            {isDeletingAccount ? "Eliminando..." : "Confirmar"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

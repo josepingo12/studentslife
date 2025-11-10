@@ -43,6 +43,14 @@
 
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* --- SAFE AREA INSETS PER IOS (INIZIO) --- */
+    /* Fallback values */
+    --safe-area-inset-top: 20px;
+    --safe-area-inset-bottom: 22px;
+    --safe-area-inset-left: 0px;
+    --safe-area-inset-right: 0px;
+    /* --- SAFE AREA INSETS PER IOS (FINE) --- */
   }
 
   .dark {
@@ -85,6 +93,29 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+
+    /* --- SAFE AREA INSETS PER IOS (INIZIO) --- */
+    /* Assicurati che il tuo body o container principale occupi tutta l'altezza */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+
+    /* Applica le safe areas solo su dispositivi iOS con notch */
+    @supports (padding-top: env(safe-area-inset-top)) {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+
+      /* Aggiorna le variabili CSS globali con i valori reali */
+      :root {
+        --safe-area-inset-top: env(safe-area-inset-top);
+        --safe-area-inset-bottom: env(safe-area-inset-bottom);
+        --safe-area-inset-left: env(safe-area-inset-left);
+        --safe-area-inset-right: env(safe-area-inset-right);
+      }
+    }
+    /* --- SAFE AREA INSETS PER IOS (FINE) --- */
   }
 }
 
@@ -92,30 +123,30 @@
   .ios-card {
     @apply bg-card rounded-2xl shadow-md border border-border/50;
   }
-  
+
   .ios-button {
     @apply bg-primary text-primary-foreground rounded-xl font-semibold shadow-sm;
     transition: var(--transition-smooth);
   }
-  
+
   .ios-button:hover {
     @apply brightness-110;
   }
-  
+
   .ios-button:active {
     @apply scale-95;
   }
-  
+
   .ios-input {
     @apply bg-secondary/50 border-border rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent;
     transition: var(--transition-smooth);
   }
-  
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }

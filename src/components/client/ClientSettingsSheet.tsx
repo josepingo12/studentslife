@@ -11,6 +11,7 @@ import { Globe, Lock, LogOut, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
   AlertDialog,
+  AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
