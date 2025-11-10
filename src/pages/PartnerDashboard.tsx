@@ -212,74 +212,81 @@ const PartnerDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
-      {activeTab === "social" ? (
-        <div className="max-w-[470px] mx-auto w-full">
-          {/* Header con Menu, Posizione, Avatar e Search Bar Integrata - AZZURRO E MODERNO */}
-          <div className="mx-4 mt-4 mb-2 relative">
-            <div className="bg-blue-500 rounded-3xl px-6 py-4 shadow-lg flex flex-col gap-3">
-              {/* Top row: Menu, Location, Avatar */}
-              <div className="flex items-center justify-between">
-                {/* Menu hamburger a sinistra */}
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Modern iOS-style header */}
+      <header className="sticky top-0 z-10 bg-background border-b" style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))', paddingBottom: '0.75rem' }}>
+        <div className="container mx-auto px-4 flex justify-between items-center">
+          <h1 className="text-xl font-semibold">
+            {activeTab === "social" && "Social"}
+            {activeTab === "events" && t('navigation.events')}
+            {activeTab === "gallery" && "Gallery"}
+            {activeTab === "scanner" && "Scanner"}
+            {activeTab === "stats" && t('navigation.stats')}
+            {activeTab === "profile" && t('navigation.profile')}
+          </h1>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate("/chats")}
+              className="relative p-2 hover:bg-muted rounded-full transition-colors"
+            >
+              <MessageCircle className="w-5 h-5" />
+              {totalUnread > 0 && (
+                <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                  {totalUnread}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setSettingsSheetOpen(true)}
+              className="p-2 hover:bg-muted rounded-full transition-colors"
+            >
+              <Settings className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setActiveTab("profile")}
+              className="hover:scale-105 transition-transform"
+            >
+              <Avatar className="h-9 w-9 ring-2 ring-muted">
+                <AvatarImage src={profile?.profile_image_url} />
+                <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+                  {getDisplayName(profile)[0].toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </button>
+          </div>
+        </div>
+        
+        {/* Search bar - only visible on social tab */}
+        {activeTab === "social" && (
+          <div className="container mx-auto px-4 mt-3 relative">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
+              <Input
+                type="text"
+                placeholder="Cerca utenti..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="w-full pl-10 pr-10 rounded-full border-muted-foreground/20 bg-muted/50"
+              />
+              {searchQuery && (
                 <button
-                  onClick={() => setSettingsSheetOpen(true)}
-                  className="flex flex-col gap-1 p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  onClick={() => handleSearch("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-10 hover:bg-muted rounded-full p-1 transition-colors"
                 >
-                  <div className="w-6 h-0.5 bg-white rounded-full"></div>
-                  <div className="w-6 h-0.5 bg-white rounded-full"></div>
-                  <div className="w-6 h-0.5 bg-white rounded-full"></div>
+                  <X className="w-4 h-4" />
                 </button>
-
-                {/* Posizione al centro con icona */}
-                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 border border-white/30">
-                  <MapPin className="w-4 h-4 text-white" />
-                  <span className="text-sm font-medium text-white">Valladolid</span>
-                </div>
-
-                {/* Avatar a destra */}
-                <button
-                  onClick={() => navigate("/profile")}
-                  className="hover:scale-105 transition-transform"
-                >
-                  <Avatar className="h-10 w-10 ring-2 ring-white/30">
-                    <AvatarImage src={profile?.profile_image_url} />
-                    <AvatarFallback className="bg-white text-blue-500 font-semibold">
-                      {getDisplayName(profile)[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </button>
-              </div>
-
-              {/* Bottom row: Integrated Search Bar */}
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400 z-10" />
-                <Input
-                  type="text"
-                  placeholder="Cerca utenti, luoghi, hashtag..."
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="w-full pl-10 pr-10 py-2.5 rounded-full border-none bg-blue-50 text-blue-800 placeholder:text-blue-400 focus-visible:ring-0 text-base font-medium transition-all duration-200"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => handleSearch("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 z-10 hover:bg-blue-100 rounded-full p-1 transition-colors"
-                  >
-                    <X className="w-4 h-4 text-blue-600" />
-                  </button>
-                )}
-              </div>
+              )}
             </div>
-
-            {/* Search Results Dropdown - positioned relative to the parent header div */}
+            
+            {/* Search Results Dropdown */}
             {searchQuery && (
-              <div className="absolute top-[calc(100%+0.5rem)] left-0 right-0 mt-0 bg-white rounded-2xl shadow-xl border border-blue-100 z-50 max-h-80 overflow-y-auto">
+              <div className="absolute top-[calc(100%+0.5rem)] left-4 right-4 bg-card rounded-xl shadow-xl border z-50 max-h-80 overflow-y-auto">
                 {searching ? (
-                  <p className="text-sm text-gray-500 text-center py-8">{t('common.loading')}</p>
+                  <p className="text-sm text-muted-foreground text-center py-8">{t('common.loading')}</p>
                 ) : searchResults.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-8">Nessun utente trovato</p>
+                  <p className="text-sm text-muted-foreground text-center py-8">Nessun utente trovato</p>
                 ) : (
-                  <div className="py-3">
+                  <div className="py-2">
                     {searchResults.map((result) => (
                       <button
                         key={result.id}
@@ -288,18 +295,18 @@ const PartnerDashboard = () => {
                           setSearchQuery("");
                           setSearchResults([]);
                         }}
-                        className="w-full flex items-center gap-4 px-4 py-3 hover:bg-blue-50 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors"
                       >
-                        <Avatar className="h-12 w-12">
+                        <Avatar className="h-10 w-10">
                           <AvatarImage src={result.profile_image_url} />
-                          <AvatarFallback className="bg-blue-500 text-white">
+                          <AvatarFallback className="bg-primary text-primary-foreground">
                             {getDisplayName(result)[0].toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div className="text-left flex-1">
-                          <p className="font-semibold text-gray-900">{getDisplayName(result)}</p>
+                          <p className="font-semibold">{getDisplayName(result)}</p>
                           {result.first_name && result.business_name && (
-                            <p className="text-sm text-gray-500">{result.business_name}</p>
+                            <p className="text-sm text-muted-foreground">{result.business_name}</p>
                           )}
                         </div>
                       </button>
@@ -309,7 +316,12 @@ const PartnerDashboard = () => {
               </div>
             )}
           </div>
+        )}
+      </header>
 
+      {/* Main Content */}
+      {activeTab === "social" ? (
+        <div className="flex-1 overflow-y-auto pb-24">
           {/* Stories */}
           <div className="mt-4">
             <StoriesCarousel currentUserId={user.id} />
@@ -405,85 +417,85 @@ const PartnerDashboard = () => {
         </div>
       )}
 
-      {/* Bottom Navigation - Reverted to original sections with modern styling */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
-        <div className="flex items-center justify-around h-20 px-4 max-w-md mx-auto">
+      {/* Bottom Navigation - Modern iOS style */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t" style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom, 0.5rem))' }}>
+        <div className="flex items-center justify-around px-2 pt-2 max-w-md mx-auto">
           <button
             onClick={() => setActiveTab("social")}
-            className={`flex flex-col items-center gap-1 p-2 rounded-full transition-colors ${
+            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors flex-1 ${
               activeTab === "social"
-                ? "bg-blue-100 text-blue-600"
-                : "text-gray-500 hover:bg-blue-50"
+                ? "text-primary"
+                : "text-muted-foreground"
             }`}
           >
             <Users className="w-6 h-6" />
-            <span className="text-xs font-medium">{t('navigation.social')}</span>
+            <span className="text-xs font-medium">Social</span>
           </button>
 
           <button
             onClick={() => setActiveTab("events")}
-            className={`flex flex-col items-center gap-1 p-2 rounded-full transition-colors ${
+            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors flex-1 ${
               activeTab === "events"
-                ? "bg-blue-100 text-blue-600"
-                : "text-gray-500 hover:bg-blue-50"
+                ? "text-primary"
+                : "text-muted-foreground"
             }`}
           >
             <Calendar className="w-6 h-6" />
-            <span className="text-xs font-medium">{t('navigation.events')}</span>
+            <span className="text-xs font-medium">Eventi</span>
           </button>
 
           <button
             onClick={() => setActiveTab("scanner")}
-            className={`flex flex-col items-center gap-1 p-2 rounded-full transition-colors ${
+            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors flex-1 ${
               activeTab === "scanner"
-                ? "bg-blue-100 text-blue-600"
-                : "text-gray-500 hover:bg-blue-50"
+                ? "text-primary"
+                : "text-muted-foreground"
             }`}
           >
             <QrCode className="w-6 h-6" />
-            <span className="text-xs font-medium">{t('navigation.scanner')}</span>
+            <span className="text-xs font-medium">QR</span>
           </button>
 
           {/* Central Upload Button */}
           <button
             onClick={() => setUploadSheetOpen(true)}
-            className="relative -mt-6 h-16 w-16 rounded-full bg-blue-500 text-white shadow-lg flex items-center justify-center hover:bg-blue-600 hover:scale-105 transition-all"
+            className="relative -mt-6 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-all flex-shrink-0 mx-1"
           >
-            <Plus className="w-8 h-8" />
+            <Plus className="w-7 h-7" />
           </button>
 
           <button
             onClick={() => setActiveTab("stats")}
-            className={`flex flex-col items-center gap-1 p-2 rounded-full transition-colors ${
+            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors flex-1 ${
               activeTab === "stats"
-                ? "bg-blue-100 text-blue-600"
-                : "text-gray-500 hover:bg-blue-50"
+                ? "text-primary"
+                : "text-muted-foreground"
             }`}
           >
             <BarChart3 className="w-6 h-6" />
-            <span className="text-xs font-medium">{t('navigation.stats')}</span>
+            <span className="text-xs font-medium">Stats</span>
           </button>
 
           <button
             onClick={() => setLikesSheetOpen(true)}
-            className="flex flex-col items-center gap-1 p-2 rounded-full transition-colors text-gray-500 relative hover:bg-blue-50"
+            className="relative flex flex-col items-center gap-1 p-2 rounded-xl transition-colors text-muted-foreground flex-1"
           >
             <div className="relative">
               <Heart className="w-6 h-6" />
               <NotificationBadge count={unreadNotifications} />
             </div>
-            <span className="text-xs font-medium">Notifiche</span>
+            <span className="text-xs font-medium">Notif</span>
           </button>
 
           <button
             onClick={() => navigate("/chats")}
-            className="flex flex-col items-center gap-1 p-2 rounded-full transition-colors relative text-gray-500 hover:bg-blue-50"
+            className="relative flex flex-col items-center gap-1 p-2 rounded-xl transition-colors text-muted-foreground flex-1"
           >
             <div className="relative">
               <MessageCircle className="w-6 h-6" />
               <NotificationBadge count={totalUnread} />
             </div>
-            <span className="text-xs font-medium">{t('navigation.chat')}</span>
+            <span className="text-xs font-medium">Chat</span>
           </button>
         </div>
       </div>
