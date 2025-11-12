@@ -97,9 +97,12 @@ export type Database = {
       }
       comments: {
         Row: {
+          auto_moderated: boolean | null
           content: string
           created_at: string
           id: string
+          moderation_category: string | null
+          moderation_reason: string | null
           moderation_score: number | null
           post_id: string
           status: string | null
@@ -107,9 +110,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          auto_moderated?: boolean | null
           content: string
           created_at?: string
           id?: string
+          moderation_category?: string | null
+          moderation_reason?: string | null
           moderation_score?: number | null
           post_id: string
           status?: string | null
@@ -117,9 +123,12 @@ export type Database = {
           user_id: string
         }
         Update: {
+          auto_moderated?: boolean | null
           content?: string
           created_at?: string
           id?: string
+          moderation_category?: string | null
+          moderation_reason?: string | null
           moderation_score?: number | null
           post_id?: string
           status?: string | null
@@ -431,6 +440,7 @@ export type Database = {
       }
       messages: {
         Row: {
+          auto_moderated: boolean | null
           content: string
           conversation_id: string
           created_at: string
@@ -438,12 +448,15 @@ export type Database = {
           is_read: boolean
           media_type: string | null
           media_url: string | null
+          moderation_category: string | null
+          moderation_reason: string | null
           moderation_score: number | null
           read_at: string | null
           sender_id: string
           status: string | null
         }
         Insert: {
+          auto_moderated?: boolean | null
           content: string
           conversation_id: string
           created_at?: string
@@ -451,12 +464,15 @@ export type Database = {
           is_read?: boolean
           media_type?: string | null
           media_url?: string | null
+          moderation_category?: string | null
+          moderation_reason?: string | null
           moderation_score?: number | null
           read_at?: string | null
           sender_id: string
           status?: string | null
         }
         Update: {
+          auto_moderated?: boolean | null
           content?: string
           conversation_id?: string
           created_at?: string
@@ -464,6 +480,8 @@ export type Database = {
           is_read?: boolean
           media_type?: string | null
           media_url?: string | null
+          moderation_category?: string | null
+          moderation_reason?: string | null
           moderation_score?: number | null
           read_at?: string | null
           sender_id?: string
@@ -549,11 +567,14 @@ export type Database = {
       }
       posts: {
         Row: {
+          auto_moderated: boolean | null
           content: string | null
           created_at: string
           id: string
           image_url: string | null
           media_type: string | null
+          moderation_category: string | null
+          moderation_reason: string | null
           moderation_score: number | null
           status: string | null
           updated_at: string
@@ -561,11 +582,14 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          auto_moderated?: boolean | null
           content?: string | null
           created_at?: string
           id?: string
           image_url?: string | null
           media_type?: string | null
+          moderation_category?: string | null
+          moderation_reason?: string | null
           moderation_score?: number | null
           status?: string | null
           updated_at?: string
@@ -573,11 +597,14 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          auto_moderated?: boolean | null
           content?: string | null
           created_at?: string
           id?: string
           image_url?: string | null
           media_type?: string | null
+          moderation_category?: string | null
+          moderation_reason?: string | null
           moderation_score?: number | null
           status?: string | null
           updated_at?: string
@@ -835,29 +862,41 @@ export type Database = {
       }
       stories: {
         Row: {
+          auto_moderated: boolean | null
           created_at: string
           expires_at: string
           id: string
           image_url: string | null
           media_type: string | null
+          moderation_category: string | null
+          moderation_reason: string | null
+          status: string | null
           user_id: string
           video_url: string | null
         }
         Insert: {
+          auto_moderated?: boolean | null
           created_at?: string
           expires_at?: string
           id?: string
           image_url?: string | null
           media_type?: string | null
+          moderation_category?: string | null
+          moderation_reason?: string | null
+          status?: string | null
           user_id: string
           video_url?: string | null
         }
         Update: {
+          auto_moderated?: boolean | null
           created_at?: string
           expires_at?: string
           id?: string
           image_url?: string | null
           media_type?: string | null
+          moderation_category?: string | null
+          moderation_reason?: string | null
+          status?: string | null
           user_id?: string
           video_url?: string | null
         }

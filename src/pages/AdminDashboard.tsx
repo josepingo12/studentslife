@@ -22,7 +22,7 @@ const AdminDashboard = () => {
     loadPendingFlags();
 
     // Realtime subscription for flags
-    const channel = supabase
+    const flagsChannel = supabase
       .channel("admin-flags-count")
       .on(
         "postgres_changes",
@@ -37,8 +37,80 @@ const AdminDashboard = () => {
       )
       .subscribe();
 
+    // Realtime subscription for auto-moderated posts
+    const postsChannel = supabase
+      .channel("admin-posts-moderation")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "posts",
+          filter: "auto_moderated=eq.true",
+        },
+        () => {
+          loadPendingFlags();
+        }
+      )
+      .subscribe();
+
+    // Realtime subscription for auto-moderated comments
+    const commentsChannel = supabase
+      .channel("admin-comments-moderation")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "comments",
+          filter: "auto_moderated=eq.true",
+        },
+        () => {
+          loadPendingFlags();
+        }
+      )
+      .subscribe();
+
+    // Realtime subscription for auto-moderated messages
+    const messagesChannel = supabase
+      .channel("admin-messages-moderation")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "messages",
+          filter: "auto_moderated=eq.true",
+        },
+        () => {
+          loadPendingFlags();
+        }
+      )
+      .subscribe();
+
+    // Realtime subscription for auto-moderated stories
+    const storiesChannel = supabase
+      .channel("admin-stories-moderation")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "stories",
+          filter: "auto_moderated=eq.true",
+        },
+        () => {
+          loadPendingFlags();
+        }
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(flagsChannel);
+      supabase.removeChannel(postsChannel);
+      supabase.removeChannel(commentsChannel);
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(storiesChannel);
     };
   }, []);
 
@@ -69,12 +141,44 @@ const AdminDashboard = () => {
 
   const loadPendingFlags = async () => {
     try {
-      const { count } = await supabase
+      // Count manual flags
+      const { count: manualFlagsCount } = await supabase
         .from("content_flags")
         .select("*", { count: "exact", head: true })
         .eq("status", "pending");
       
-      setPendingFlags(count || 0);
+      // Count auto-moderated content
+      const { count: autoPostsCount } = await supabase
+        .from("posts")
+        .select("*", { count: "exact", head: true })
+        .eq("auto_moderated", true)
+        .eq("status", "pending");
+
+      const { count: autoCommentsCount } = await supabase
+        .from("comments")
+        .select("*", { count: "exact", head: true })
+        .eq("auto_moderated", true)
+        .eq("status", "pending");
+
+      const { count: autoMessagesCount } = await supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .eq("auto_moderated", true)
+        .eq("status", "pending");
+
+      const { count: autoStoriesCount } = await supabase
+        .from("stories")
+        .select("*", { count: "exact", head: true })
+        .eq("auto_moderated", true)
+        .eq("status", "pending");
+      
+      const totalPending = (manualFlagsCount || 0) + 
+                           (autoPostsCount || 0) + 
+                           (autoCommentsCount || 0) + 
+                           (autoMessagesCount || 0) +
+                           (autoStoriesCount || 0);
+      
+      setPendingFlags(totalPending);
     } catch (error) {
       console.error("Error loading pending flags:", error);
     }

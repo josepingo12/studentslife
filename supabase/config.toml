@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.delete-own-account]
 verify_jwt = false
+
+[functions.moderate-content]
+verify_jwt = false

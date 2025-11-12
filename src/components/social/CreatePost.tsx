@@ -45,6 +45,25 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
     setLoading(true);
 
     try {
+      // Call moderation AI before publishing
+      const { data: moderationData, error: moderationError } = await supabase.functions.invoke(
+        'moderate-content',
+        {
+          body: {
+            content: content.trim(),
+            mediaUrl: mediaUrl || undefined,
+            contentType: 'post'
+          }
+        }
+      );
+
+      if (moderationError) {
+        console.error('Moderation error:', moderationError);
+        // Proceed with caution if moderation fails
+      }
+
+      const moderation = moderationData || { approved: true, score: 0 };
+
       const { error } = await supabase
         .from("posts")
         .insert({
@@ -53,14 +72,27 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
           image_url: mediaType === 'image' ? mediaUrl : null,
           video_url: mediaType === 'video' ? mediaUrl : null,
           media_type: mediaType,
+          status: moderation.approved ? 'approved' : 'pending',
+          moderation_score: moderation.score || 0,
+          moderation_category: moderation.category,
+          moderation_reason: moderation.reason,
+          auto_moderated: !moderation.approved,
         });
 
       if (error) throw error;
 
-      toast({
-        title: "Post pubblicato!",
-        description: "Il tuo post è stato condiviso con successo",
-      });
+      if (moderation.approved) {
+        toast({
+          title: "¡Post publicado!",
+          description: "Tu post ha sido compartido con éxito",
+        });
+      } else {
+        toast({
+          title: "Post en revisión",
+          description: "Tu post está siendo revisado por nuestro equipo de moderación",
+          variant: "default",
+        });
+      }
 
       setContent("");
       setMediaUrl(null);

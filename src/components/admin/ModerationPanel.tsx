@@ -55,16 +55,102 @@ const ModerationPanel = () => {
   const loadFlags = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // Load manual flags
+      const { data: flagData, error: flagError } = await supabase
         .from("content_flags")
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (flagError) throw flagError;
 
-      // Load content and reporter details for each flag
+      // Load auto-moderated content
+      const { data: autoModPosts } = await supabase
+        .from("posts")
+        .select("*, public_profiles(*)")
+        .eq("auto_moderated", true)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+
+      const { data: autoModComments } = await supabase
+        .from("comments")
+        .select("*")
+        .eq("auto_moderated", true)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+
+      const { data: autoModMessages } = await supabase
+        .from("messages")
+        .select("*")
+        .eq("auto_moderated", true)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+
+      const { data: autoModStories } = await supabase
+        .from("stories")
+        .select("*")
+        .eq("auto_moderated", true)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+
+      // Convert auto-moderated content to flag format
+      const autoModFlags: ContentFlag[] = [
+        ...(autoModPosts || []).map((post: any) => ({
+          id: `auto-post-${post.id}`,
+          content_id: post.id,
+          content_type: "post",
+          reason: post.moderation_category || "auto_moderation",
+          description: post.moderation_reason,
+          status: "pending",
+          reporter_user_id: "system",
+          created_at: post.created_at,
+          moderation_notes: null,
+          content: post,
+          reporter: { first_name: "Sistema", last_name: "AI" }
+        })),
+        ...(autoModComments || []).map((comment: any) => ({
+          id: `auto-comment-${comment.id}`,
+          content_id: comment.id,
+          content_type: "comment",
+          reason: comment.moderation_category || "auto_moderation",
+          description: comment.moderation_reason,
+          status: "pending",
+          reporter_user_id: "system",
+          created_at: comment.created_at,
+          moderation_notes: null,
+          content: comment,
+          reporter: { first_name: "Sistema", last_name: "AI" }
+        })),
+        ...(autoModMessages || []).map((message: any) => ({
+          id: `auto-message-${message.id}`,
+          content_id: message.id,
+          content_type: "message",
+          reason: message.moderation_category || "auto_moderation",
+          description: message.moderation_reason,
+          status: "pending",
+          reporter_user_id: "system",
+          created_at: message.created_at,
+          moderation_notes: null,
+          content: message,
+          reporter: { first_name: "Sistema", last_name: "AI" }
+        })),
+        ...(autoModStories || []).map((story: any) => ({
+          id: `auto-story-${story.id}`,
+          content_id: story.id,
+          content_type: "story",
+          reason: story.moderation_category || "auto_moderation",
+          description: story.moderation_reason,
+          status: "pending",
+          reporter_user_id: "system",
+          created_at: story.created_at,
+          moderation_notes: null,
+          content: story,
+          reporter: { first_name: "Sistema", last_name: "AI" }
+        }))
+      ];
+
+      // Load content and reporter details for manual flags
       const flagsWithDetails = await Promise.all(
-        (data || []).map(async (flag) => {
+        (flagData || []).map(async (flag) => {
           let content = null;
           let reporter = null;
 
@@ -100,11 +186,16 @@ const ModerationPanel = () => {
             .single();
           reporter = reporterData;
 
-          return { ...flag, content, reporter };
+          return {
+            ...flag,
+            content,
+            reporter,
+          };
         })
       );
 
-      setFlags(flagsWithDetails);
+      // Combine manual flags and auto-moderated flags
+      setFlags([...autoModFlags, ...flagsWithDetails]);
     } catch (error) {
       console.error("Error loading flags:", error);
       toast.error("Error al cargar reportes");
@@ -118,17 +209,52 @@ const ModerationPanel = () => {
     status: "reviewed" | "resolved" | "dismissed"
   ) => {
     try {
-      const { error } = await supabase
-        .from("content_flags")
-        .update({
-          status,
-          moderation_notes: notes || null,
-        })
-        .eq("id", flagId);
+      // Check if it's an auto-moderated flag
+      if (flagId.startsWith("auto-")) {
+        // Handle auto-moderated content approval/rejection
+        const [, contentType, contentId] = flagId.split("-");
+        
+        if (status === "resolved") {
+          // Approve the content
+          const table = contentType === "post" ? "posts" :
+                       contentType === "comment" ? "comments" :
+                       contentType === "message" ? "messages" : "stories";
+          
+          const { error } = await supabase
+            .from(table)
+            .update({ status: "approved" })
+            .eq("id", contentId);
+          
+          if (error) throw error;
+          toast.success("Contenido aprobado correctamente");
+        } else if (status === "dismissed") {
+          // Keep as pending, admin dismissed the auto-moderation
+          const table = contentType === "post" ? "posts" :
+                       contentType === "comment" ? "comments" :
+                       contentType === "message" ? "messages" : "stories";
+          
+          const { error } = await supabase
+            .from(table)
+            .update({ status: "approved", auto_moderated: false })
+            .eq("id", contentId);
+          
+          if (error) throw error;
+          toast.success("Auto-moderación descartada, contenido aprobado");
+        }
+      } else {
+        // Handle manual flag
+        const { error } = await supabase
+          .from("content_flags")
+          .update({
+            status,
+            moderation_notes: notes || null,
+          })
+          .eq("id", flagId);
 
-      if (error) throw error;
+        if (error) throw error;
+        toast.success("Estado actualizado correctamente");
+      }
 
-      toast.success("Estado actualizado correctamente");
       setNotes("");
       setSelectedFlag(null);
       loadFlags();
@@ -160,6 +286,12 @@ const ModerationPanel = () => {
           .delete()
           .eq("id", contentId);
         error = result.error;
+      } else if (contentType === "story") {
+        const result = await supabase
+          .from("stories")
+          .delete()
+          .eq("id", contentId);
+        error = result.error;
       }
 
       if (error) throw error;
@@ -175,10 +307,16 @@ const ModerationPanel = () => {
   const getReasonLabel = (reason: string) => {
     const labels: Record<string, string> = {
       spam: "Spam",
-      hate_speech: "Discurso de odio",
+      hate_speech: "Discurso de odio / Discriminación",
       harassment: "Acoso",
-      violence: "Violencia",
+      violence: "Violencia / Tortura / Abuso",
+      weapons: "Armas / Contenido peligroso",
+      sexual_content: "Contenido sexual / Pornografía",
+      misinformation: "Desinformación / Engaño",
+      harmful_exploitation: "Explotación de eventos",
       inappropriate: "Inapropiado",
+      auto_moderation: "Moderación automática AI",
+      safe: "Contenido seguro",
       other: "Otro",
     };
     return labels[reason] || reason;
@@ -208,19 +346,24 @@ const ModerationPanel = () => {
   };
 
   const FlagCard = ({ flag }: { flag: ContentFlag }) => {
-    const reporterName = flag.reporter?.first_name 
-      ? `${flag.reporter.first_name} ${flag.reporter.last_name || ""}`.trim()
-      : flag.reporter?.business_name || "Usuario desconocido";
+    const isAutoModerated = flag.id.startsWith("auto-");
+    const reporterName = isAutoModerated 
+      ? "🤖 Sistema de Moderación AI"
+      : flag.reporter?.first_name 
+        ? `${flag.reporter.first_name} ${flag.reporter.last_name || ""}`.trim()
+        : flag.reporter?.business_name || "Usuario desconocido";
 
     const contentAuthor = flag.content?.public_profiles?.first_name
       ? `${flag.content.public_profiles.first_name} ${flag.content.public_profiles.last_name || ""}`.trim()
-      : flag.content?.public_profiles?.business_name || "Usuario desconocido";
+      : flag.content?.public_profiles?.business_name || 
+        (flag.content?.user_id ? `Usuario ${flag.content.user_id.slice(0, 8)}` : "Usuario desconocido");
 
     return (
-      <Card key={flag.id} className="mb-4">
+      <Card key={flag.id} className={`mb-4 ${isAutoModerated ? 'border-l-4 border-l-orange-500' : ''}`}>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm">
+            <CardTitle className="text-sm flex items-center gap-2">
+              {isAutoModerated && <span className="text-orange-500">🤖</span>}
               {flag.content_type.toUpperCase()} - {getReasonLabel(flag.reason)}
             </CardTitle>
             {getStatusBadge(flag.status)}
@@ -228,20 +371,31 @@ const ModerationPanel = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div className="bg-muted p-3 rounded-lg">
-              <p className="text-sm font-medium mb-1">Reportado por:</p>
+            <div className={`p-3 rounded-lg ${isAutoModerated ? 'bg-orange-50 border border-orange-200' : 'bg-muted'}`}>
+              <p className="text-sm font-medium mb-1">
+                {isAutoModerated ? "Detectado por:" : "Reportado por:"}
+              </p>
               <p className="text-sm">{reporterName}</p>
               <p className="text-xs text-muted-foreground mt-1">
                 {new Date(flag.created_at).toLocaleString("es-ES")}
               </p>
             </div>
 
+            {flag.description && (
+              <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
+                <p className="text-sm font-medium mb-1">
+                  {isAutoModerated ? "Razón AI:" : "Motivo:"}
+                </p>
+                <p className="text-sm">{flag.description}</p>
+              </div>
+            )}
+
             {flag.content && (
               <div className="bg-accent/10 p-3 rounded-lg border">
-                <p className="text-sm font-medium mb-2">Contenido segnalato:</p>
+                <p className="text-sm font-medium mb-2">Contenido detectado:</p>
+                <p className="text-xs text-muted-foreground mb-2">Autor: {contentAuthor}</p>
                 {flag.content_type === "post" || flag.content_type === "video" ? (
                   <>
-                    <p className="text-xs text-muted-foreground mb-1">Autor: {contentAuthor}</p>
                     {flag.content.content && (
                       <p className="text-sm mb-2">{flag.content.content}</p>
                     )}
@@ -262,23 +416,16 @@ const ModerationPanel = () => {
 
             {!flag.content && (
               <div className="bg-destructive/10 p-3 rounded-lg border border-destructive/20">
-                <p className="text-sm text-destructive">Il contenuto è stato eliminato o non è più disponibile</p>
+                <p className="text-sm text-destructive">El contenido ha sido eliminado o ya no está disponible</p>
               </div>
             )}
 
-          {flag.description && (
-            <div>
-              <p className="text-sm font-medium mb-1">Descripción:</p>
-              <p className="text-sm text-muted-foreground">{flag.description}</p>
-            </div>
-          )}
-
-          {flag.moderation_notes && (
-            <div>
-              <p className="text-sm font-medium mb-1">Notas de moderación:</p>
-              <p className="text-sm text-muted-foreground">{flag.moderation_notes}</p>
-            </div>
-          )}
+            {flag.moderation_notes && (
+              <div>
+                <p className="text-sm font-medium mb-1">Notas de moderación:</p>
+                <p className="text-sm text-muted-foreground">{flag.moderation_notes}</p>
+              </div>
+            )}
 
           {selectedFlag === flag.id ? (
             <div className="space-y-2">
