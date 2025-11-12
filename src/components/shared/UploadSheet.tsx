@@ -74,7 +74,27 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete, uploadType:
       clearInterval(progressInterval);
       setUploadProgress(100);
 
-      // Create post or story con media_type corretto
+      // Call moderation AI before publishing
+      const { data: moderationData, error: moderationError } = await supabase.functions.invoke(
+        'moderate-content',
+        {
+          body: {
+            content: content || '',
+            mediaUrl: publicUrl,
+            contentType: uploadType === 'story' ? 'story' : 'post'
+          }
+        }
+      );
+
+      // Handle moderation errors
+      if (moderationError || moderationData?.error) {
+        console.error('Moderation error:', moderationError || moderationData?.error);
+        // Continue with pending status if moderation fails
+      }
+
+      const moderation = moderationData || { approved: true, score: 0 };
+
+      // Create post or story con media_type corretto e moderazione
       if (uploadType === "story") {
         const { error: storyError } = await supabase
           .from("stories")
@@ -83,6 +103,11 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete, uploadType:
             image_url: isVideo ? null : publicUrl,
             video_url: isVideo ? publicUrl : null,
             media_type: isVideo ? 'video' : 'image',
+            status: moderation.approved ? 'approved' : 'pending',
+            moderation_score: moderation.score || 0,
+            moderation_category: moderation.category,
+            moderation_reason: moderation.reason,
+            auto_moderated: !moderation.approved,
           });
 
         if (storyError) throw storyError;
@@ -95,6 +120,11 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete, uploadType:
             image_url: isVideo ? null : publicUrl,
             video_url: isVideo ? publicUrl : null,
             media_type: isVideo ? 'video' : 'image',
+            status: moderation.approved ? 'approved' : 'pending',
+            moderation_score: moderation.score || 0,
+            moderation_category: moderation.category,
+            moderation_reason: moderation.reason,
+            auto_moderated: !moderation.approved,
           });
 
         if (postError) throw postError;

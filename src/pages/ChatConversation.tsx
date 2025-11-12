@@ -211,11 +211,36 @@ const ChatConversation = () => {
 
     try {
       const hasMedia = !!mediaUrl;
+      const messageContent = newMessage.trim() || (hasMedia ? "" : "");
+
+      // Call moderation AI for message
+      const { data: moderationData, error: moderationError } = await supabase.functions.invoke(
+        'moderate-content',
+        {
+          body: {
+            content: messageContent,
+            mediaUrl: mediaUrl || undefined,
+            contentType: 'message'
+          }
+        }
+      );
+
+      // Handle moderation errors silently for messages (to avoid interrupting chat flow)
+      if (moderationError || moderationData?.error) {
+        console.error('Message moderation error:', moderationError || moderationData?.error);
+      }
+
+      const moderation = moderationData || { approved: true, score: 0 };
+
       const messageData: any = {
         conversation_id: conversationId,
         sender_id: user.id,
-        // content must be non-null per DB schema
-        content: newMessage.trim() || (hasMedia ? "" : ""),
+        content: messageContent,
+        status: moderation.approved ? 'approved' : 'pending',
+        moderation_score: moderation.score || 0,
+        moderation_category: moderation.category,
+        moderation_reason: moderation.reason,
+        auto_moderated: !moderation.approved,
       };
 
       if (mediaUrl) {
@@ -226,6 +251,14 @@ const ChatConversation = () => {
       const { error } = await supabase.from("messages").insert(messageData);
 
       if (error) throw error;
+
+      // Inform user if message is pending moderation
+      if (!moderation.approved) {
+        toast({
+          title: "Mensaje en revisión",
+          description: "Tu mensaje está siendo revisado antes de enviarse",
+        });
+      }
 
       // Notify admin about new message
       try {

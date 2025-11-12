@@ -221,7 +221,10 @@ const UserProfile = () => {
   const loadUserContent = async (id: string) => {
     setLoading(true);
 
-    const { data: postsData } = await supabase
+    // If viewing own profile, show all posts. If viewing someone else's, show only approved
+    const isOwnProfile = id === currentUser?.id;
+    
+    let postsQuery = supabase
       .from("posts")
       .select(
         `
@@ -230,8 +233,13 @@ const UserProfile = () => {
         public_profiles!posts_user_id_fkey(first_name, last_name, profile_image_url, business_name)
         `
       )
-      .eq("user_id", id)
-      .order("created_at", { ascending: false });
+      .eq("user_id", id);
+    
+    if (!isOwnProfile) {
+      postsQuery = postsQuery.eq("status", "approved");
+    }
+    
+    const { data: postsData } = await postsQuery.order("created_at", { ascending: false });
 
     setPosts(postsData || []);
 

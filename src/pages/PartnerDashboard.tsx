@@ -104,6 +104,7 @@ const PartnerDashboard = () => {
         likes(id, user_id)
         `
       )
+      .eq("status", "approved")
       .order("created_at", { ascending: false });
 
     setPosts(postsData || []);

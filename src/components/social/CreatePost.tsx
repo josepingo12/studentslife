@@ -57,9 +57,28 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
         }
       );
 
+      // Handle function invocation errors
       if (moderationError) {
-        console.error('Moderation error:', moderationError);
-        // Proceed with caution if moderation fails
+        console.error('Moderation function error:', moderationError);
+        toast({
+          title: "Error de moderación",
+          description: "No se pudo verificar el contenido. Inténtalo de nuevo.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check if moderation returned an error in the response body (rate limits, etc.)
+      if (moderationData?.error) {
+        console.error('Moderation API error:', moderationData.error);
+        toast({
+          title: "Servicio temporalmente no disponible",
+          description: moderationData.error === 'Rate limit exceeded. Please try again later.' 
+            ? "Demasiadas solicitudes. Por favor, espera un momento."
+            : "Error al verificar el contenido. Inténtalo más tarde.",
+          variant: "destructive",
+        });
+        return;
       }
 
       const moderation = moderationData || { approved: true, score: 0 };

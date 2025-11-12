@@ -37,6 +37,7 @@ const CommentsSheet = ({ open, onOpenChange, postId, currentUserId }: CommentsSh
         public_profiles!comments_user_id_fkey(first_name, last_name, profile_image_url, business_name)
       `)
       .eq("post_id", postId)
+      .eq("status", "approved")
       .order("created_at", { ascending: false });
 
     setComments(data || []);
@@ -69,18 +70,49 @@ const CommentsSheet = ({ open, onOpenChange, postId, currentUserId }: CommentsSh
 
     setLoading(true);
     try {
+      // Call moderation AI for comment
+      const { data: moderationData, error: moderationError } = await supabase.functions.invoke(
+        'moderate-content',
+        {
+          body: {
+            content: newComment.trim(),
+            contentType: 'comment'
+          }
+        }
+      );
+
+      // Handle moderation errors silently for comments
+      if (moderationError || moderationData?.error) {
+        console.error('Comment moderation error:', moderationError || moderationData?.error);
+      }
+
+      const moderation = moderationData || { approved: true, score: 0 };
+
       const { error } = await supabase.from("comments").insert({
         post_id: postId,
         user_id: currentUserId,
         content: newComment.trim(),
+        status: moderation.approved ? 'approved' : 'pending',
+        moderation_score: moderation.score || 0,
+        moderation_category: moderation.category,
+        moderation_reason: moderation.reason,
+        auto_moderated: !moderation.approved,
       });
 
       if (error) throw error;
 
       setNewComment("");
-      toast({
-        title: "Commento pubblicato",
-      });
+      
+      if (moderation.approved) {
+        toast({
+          title: "Commento pubblicato",
+        });
+      } else {
+        toast({
+          title: "Commento en revisión",
+          description: "Tu comentario está siendo revisado antes de publicarse",
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Errore",

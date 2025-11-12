@@ -30,6 +30,7 @@ const StoriesCarousel = ({ currentUserId }: StoriesCarouselProps) => {
         *,
         profiles(first_name, last_name, profile_image_url, business_name)
       `)
+      .eq("status", "approved")
       .gt("expires_at", new Date().toISOString())
       .order("created_at", { ascending: false });
 
