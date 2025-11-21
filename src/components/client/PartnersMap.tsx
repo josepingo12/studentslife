@@ -30,18 +30,14 @@ const PartnersMap = () => {
   const fetchPartners = async () => {
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, business_name, business_address, business_city, profile_image_url")
+      .select("id, business_name, business_address, business_city, profile_image_url, latitude, longitude")
       .not("business_name", "is", null)
-      .not("business_address", "is", null);
+      .not("business_address", "is", null)
+      .not("latitude", "is", null)
+      .not("longitude", "is", null);
 
     if (!error && data) {
-      // For demo purposes, assign random coordinates around Valladolid, Spain
-      const partnersWithCoords = data.map((partner, idx) => ({
-        ...partner,
-        latitude: 41.6523 + (Math.random() - 0.5) * 0.1,
-        longitude: -4.7245 + (Math.random() - 0.5) * 0.1,
-      }));
-      setPartners(partnersWithCoords);
+      setPartners(data);
     }
     setLoading(false);
   };
@@ -144,15 +140,15 @@ const PartnersMap = () => {
         `;
         el.appendChild(img);
 
-        // Add hover effect
+        // Add hover effect - solo scale sin translateY para evitar movimiento
         el.addEventListener("mouseenter", () => {
-          el.style.transform = "scale(1.2) translateY(-8px)";
+          el.style.transform = "scale(1.15)";
           el.style.boxShadow = "0 8px 20px rgba(0,0,0,0.4), 0 0 0 6px rgba(33, 150, 243, 0.3)";
           el.style.zIndex = "1000";
         });
 
         el.addEventListener("mouseleave", () => {
-          el.style.transform = "scale(1) translateY(0)";
+          el.style.transform = "scale(1)";
           el.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3), 0 0 0 4px rgba(33, 150, 243, 0.2)";
           el.style.zIndex = "1";
         });

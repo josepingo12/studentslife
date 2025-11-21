@@ -647,6 +647,8 @@ export type Database = {
           last_name: string | null
           last_payment_amount: number | null
           last_payment_date: string | null
+          latitude: number | null
+          longitude: number | null
           phone: string | null
           phone_number: string | null
           profile_image_url: string | null
@@ -672,6 +674,8 @@ export type Database = {
           last_name?: string | null
           last_payment_amount?: number | null
           last_payment_date?: string | null
+          latitude?: number | null
+          longitude?: number | null
           phone?: string | null
           phone_number?: string | null
           profile_image_url?: string | null
@@ -697,6 +701,8 @@ export type Database = {
           last_name?: string | null
           last_payment_amount?: number | null
           last_payment_date?: string | null
+          latitude?: number | null
+          longitude?: number | null
           phone?: string | null
           phone_number?: string | null
           profile_image_url?: string | null
