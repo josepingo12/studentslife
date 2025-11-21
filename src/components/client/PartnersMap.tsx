@@ -144,16 +144,18 @@ const PartnersMap = () => {
         el.appendChild(img);
 
         // Add hover effect - solo scale sin translateY para evitar movimiento
-        el.addEventListener("mouseenter", () => {
-  el.style.transform = "scale(1.15)";
-  el.style.boxShadow = "0 8px 20px rgba(0,0,0,0.4), 0 0 0 6px rgba(33, 150, 243, 0.3)";
-  el.style.zIndex = "1000";
+        // ✅ SOLUZIONE - Solo effetto ombra, NO scale
+el.addEventListener("mouseenter", () => {
+// NON cambiare transform/scale
+el.style.boxShadow = "0 8px 20px rgba(0,0,0,0.4), 0 0 0 6px rgba(33, 150, 243, 0.3)";
+el.style.zIndex = "1000";
+// Aggiungi un effetto di brightness invece
+el.style.filter = "brightness(1.1)";
 });
-
 el.addEventListener("mouseleave", () => {
-  el.style.transform = "scale(1)";
-  el.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3), 0 0 0 4px rgba(33, 150, 243, 0.2)";
-  el.style.zIndex = "1";
+el.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3), 0 0 0 4px rgba(33, 150, 243, 0.2)";
+el.style.zIndex = "1";
+el.style.filter = "brightness(1)";
 });
 
         // Add click handler
