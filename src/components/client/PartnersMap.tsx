@@ -172,10 +172,10 @@ el.addEventListener("mouseleave", () => {
         `);
 
         // Add marker to map
-        new mapboxgl.Marker(el)
-          .setLngLat([partner.longitude, partner.latitude])
-          .setPopup(popup)
-          .addTo(map.current!);
+        new mapboxgl.Marker(el, { anchor: 'center' })
+.setLngLat([partner.longitude, partner.latitude])
+.setPopup(popup)
+.addTo(map.current!);
       });
     });
 
