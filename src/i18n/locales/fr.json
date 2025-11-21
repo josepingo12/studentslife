@@ -128,7 +128,10 @@
     "visitWebsite": "Visiter le Site Officiel",
     "downloadQR": "Télécharger le Code QR",
     "leaveReview": "Laisser un avis",
-    "leaveYourReview": "Laissez votre avis"
+    "leaveYourReview": "Laissez votre avis",
+    "mapTitle": "Carte des Partenaires",
+    "tapMarkerToView": "Appuyez sur un marqueur pour voir le profil du partenaire",
+    "selectCategory": "Sélectionnez une catégorie pour voir les partenaires"
   },
   "events": {
     "title": "Événements",

@@ -128,7 +128,10 @@
     "visitWebsite": "Visitar Sitio Oficial",
     "downloadQR": "Descargar Código QR",
     "leaveReview": "Dejar una reseña",
-    "leaveYourReview": "Deja tu reseña"
+    "leaveYourReview": "Deja tu reseña",
+    "mapTitle": "Mapa de Socios",
+    "tapMarkerToView": "Toca un marcador para ver el perfil del socio",
+    "selectCategory": "Selecciona una categoría para ver los socios"
   },
   "events": {
     "title": "Eventos",

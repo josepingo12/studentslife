@@ -66,7 +66,7 @@ const CategoryCarousel = ({ onSelectCategory }: CategoryCarouselProps) => {
   }
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+    <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide px-1">
       {categories.map((category, idx) => {
         const isSelected = selected === category.name;
         const gradient = gradients[idx % gradients.length];
@@ -76,13 +76,23 @@ const CategoryCarousel = ({ onSelectCategory }: CategoryCarouselProps) => {
             key={category.id}
             onClick={() => handleSelect(category.name)}
             className={`
-              flex-shrink-0 w-40 snap-center
-              ios-card p-6 transition-all duration-300
-              ${isSelected ? "scale-105 shadow-xl" : "hover:scale-102"}
+              flex-shrink-0 w-[110px] snap-center
+              bg-card rounded-3xl p-4 transition-all duration-300 border-2
+              ${isSelected 
+                ? "scale-105 shadow-2xl border-primary bg-primary/5" 
+                : "hover:scale-[1.02] shadow-md border-border/50 active:scale-95"
+              }
             `}
+            style={{
+              transform: isSelected ? 'translateY(-4px)' : 'translateY(0)',
+            }}
           >
             {category.image_url ? (
-              <div className="w-16 h-16 rounded-2xl mx-auto mb-3 overflow-hidden">
+              <div className={`
+                w-14 h-14 rounded-2xl mx-auto mb-2.5 overflow-hidden shadow-lg
+                transition-all duration-300
+                ${isSelected ? "ring-4 ring-primary/30" : ""}
+              `}>
                 <img
                   src={category.image_url}
                   alt={category.display_name}
@@ -92,17 +102,21 @@ const CategoryCarousel = ({ onSelectCategory }: CategoryCarouselProps) => {
             ) : (
               <div
                 className={`
-                  w-16 h-16 rounded-2xl mx-auto mb-3
+                  w-14 h-14 rounded-2xl mx-auto mb-2.5
                   bg-gradient-to-br ${gradient}
                   flex items-center justify-center
-                  transition-transform duration-300
-                  ${isSelected ? "animate-bounce" : ""}
+                  transition-all duration-300 shadow-lg
+                  ${isSelected ? "ring-4 ring-primary/30 scale-110" : ""}
                 `}
               >
-                <Folder className="w-8 h-8 text-white" />
+                <Folder className="w-7 h-7 text-white" />
               </div>
             )}
-            <p className={`font-semibold text-sm text-center ${isSelected ? "text-primary" : "text-foreground"}`}>
+            <p className={`
+              font-bold text-xs text-center leading-tight
+              transition-colors duration-300
+              ${isSelected ? "text-primary" : "text-foreground"}
+            `}>
               {category.display_name}
             </p>
           </button>
