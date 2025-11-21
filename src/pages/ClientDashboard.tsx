@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import CategoryCarousel from "@/components/client/CategoryCarousel";
 import PartnersList from "@/components/client/PartnersList";
 import RecentPartners from "@/components/client/RecentPartners";
+import PartnersMap from "@/components/client/PartnersMap";
 import StoriesCarousel from "@/components/social/StoriesCarousel";
 import CreatePost from "@/components/social/CreatePost";
 import PostCard from "@/components/social/PostCard";
@@ -385,14 +386,20 @@ const ClientDashboard = () => {
 
           {/* Category Carousel */}
           <div className="mt-6 px-4">
-            <h3 className="text-xl font-bold mb-4">{t('partner.category')}</h3>
+            <h3 className="text-2xl font-bold mb-4 text-foreground">{t('partner.category')}</h3>
             <CategoryCarousel onSelectCategory={setSelectedCategory} />
+          </div>
+
+          {/* Partners Map */}
+          <div className="mt-8">
+            <h3 className="text-2xl font-bold mb-4 px-4 text-foreground">{t('partner.mapTitle')}</h3>
+            <PartnersMap />
           </div>
 
           {/* Partners List */}
           {selectedCategory && (
-            <div className="mt-6">
-              <h3 className="text-xl font-bold mb-4 px-4">{t('navigation.partners')}</h3>
+            <div className="mt-8">
+              <h3 className="text-2xl font-bold mb-4 px-4 text-foreground">{t('navigation.partners')}</h3>
               <div className="px-4">
                 <PartnersList category={selectedCategory} />
               </div>
@@ -401,8 +408,8 @@ const ClientDashboard = () => {
 
           {!selectedCategory && (
             <div className="mt-12 text-center px-4">
-              <p className="text-gray-600">
-                {t('partner.category')}
+              <p className="text-muted-foreground text-base">
+                {t('partner.selectCategory')}
               </p>
             </div>
           )}
