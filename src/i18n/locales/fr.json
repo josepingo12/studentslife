@@ -343,6 +343,15 @@
     "error": "Erreur",
     "errorUpdating": "Impossible de mettre à jour le profil",
     "success": "Profil mis à jour !",
-    "successDescription": "Vos modifications ont été enregistrées"
+    "successDescription": "Vos modifications ont été enregistrées",
+    "coordinates": "Emplacement sur la carte",
+    "coordinatesDescription": "Entrez les coordonnées GPS de votre entreprise pour apparaître sur la carte des partenaires",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "latitudeHelper": "Entre -90 et 90",
+    "longitudeHelper": "Entre -180 et 180",
+    "coordinatesHelper": "Vous pouvez trouver vos coordonnées sur Google Maps : faites un clic droit sur votre emplacement et sélectionnez les coordonnées pour les copier.",
+    "invalidLatitude": "La latitude doit être entre -90 et 90",
+    "invalidLongitude": "La longitude doit être entre -180 et 180"
   }
 }

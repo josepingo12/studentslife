@@ -343,6 +343,15 @@
     "error": "Fehler",
     "errorUpdating": "Profil konnte nicht aktualisiert werden",
     "success": "Profil aktualisiert!",
-    "successDescription": "Ihre Änderungen wurden gespeichert"
+    "successDescription": "Ihre Änderungen wurden gespeichert",
+    "coordinates": "Kartenstandort",
+    "coordinatesDescription": "Geben Sie die GPS-Koordinaten Ihres Unternehmens ein, um auf der Partnerkarte zu erscheinen",
+    "latitude": "Breitengrad",
+    "longitude": "Längengrad",
+    "latitudeHelper": "Zwischen -90 und 90",
+    "longitudeHelper": "Zwischen -180 und 180",
+    "coordinatesHelper": "Sie können Ihre Koordinaten auf Google Maps finden: Klicken Sie mit der rechten Maustaste auf Ihren Standort und wählen Sie die Koordinaten zum Kopieren aus.",
+    "invalidLatitude": "Der Breitengrad muss zwischen -90 und 90 liegen",
+    "invalidLongitude": "Der Längengrad muss zwischen -180 und 180 liegen"
   }
 }

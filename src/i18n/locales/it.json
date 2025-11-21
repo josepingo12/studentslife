@@ -343,6 +343,15 @@
     "error": "Errore",
     "errorUpdating": "Impossibile aggiornare il profilo",
     "success": "Profilo aggiornato!",
-    "successDescription": "Le tue modifiche sono state salvate"
+    "successDescription": "Le tue modifiche sono state salvate",
+    "coordinates": "Posizione sulla mappa",
+    "coordinatesDescription": "Inserisci le coordinate GPS della tua attività per apparire sulla mappa dei partner",
+    "latitude": "Latitudine",
+    "longitude": "Longitudine",
+    "latitudeHelper": "Tra -90 e 90",
+    "longitudeHelper": "Tra -180 e 180",
+    "coordinatesHelper": "Puoi trovare le tue coordinate su Google Maps: fai clic destro sulla tua posizione e seleziona le coordinate per copiarle.",
+    "invalidLatitude": "La latitudine deve essere tra -90 e 90",
+    "invalidLongitude": "La longitudine deve essere tra -180 e 180"
   }
 }
