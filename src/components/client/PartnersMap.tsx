@@ -49,8 +49,7 @@ const PartnersMap = () => {
   useEffect(() => {
     if (!mapContainer.current || partners.length === 0) return;
 
-    // Get the MAPBOX token from environment
-    const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN;
+   const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN || "pk.eyJ1IjoicGluZ29kZXZlbG9wbWVudCIsImEiOiJjbWk5ZW9tOXgwNHN3MmtzaDUxeDR4YjM5In0.CNdjOrEnCNdtV4PEapqiug";
     
     if (!MAPBOX_TOKEN) {
       console.error("MAPBOX_PUBLIC_TOKEN no está configurado");
