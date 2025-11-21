@@ -116,20 +116,22 @@ const PartnersMap = () => {
         const el = document.createElement("div");
         el.className = "partner-marker";
         el.style.cssText = `
-          width: 50px;
-          height: 50px;
-          cursor: pointer;
-          background: white;
-          border-radius: 50%;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 0 4px rgba(33, 150, 243, 0.2);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          border: 3px solid #2196F3;
-          transform-origin: center center;
-        `;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 0 4px rgba(33, 150, 243, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 3px solid #2196F3;
+  transform-origin: center center;
+  margin-left: -25px;
+  margin-top: -25px;
+`;
 
         // Add logo image
         const img = document.createElement("img");
