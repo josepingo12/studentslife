@@ -30,6 +30,8 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
     business_category: profile.business_category || "",
     profile_image_url: profile.profile_image_url || "",
     cover_image_url: profile.cover_image_url || "",
+    latitude: profile.latitude || "",
+    longitude: profile.longitude || "",
   });
 
   useEffect(() => {
@@ -51,9 +53,41 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
     e.preventDefault();
     setLoading(true);
 
+    // Validate coordinates
+    if (formData.latitude && formData.longitude) {
+      const lat = parseFloat(formData.latitude as string);
+      const lng = parseFloat(formData.longitude as string);
+      
+      if (isNaN(lat) || lat < -90 || lat > 90) {
+        toast({
+          title: t("profileEdit.error"),
+          description: t("profileEdit.invalidLatitude"),
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+      
+      if (isNaN(lng) || lng < -180 || lng > 180) {
+        toast({
+          title: t("profileEdit.error"),
+          description: t("profileEdit.invalidLongitude"),
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+    }
+
+    const updateData = {
+      ...formData,
+      latitude: formData.latitude ? parseFloat(formData.latitude as string) : null,
+      longitude: formData.longitude ? parseFloat(formData.longitude as string) : null,
+    };
+
     const { error } = await supabase
       .from("profiles")
-      .update(formData)
+      .update(updateData)
       .eq("id", profile.id);
 
     if (error) {
@@ -113,6 +147,54 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
             value={formData.business_city}
             onChange={(e) => setFormData({ ...formData, business_city: e.target.value })}
           />
+        </div>
+
+        {/* Coordinates Section */}
+        <div className="space-y-4 pt-4 border-t border-border/50">
+          <div>
+            <h3 className="font-semibold text-lg mb-1">{t("profileEdit.coordinates")}</h3>
+            <p className="text-sm text-muted-foreground">
+              {t("profileEdit.coordinatesDescription")}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>{t("profileEdit.latitude")}</Label>
+              <Input
+                type="number"
+                step="any"
+                placeholder="41.6523"
+                className="ios-input"
+                value={formData.latitude}
+                onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">
+                {t("profileEdit.latitudeHelper")}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t("profileEdit.longitude")}</Label>
+              <Input
+                type="number"
+                step="any"
+                placeholder="-4.7245"
+                className="ios-input"
+                value={formData.longitude}
+                onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">
+                {t("profileEdit.longitudeHelper")}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
+            <p className="text-sm text-muted-foreground">
+              💡 {t("profileEdit.coordinatesHelper")}
+            </p>
+          </div>
         </div>
 
         <div className="space-y-2">

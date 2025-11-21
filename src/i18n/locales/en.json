@@ -343,6 +343,15 @@
     "error": "Error",
     "errorUpdating": "Unable to update profile",
     "success": "Profile updated!",
-    "successDescription": "Your changes have been saved"
+    "successDescription": "Your changes have been saved",
+    "coordinates": "Map Location",
+    "coordinatesDescription": "Enter your business GPS coordinates to appear on the partners map",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "latitudeHelper": "Between -90 and 90",
+    "longitudeHelper": "Between -180 and 180",
+    "coordinatesHelper": "You can find your coordinates on Google Maps: right-click on your location and select the coordinates to copy them.",
+    "invalidLatitude": "Latitude must be between -90 and 90",
+    "invalidLongitude": "Longitude must be between -180 and 180"
   }
 }
