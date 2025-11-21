@@ -128,6 +128,7 @@ const PartnersMap = () => {
           overflow: hidden;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           border: 3px solid #2196F3;
+          transform-origin: center center;
         `;
 
         // Add logo image
