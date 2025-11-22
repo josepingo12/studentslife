@@ -61,36 +61,21 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
   };
 
   const handleTouchEnd = () => {
-    const deltaY = startY.current - currentY.current;
-    const threshold = 50; // Soglia minima per lo swipe
-
-    if (Math.abs(deltaY) > threshold) {
-      if (deltaY > 0 && currentIndex < posts.length - 1) {
-        // Swipe up - video successivo
-        setCurrentIndex(prev => prev + 1);
-      } else if (deltaY < 0 && currentIndex > 0) {
-        // Swipe down - video precedente
-        setCurrentIndex(prev => prev - 1);
-      }
-    }
+  const deltaY = startY.current - currentY.current;
+  if (deltaY > 0 && currentIndex < posts.length - 1) {
+  setCurrentIndex(prev => prev + 1);
+  } else if (deltaY < 0 && currentIndex > 0) {
+  setCurrentIndex(prev => prev - 1);
+  }
   };
-
   const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const deltaY = e.deltaY;
-    const threshold = 50;
-
-    if (Math.abs(deltaY) > threshold) {
-      if (deltaY > 0 && currentIndex < posts.length - 1) {
-        // Scroll down - video successivo
-        setCurrentIndex(prev => prev + 1);
-      } else if (deltaY < 0 && currentIndex > 0) {
-        // Scroll up - video precedente
-        setCurrentIndex(prev => prev - 1);
-      }
-    }
+  e.preventDefault();
+  if (e.deltaY > 0 && currentIndex < posts.length - 1) {
+  setCurrentIndex(prev => prev + 1);
+  } else if (e.deltaY < 0 && currentIndex > 0) {
+  setCurrentIndex(prev => prev - 1);
+  }
   };
-
   if (!open || posts.length === 0) return null;
 
   const currentPost = posts[currentIndex];

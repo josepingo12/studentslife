@@ -6,7 +6,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Search, X } from "lucide-react";
-import StoriesCarousel from "@/components/social/StoriesCarousel";
 import CreatePost from "@/components/social/CreatePost";
 import PostCard from "@/components/social/PostCard";
 import SettingsSheet from "@/components/partner/SettingsSheet";
@@ -208,10 +207,7 @@ const Social = () => {
           )}
         </div>
 
-        {/* Stories */}
-        <div className="mt-4">
-          <StoriesCarousel currentUserId={user.id} />
-        </div>
+
 
         {/* Create Post */}
         <div className="mx-4 mt-4">

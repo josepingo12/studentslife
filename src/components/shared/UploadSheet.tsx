@@ -20,7 +20,7 @@ interface UploadSheetProps {
 
 const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete, uploadType: initialUploadType, enableCamera, hideBackButton }: UploadSheetProps) => {
   const { toast } = useToast();
-  const [uploadType, setUploadType] = useState<"post" | "story" | null>(initialUploadType || null);
+ const [uploadType, setUploadType] = useState<"post" | "story" | null>(initialUploadType || "post");
   const [content, setContent] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -139,7 +139,7 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete, uploadType:
 
       toast({
         title: "Successo! ✨",
-        description: `${uploadType === "story" ? "Storia" : "Post"} caricato con successo`,
+        description: `${uploadType === "story" ? "Storia" : "Post"} cargado con éxito`,
       });
     } catch (error: any) {
       toast({
@@ -152,25 +152,25 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete, uploadType:
     }
   };
 
-  const handleClose = () => {
-    setUploadType(initialUploadType || null); // Reset to initial or null
-    setContent("");
-    setUploading(false);
-    setUploadProgress(0);
-    setSuccess(false);
-    onOpenChange(false);
-  };
+ const handleClose = () => {
+ setUploadType(initialUploadType || "post"); // Cambia da null a "post"
+ setContent("");
+ setUploading(false);
+ setUploadProgress(0);
+ setSuccess(false);
+ onOpenChange(false);
+ };
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent
-        side="bottom"
-        className={`rounded-t-[24px] bg-white border-t border-border/30 p-0 shadow-2xl ${
-          isDesktop
-            ? uploadType ? 'h-[500px] max-w-2xl mx-auto' : 'h-[280px] max-w-lg mx-auto'
-            : uploadType ? 'h-[80vh]' : 'h-[280px]'
-        }`}
-      >
+     <SheetContent
+       side="bottom"
+       className={`rounded-t-[24px] bg-white border-t border-border/30 p-0 shadow-2xl ${
+         isDesktop
+           ? uploadType ? 'h-[350px] max-w-2xl mx-auto' : 'h-[280px] max-w-lg mx-auto'
+           : uploadType ? 'h-[45vh]' : 'h-[280px]'
+       }`}
+     >
         {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-2">
           <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
@@ -179,11 +179,11 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete, uploadType:
         {/* Header - SENZA X */}
         <div className="text-center px-6 py-4 border-b border-gray-100">
           <h2 className="text-lg font-semibold text-gray-900">
-            {uploadType ? (uploadType === "story" ? "Nuova Storia" : "Nuovo Post") : "Cosa vuoi condividere?"}
+            {uploadType ? (uploadType === "story" ? "Nuova Storia" : "Nuevo Post") : "Cosa vuoi condividere?"}
           </h2>
         </div>
 
-        <div className="px-6 py-6">
+        <div className="px-6 py-4">
           {!uploadType ? (
             // Selection screen - SOLO STORIA E POST
             <div className="grid grid-cols-2 gap-4">
@@ -231,7 +231,7 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete, uploadType:
               <CheckCircle2 className="w-24 h-24 text-green-500 animate-pulse" />
               <h3 className="text-2xl font-bold text-green-500">Pubblicato!</h3>
               <p className="text-gray-600 text-center">
-                Il tuo {uploadType === "story" ? "storia" : "post"} è stato caricato con successo
+                Il tuo {uploadType === "story" ? "storia" : "post"} ha sido cargado con éxito
               </p>
             </div>
           ) : uploading ? (
@@ -246,27 +246,27 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete, uploadType:
               </div>
               <Progress value={uploadProgress} className="h-3" />
               <p className="text-center text-gray-600">
-                Caricamento in corso...
+                Cargando...
               </p>
             </div>
           ) : (
             // Upload form with Camera and Gallery buttons
-            <div className="space-y-6">
+            <div className="space-y-3">
               {uploadType === "post" && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Descrizione</label>
+                  <label className="text-sm font-medium text-gray-700">Descripción</label>
                   <Textarea
-                    placeholder="Scrivi qualcosa..."
+                    placeholder="Escribe algo..."
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
-                    className="min-h-[120px] resize-none rounded-2xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                    className="min-h-[80px] resize-none rounded-2xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
               )}
 
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-gray-700">Seleziona dal dispositivo</label>
-                <div className="grid grid-cols-2 gap-4"> {/* Use grid for two buttons */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Selecciona del dispositivo</label>
+                <div className="grid grid-cols-2 gap-3"> {/* Use grid for two buttons */}
                   {/* Camera Button */}
                   <input
                     type="file"
@@ -279,12 +279,12 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete, uploadType:
                   <label htmlFor="camera-upload">
                     <Button
                       type="button"
-                      className="w-full h-20 flex-col gap-2 bg-blue-500 text-white border-0 rounded-2xl hover:bg-blue-600 transition-all duration-200"
+                      className="w-full h-14 flex-col gap-2 bg-blue-500 text-white border-0 rounded-2xl hover:bg-blue-600 transition-all duration-200"
                       asChild
                     >
                       <div className="cursor-pointer flex flex-col items-center justify-center gap-2">
                         <Camera className="w-6 h-6" />
-                        <span className="text-sm font-medium">Fotocamera</span>
+                        <span className="text-sm font-medium">"Cámara</span>
                       </div>
                     </Button>
                   </label>
@@ -300,12 +300,12 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete, uploadType:
                   <label htmlFor="gallery-upload">
                     <Button
                       type="button"
-                      className="w-full h-20 flex-col gap-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-2xl hover:bg-blue-100 transition-all duration-200"
+                      className="w-full h-14 flex-col gap-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-2xl hover:bg-blue-100 transition-all duration-200"
                       asChild
                     >
                       <div className="cursor-pointer flex flex-col items-center justify-center gap-2">
                         <Image className="w-6 h-6" />
-                        <span className="text-sm font-medium">Galleria</span>
+                        <span className="text-sm font-medium">Galería</span>
                       </div>
                     </Button>
                   </label>

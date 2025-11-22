@@ -7,8 +7,19 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/> <!-- Necessario per Android 13+ -->
     <uses-permission android:name="android.permission.VIBRATE" /> <!-- Utile per le notifiche con vibrazione -->
-    <!-- Se la tua app ha bisogno di Wake Lock per i servizi in background relativi alle notifiche (meno comune per FCM standard) -->
-    <!-- <uses-permission android:name="android.permission.WAKE_LOCK" /> -->
+    <!-- ✅ NUOVI PERMESSI PER MAPPA -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- ✅ NUOVI PERMESSI PER FOTOCAMERA -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- ✅ NUOVI PERMESSI PER AUDIO -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <!-- Le 'queries' e i permessi specifici di Firebase C2DM sono già gestiti dalle dipendenze, non serve ridichiararli qui -->
     <!-- Anche la permission con protectionLevel="signature" è gestita dalle librerie -->

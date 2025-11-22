@@ -268,7 +268,7 @@ const NotificationsSheet = ({ open, onOpenChange, userId, userRole }: Notificati
                   <div className="flex-1 min-w-0">
                     <p className="text-sm flex items-center gap-2">
                       {getNotificationIcon(notification.type)}
-                      <span 
+                      <span
                         className="font-semibold cursor-pointer hover:underline"
                         onClick={() => handleProfileClick(notification.user_id)}
                       >
@@ -286,7 +286,7 @@ const NotificationsSheet = ({ open, onOpenChange, userId, userRole }: Notificati
                     </p>
                   </div>
                   {notification.posts?.image_url && (
-                    <div 
+                    <div
                       onClick={() => notification.post_id && handlePostClick(notification.post_id)}
                       className="cursor-pointer"
                     >
@@ -298,7 +298,7 @@ const NotificationsSheet = ({ open, onOpenChange, userId, userRole }: Notificati
                     </div>
                   )}
                   {notification.posts?.video_url && !notification.posts?.image_url && (
-                    <div 
+                    <div
                       onClick={() => notification.post_id && handlePostClick(notification.post_id)}
                       className="cursor-pointer"
                     >

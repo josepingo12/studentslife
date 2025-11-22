@@ -13,7 +13,6 @@ import CategoryCarousel from "@/components/client/CategoryCarousel";
 import PartnersList from "@/components/client/PartnersList";
 import RecentPartners from "@/components/client/RecentPartners";
 import PartnersMap from "@/components/client/PartnersMap";
-import StoriesCarousel from "@/components/social/StoriesCarousel";
 import CreatePost from "@/components/social/CreatePost";
 import PostCard from "@/components/social/PostCard";
 import UploadSheet from "@/components/shared/UploadSheet";
@@ -51,6 +50,11 @@ const ClientDashboard = () => {
   const totalUnread = useUnreadMessages(user?.id);
   const unreadNotifications = useUnreadNotifications(user?.id);
   const [userRole, setUserRole] = useState<string>();
+  const [partnerSearchQuery, setPartnerSearchQuery] = useState("");
+const [partnerSearchResults, setPartnerSearchResults] = useState<any[]>([]);
+const [partnerSearching, setPartnerSearching] = useState(false);
+
+
   // Rimuovi questo stato, non è più necessario qui
   // const [fcmToken, setFcmToken] = useState<string | null>(null);
 
@@ -218,6 +222,28 @@ const ClientDashboard = () => {
     setSearching(false);
   };
 
+const handlePartnerSearch = async (query: string) => {
+  setPartnerSearchQuery(query);
+
+  if (!query.trim()) {
+    setPartnerSearchResults([]);
+    setPartnerSearching(false);
+    return;
+  }
+
+  setPartnerSearching(true);
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, first_name, last_name, business_name, profile_image_url")
+    .not("business_name", "is", null) // Solo partner con business_name
+    .or(`business_name.ilike.%${query}%,first_name.ilike.%${query}%,last_name.ilike.%${query}%`)
+    .limit(10);
+
+  setPartnerSearchResults(data || []);
+  setPartnerSearching(false);
+};
+
+
   const getDisplayName = (profile: any) => {
     if (profile.first_name) {
       return `${profile.first_name} ${profile.last_name || ""}`.trim();
@@ -336,10 +362,6 @@ const ClientDashboard = () => {
             )}
           </div>
 
-          {/* Stories */}
-          <div className="mt-4">
-            <StoriesCarousel currentUserId={user.id} />
-          </div>
 
           {/* Create Post */}
           <div className="mx-4 mt-4">
@@ -379,6 +401,118 @@ const ClientDashboard = () => {
         </div>
       ) : (
         <>
+    {/* Header moderno per Partners con Wallet e Search */}
+    <div className="mt-4 mx-4 mb-6 relative">
+      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl px-6 py-5 shadow-xl">
+        {/* Top row: Titolo e Wallet */}
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-2xl font-bold text-white">Socios</h2>
+            <p className="text-blue-100 text-sm">Encuentra partners cerca</p>
+          </div>
+
+          <div className="relative">
+            <button
+              onClick={() => setWalletSheetOpen(true)}
+              className="flex flex-col items-center gap-1 text-white hover:scale-105 transition-all"
+            >
+              <Wallet className="w-5 h-6" />
+              <span className="text-xs font-semibold">Wallet</span>
+            </button>
+          </div>
+          </div>
+        {/* Search Bar moderna */}
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400 z-10" />
+          <Input
+            type="text"
+            placeholder="Busca socios, restaurantes, tiendas..."
+            value={partnerSearchQuery}
+            onChange={(e) => handlePartnerSearch(e.target.value)}
+            className="w-full pl-12 pr-10 py-4 rounded-2xl border-none bg-white/95 backdrop-blur-sm text-gray-800 placeholder:text-gray-500 focus-visible:ring-0 focus:bg-white text-base font-medium shadow-lg"
+          />
+          {partnerSearchQuery && (
+            <button
+              onClick={() => handlePartnerSearch("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-10 bg-gray-100 hover:bg-gray-200 rounded-full p-2 transition-colors"
+            >
+              <X className="w-4 h-4 text-gray-600" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Search Results Dropdown - Più elegante */}
+      {partnerSearchQuery && (
+        <div className="absolute top-[calc(100%+0.5rem)] left-0 right-0 mt-0 bg-white rounded-3xl shadow-2xl border border-gray-100 z-50 max-h-80 overflow-y-auto backdrop-blur-lg">
+          {partnerSearching ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-3"></div>
+              <p className="text-sm text-gray-500">Buscando socios...</p>
+            </div>
+          ) : partnerSearchResults.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Search className="w-8 h-8 text-gray-400" />
+              </div>
+              <p className="text-sm text-gray-500">No se encontraron socios</p>
+              <p className="text-xs text-gray-400 mt-1">Intenta con otros términos</p>
+            </div>
+          ) : (
+            <div className="py-3">
+              {partnerSearchResults.map((result, index) => (
+                <button
+                  key={result.id}
+                  onClick={() => {
+                    navigate(`/partner/${result.id}`);
+                    setPartnerSearchQuery("");
+                    setPartnerSearchResults([]);
+                  }}
+                  className={`w-full flex items-center gap-4 px-6 py-4 hover:bg-blue-50 transition-all duration-200 ${
+                    index === 0 ? 'rounded-t-3xl' : ''
+                  } ${
+                    index === partnerSearchResults.length - 1 ? 'rounded-b-3xl' : ''
+                  }`}
+                >
+                  <div className="relative">
+                    <Avatar className="h-14 w-14 ring-2 ring-blue-100">
+                      <AvatarImage src={result.profile_image_url} />
+                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold">
+                        {(result.business_name || result.first_name || "S")[0].toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></div>
+                  </div>
+
+                  <div className="text-left flex-1">
+                    <p className="font-bold text-gray-900 text-lg">
+                      {result.business_name || `${result.first_name} ${result.last_name || ""}`.trim()}
+                    </p>
+                    {result.business_name && result.first_name && (
+                      <p className="text-sm text-gray-500">{result.first_name} {result.last_name}</p>
+                    )}
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                        <span className="text-xs text-green-600 font-medium">Activo</span>
+                      </div>
+                      <span className="text-xs text-gray-400">•</span>
+                      <span className="text-xs text-gray-500">2.3 km</span>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                      Ver
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
           {/* Recent Partners */}
           <div className="mt-6">
             <RecentPartners userId={user.id} />
@@ -390,13 +524,7 @@ const ClientDashboard = () => {
             <CategoryCarousel onSelectCategory={setSelectedCategory} />
           </div>
 
-          {/* Partners Map */}
-          <div className="mt-8">
-            <h3 className="text-2xl font-bold mb-4 px-4 text-foreground">{t('partner.mapTitle')}</h3>
-            <PartnersMap />
-          </div>
-
-          {/* Partners List */}
+ {/* Partners List */}
           {selectedCategory && (
             <div className="mt-8">
               <h3 className="text-2xl font-bold mb-4 px-4 text-foreground">{t('navigation.partners')}</h3>
@@ -405,6 +533,14 @@ const ClientDashboard = () => {
               </div>
             </div>
           )}
+
+
+          {/* Partners Map */}
+          <div className="mt-8">
+            <h3 className="text-2xl font-bold mb-4 px-4 text-foreground">{t('partner.mapTitle')}</h3>
+            <PartnersMap />
+          </div>
+
 
           {!selectedCategory && (
             <div className="mt-12 text-center px-4">
@@ -512,15 +648,7 @@ const ClientDashboard = () => {
         userId={user.id}
       />
 
-      {/* Floating Wallet Button - Only visible in partners tab */}
-      {activeTab === "partners" && (
-        <button
-          onClick={() => setWalletSheetOpen(true)}
-          className="fixed bottom-24 right-6 h-16 w-16 rounded-2xl bg-blue-500 text-white shadow-xl hover:scale-105 transition-all flex items-center justify-center z-40 border-2 border-white/20"
-        >
-          <Wallet className="w-7 h-7" />
-        </button>
-      )}
+
     </div>
   );
 };

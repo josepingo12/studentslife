@@ -14,7 +14,6 @@ import QRScanner from "@/components/partner/QRScanner";
 import PartnerStats from "@/components/partner/PartnerStats";
 import PartnerProfileEdit from "@/components/partner/PartnerProfileEdit";
 import PartnerSocialProfile from "@/components/partner/PartnerSocialProfile";
-import StoriesCarousel from "@/components/social/StoriesCarousel";
 import CreatePost from "@/components/social/CreatePost";
 import PostCard from "@/components/social/PostCard";
 import UploadSheet from "@/components/shared/UploadSheet";
@@ -323,13 +322,9 @@ const PartnerDashboard = () => {
       {/* Main Content */}
       {activeTab === "social" ? (
         <div className="flex-1 overflow-y-auto pb-24">
-          {/* Stories */}
-          <div className="mt-4">
-            <StoriesCarousel currentUserId={user.id} />
-          </div>
 
           {/* Create Post */}
-          <div className="mx-4 mt-4">
+          <div className="mx-4 mt-2">
             <CreatePost
               userId={user.id}
               userProfile={profile}
@@ -430,7 +425,7 @@ const PartnerDashboard = () => {
             }`}
           >
             <Calendar className="w-6 h-6" />
-            <span className="text-xs font-medium">Eventi</span>
+            <span className="text-xs font-medium">Descue</span>
           </button>
 
           <button
