@@ -18,53 +18,68 @@ const UpdatePassword = () => {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    // Check if there's a valid recovery session
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    const checkSessionAndTokens = async () => {
+      // Try to get session directly from Supabase (it might have processed tokens already)
+      let { data: { session } } = await supabase.auth.getSession();
+
+      // If no session, try to extract tokens from URL (hash or query string)
       if (!session) {
-        // Try to get tokens from multiple sources (hash fragment or query string)
         let accessToken: string | null = null;
         let refreshToken: string | null = null;
         
-        // First try hash fragment (standard Supabase flow)
+        // Prioritize hash fragment (standard Supabase recovery flow)
         const hashContent = window.location.hash;
-        if (hashContent.includes('access_token')) {
-          // Extract the token part after /update-password
-          const tokenPart = hashContent.split('?')[1] || hashContent.split('access_token')[0].includes('/') 
-            ? hashContent.substring(hashContent.indexOf('access_token') - 1)
-            : hashContent.substring(1);
-          const hashParams = new URLSearchParams(tokenPart);
+        if (hashContent) {
+          const hashParams = new URLSearchParams(hashContent.substring(1)); // Remove '#'
           accessToken = hashParams.get('access_token');
           refreshToken = hashParams.get('refresh_token');
         }
         
-        // Also try query string (after redirect)
+        // Fallback to query string if tokens not found in hash
         if (!accessToken) {
           const searchParams = new URLSearchParams(window.location.search);
           accessToken = searchParams.get('access_token');
           refreshToken = searchParams.get('refresh_token');
         }
         
-        // Try extracting from hash after ? character
-        if (!accessToken && hashContent.includes('?')) {
-          const queryPart = hashContent.split('?')[1];
-          if (queryPart) {
-            const queryParams = new URLSearchParams(queryPart);
-            accessToken = queryParams.get('access_token');
-            refreshToken = queryParams.get('refresh_token');
-          }
-        }
-        
         if (accessToken && refreshToken) {
-          await supabase.auth.setSession({
+          // Explicitly set session if tokens are found in URL
+          const { error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken
           });
+
+          if (error) {
+            console.error("Error setting session:", error);
+            toast({
+              title: "Errore di sessione",
+              description: error.message,
+              variant: "destructive",
+            });
+            // Redirect to login if session cannot be set
+            navigate("/login"); 
+            return;
+          }
+          // After setting session, re-fetch it to ensure it's active
+          ({ data: { session } } = await supabase.auth.getSession());
+        } else {
+          // If no tokens and no session, redirect to login
+          console.log("No session or tokens found, redirecting to login.");
+          navigate("/login");
+          return;
         }
       }
+
+      // If a session is now active (either from initial getSession or after setSession), 
+      // the component can proceed. Otherwise, the redirects above would have handled it.
+      if (!session) {
+        // This case should ideally not be reached if the above logic works
+        console.log("Still no session after token processing, redirecting to login.");
+        navigate("/login");
+      }
     };
-    checkSession();
-  }, []);
+    checkSessionAndTokens();
+  }, [navigate, toast]); // Add navigate and toast to dependency array
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
