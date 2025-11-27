@@ -18,21 +18,29 @@ const ResetPassword = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/update-password`,
+      // Usa la edge function personalizzata per inviare l'email senza watermark
+      const { data, error } = await supabase.functions.invoke('send-password-reset', {
+        body: {
+          email: email,
+          redirect_to: `${window.location.origin}/#/update-password`,
+        },
       });
 
       if (error) throw error;
 
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
       setSent(true);
       toast({
-        title: "Email inviata!",
-        description: "Controlla la tua casella di posta per il link di reset",
+        title: "¡Email enviado!",
+        description: "Revisa tu bandeja de entrada para el enlace de restablecimiento",
       });
     } catch (error: any) {
       toast({
-        title: "Errore",
-        description: error.message,
+        title: "Error",
+        description: error.message || "No se pudo enviar el email",
         variant: "destructive",
       });
     } finally {
@@ -45,7 +53,7 @@ const ResetPassword = () => {
       <div className="w-full max-w-md ios-card p-6 space-y-6">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-primary">Students Life</h1>
-          <p className="text-muted-foreground mt-2">Recupera la tua password</p>
+          <p className="text-muted-foreground mt-2">Recupera tu contraseña</p>
         </div>
 
         {!sent ? (
@@ -59,7 +67,7 @@ const ResetPassword = () => {
                 className="ios-input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Inserisci la tua email"
+                placeholder="Introduce tu email"
               />
             </div>
 
@@ -71,10 +79,10 @@ const ResetPassword = () => {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Invio...
+                  Enviando...
                 </>
               ) : (
-                "Invia link di reset"
+                "Enviar enlace de restablecimiento"
               )}
             </Button>
 
@@ -83,15 +91,15 @@ const ResetPassword = () => {
               className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" />
-              Torna al login
+              Volver al login
             </Link>
           </form>
         ) : (
           <div className="space-y-4 text-center">
             <div className="ios-card p-4 bg-primary/10">
               <p className="text-sm">
-                Ti abbiamo inviato un'email con le istruzioni per reimpostare la password.
-                Controlla la tua casella di posta!
+                Te hemos enviado un email con las instrucciones para restablecer tu contraseña.
+                ¡Revisa tu bandeja de entrada!
               </p>
             </div>
 
@@ -100,7 +108,7 @@ const ResetPassword = () => {
               className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" />
-              Torna al login
+              Volver al login
             </Link>
           </div>
         )}
