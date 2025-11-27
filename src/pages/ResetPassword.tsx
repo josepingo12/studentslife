@@ -18,11 +18,14 @@ const ResetPassword = () => {
     setLoading(true);
 
     try {
-      // Usa la edge function personalizzata per inviare l'email senza watermark
+      // Usa la edge function personalizzata para enviar el email sin watermark
+      // Siempre redirigir al dominio de producción
+      const productionUrl = 'https://studentslife.es/#/update-password';
+      
       const { data, error } = await supabase.functions.invoke('send-password-reset', {
         body: {
           email: email,
-          redirect_to: `${window.location.origin}/#/update-password`,
+          redirect_to: productionUrl,
         },
       });
 
