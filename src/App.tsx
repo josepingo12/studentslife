@@ -9,6 +9,7 @@ import RegisterClient from "./pages/RegisterClient";
 import RegisterPartner from "./pages/RegisterPartner";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
+import UpdatePassword from "./pages/UpdatePassword";
 import ClientDashboard from "./pages/ClientDashboard";
 import PartnerDetails from "./pages/PartnerDetails";
 import PartnerDashboard from "./pages/PartnerDashboard";
@@ -71,6 +72,7 @@ const App = () => {
               }
             />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/update-password" element={<UpdatePassword />} />
             <Route path="/pending-approval" element={<PendingApproval />} />
             <Route path="/home" element={<Index />} />
 
