@@ -84,7 +84,7 @@ const PartnersMap = () => {
     mapboxgl.accessToken = MAPBOX_TOKEN;
 
     // Usa posizione utente se disponibile, altrimenti Valladolid
-    const centerCoords = userLocation ? [userLocation.lng, userLocation.lat] : [-4.7245, 41.6523];
+    const centerCoords: [number, number] = userLocation ? [userLocation.lng, userLocation.lat] : [-4.7245, 41.6523];
 
     // Initialize map
     map.current = new mapboxgl.Map({
