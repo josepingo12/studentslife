@@ -22,10 +22,38 @@ const UpdatePassword = () => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        // Try to get session from URL hash (recovery flow)
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
+        // Try to get tokens from multiple sources (hash fragment or query string)
+        let accessToken: string | null = null;
+        let refreshToken: string | null = null;
+        
+        // First try hash fragment (standard Supabase flow)
+        const hashContent = window.location.hash;
+        if (hashContent.includes('access_token')) {
+          // Extract the token part after /update-password
+          const tokenPart = hashContent.split('?')[1] || hashContent.split('access_token')[0].includes('/') 
+            ? hashContent.substring(hashContent.indexOf('access_token') - 1)
+            : hashContent.substring(1);
+          const hashParams = new URLSearchParams(tokenPart);
+          accessToken = hashParams.get('access_token');
+          refreshToken = hashParams.get('refresh_token');
+        }
+        
+        // Also try query string (after redirect)
+        if (!accessToken) {
+          const searchParams = new URLSearchParams(window.location.search);
+          accessToken = searchParams.get('access_token');
+          refreshToken = searchParams.get('refresh_token');
+        }
+        
+        // Try extracting from hash after ? character
+        if (!accessToken && hashContent.includes('?')) {
+          const queryPart = hashContent.split('?')[1];
+          if (queryPart) {
+            const queryParams = new URLSearchParams(queryPart);
+            accessToken = queryParams.get('access_token');
+            refreshToken = queryParams.get('refresh_token');
+          }
+        }
         
         if (accessToken && refreshToken) {
           await supabase.auth.setSession({
