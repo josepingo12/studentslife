@@ -34,33 +34,33 @@ const usePasswordRecoveryRedirect = () => {
   const [isRedirecting, setIsRedirecting] = useState(false);
   
   useEffect(() => {
-    const currentUrl = window.location.href;
+    const pathname = window.location.pathname;
     const hash = window.location.hash;
     const search = window.location.search;
     
-    // Detecta si hay tokens de recuperación en la URL
-    const hasRecoveryTokens = 
-      currentUrl.includes('type=recovery') ||
-      currentUrl.includes('access_token') ||
-      search.includes('type=recovery') ||
-      hash.includes('access_token');
+    // Detectar si estamos en la ruta de recuperación de contraseña (sin HashRouter)
+    // Supabase redirige a: /password-recovery#access_token=xxx
+    const isPasswordRecoveryPath = pathname === '/password-recovery';
     
-    // Si estamos en /update-password sin hash routing, redirigir correctamente
-    const isOnUpdatePasswordPath = window.location.pathname === '/update-password';
-    
-    if (hasRecoveryTokens || isOnUpdatePasswordPath) {
+    if (isPasswordRecoveryPath) {
       setIsRedirecting(true);
       
-      // Extraer tokens del hash fragment o query string
-      let tokenParams = '';
-      if (hash.includes('access_token')) {
-        tokenParams = hash.replace('#', '');
-      } else if (search) {
-        tokenParams = search.replace('?', '');
-      }
+      // Los tokens están en el hash: #access_token=xxx&refresh_token=xxx
+      const tokenParams = hash.replace('#', '');
       
-      // Redirigir a la ruta con hash incluyendo los tokens
-      const newUrl = `${window.location.origin}/#/update-password${tokenParams ? '?' + tokenParams : ''}`;
+      // Redirigir a la ruta HashRouter con los tokens como query params
+      const newUrl = `${window.location.origin}/#/update-password?${tokenParams}`;
+      window.location.replace(newUrl);
+      return;
+    }
+    
+    // También manejar si el hash tiene doble # (edge case)
+    if (hash.includes('#') && hash.includes('access_token')) {
+      setIsRedirecting(true);
+      const parts = hash.split('#');
+      const route = parts[1]?.split('?')[0] || 'update-password';
+      const tokens = parts.find(p => p.includes('access_token')) || '';
+      const newUrl = `${window.location.origin}/#/${route}?${tokens}`;
       window.location.replace(newUrl);
     }
   }, []);

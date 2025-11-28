@@ -22,24 +22,31 @@ const UpdatePassword = () => {
       // Try to get session directly from Supabase (it might have processed tokens already)
       let { data: { session } } = await supabase.auth.getSession();
 
-      // If no session, try to extract tokens from URL (hash or query string)
+      // If no session, try to extract tokens from URL
       if (!session) {
         let accessToken: string | null = null;
         let refreshToken: string | null = null;
         
-        // Prioritize hash fragment (standard Supabase recovery flow)
         const hashContent = window.location.hash;
-        if (hashContent) {
-          const hashParams = new URLSearchParams(hashContent.substring(1)); // Remove '#'
-          accessToken = hashParams.get('access_token');
-          refreshToken = hashParams.get('refresh_token');
+        const searchParams = window.location.search;
+        
+        // En HashRouter, la URL es: /#/update-password?access_token=xxx
+        // Entonces el hash contiene tanto la ruta como los query params
+        if (hashContent.includes('access_token')) {
+          // Extraer la parte después del '?' en el hash
+          const queryPart = hashContent.split('?')[1];
+          if (queryPart) {
+            const params = new URLSearchParams(queryPart);
+            accessToken = params.get('access_token');
+            refreshToken = params.get('refresh_token');
+          }
         }
         
-        // Fallback to query string if tokens not found in hash
-        if (!accessToken) {
-          const searchParams = new URLSearchParams(window.location.search);
-          accessToken = searchParams.get('access_token');
-          refreshToken = searchParams.get('refresh_token');
+        // Fallback: buscar en window.location.search
+        if (!accessToken && searchParams) {
+          const params = new URLSearchParams(searchParams);
+          accessToken = params.get('access_token');
+          refreshToken = params.get('refresh_token');
         }
         
         if (accessToken && refreshToken) {
@@ -52,34 +59,29 @@ const UpdatePassword = () => {
           if (error) {
             console.error("Error setting session:", error);
             toast({
-              title: "Errore di sessione",
+              title: "Error de sesión",
               description: error.message,
               variant: "destructive",
             });
-            // Redirect to login if session cannot be set
             navigate("/login"); 
             return;
           }
           // After setting session, re-fetch it to ensure it's active
           ({ data: { session } } = await supabase.auth.getSession());
         } else {
-          // If no tokens and no session, redirect to login
           console.log("No session or tokens found, redirecting to login.");
           navigate("/login");
           return;
         }
       }
 
-      // If a session is now active (either from initial getSession or after setSession), 
-      // the component can proceed. Otherwise, the redirects above would have handled it.
       if (!session) {
-        // This case should ideally not be reached if the above logic works
         console.log("Still no session after token processing, redirecting to login.");
         navigate("/login");
       }
     };
     checkSessionAndTokens();
-  }, [navigate, toast]); // Add navigate and toast to dependency array
+  }, [navigate, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
