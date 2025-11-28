@@ -115,6 +115,21 @@
 
 <body>
 <div id="root"></div>
+<script>
+  // Detectar ruta de recuperación de contraseña ANTES de que React cargue
+  (function() {
+    var pathname = window.location.pathname;
+    var hash = window.location.hash;
+    
+    // Si estamos en /password-recovery, redirigir a HashRouter con los tokens
+    if (pathname === '/password-recovery') {
+      // Los tokens vienen en el hash: #access_token=xxx&refresh_token=xxx
+      var tokens = hash.replace('#', '');
+      var newUrl = window.location.origin + '/#/update-password' + (tokens ? '?' + tokens : '');
+      window.location.replace(newUrl);
+    }
+  })();
+</script>
 <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
