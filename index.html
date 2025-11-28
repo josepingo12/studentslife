@@ -2,21 +2,6 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <script type="text/javascript">
-    // Detectar ruta de recuperación de contraseña ANTES de que React cargue
-    (function() {
-      var pathname = window.location.pathname;
-      var hash = window.location.hash;
-      
-      // Se siamo in /password-recovery e l'hash contiene i token
-      if (pathname === '/password-recovery' && hash.includes('access_token')) {
-        // I token vengono nell'hash: #access_token=xxx&refresh_token=xxx
-        var tokens = hash.substring(1); // Rimuove il '#' iniziale dall'hash
-        var newUrl = window.location.origin + '/#/update-password?' + tokens; // Costruisce la nuova URL con hash routing e query params
-        window.location.replace(newUrl); // Reindirizza
-      }
-    })();
-  </script>
   <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
   <!-- QUI DEVI INSERIRE I TUOI METATAG DEL FAVICON -->
