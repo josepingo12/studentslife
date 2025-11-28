@@ -81,8 +81,8 @@ serve(async (req) => {
     );
 
     // Genera il link di reset password usando l'API admin
-    // Usa la URL con hash routing para que funcione correctamente con HashRouter
-    const cleanRedirectUrl = 'https://studentslife.es/#/update-password';
+    // Usa URL sin hash - el frontend detectará los tokens y redirigirá
+    const cleanRedirectUrl = 'https://studentslife.es/password-recovery';
     
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'recovery',
