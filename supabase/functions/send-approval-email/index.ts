@@ -124,12 +124,6 @@ serve(async (req) => {
                       </ul>
                     </div>
                   `}
-                  
-                  <div style="margin-top: 32px; text-align: center;">
-                    <a href="https://studentslife.es/#/login" style="display: inline-block; background: linear-gradient(135deg, #4F9CF9 0%, #3B82F6 100%); color: white; text-decoration: none; padding: 16px 40px; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);">
-                      Acceder a mi cuenta
-                    </a>
-                  </div>
                 </td>
               </tr>
               
