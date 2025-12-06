@@ -8,8 +8,8 @@ export interface ClientOnboardingStep {
   targetTab?: "social" | "partners" | "chats";
   checkField?: string;
   position?: "center" | "top" | "bottom";
-  required?: boolean; // If true, user must complete this step to proceed
-  highlightElement?: string; // CSS selector or identifier for spotlight
+  required?: boolean;
+  highlightElement?: string;
   arrowDirection?: "up" | "down" | "left" | "right";
 }
 
@@ -22,54 +22,36 @@ const ONBOARDING_STEPS: ClientOnboardingStep[] = [
   {
     id: "welcome",
     title: "¡Bienvenido a StudentsLife! 🎉",
-    description: "Te guiaremos para configurar tu perfil. ¡Solo unos segundos!",
+    description: "Te guiaremos para conocer la app. ¡Solo unos segundos!",
     position: "center",
   },
   {
-    id: "go-to-profile",
-    title: "📷 Tu Perfil",
-    description: "Haz clic en tu avatar para ir a tu perfil y configurar tus fotos. ¡Es obligatorio!",
+    id: "profile-photo",
+    title: "📷 Tu Foto de Perfil",
+    description: "Puedes personalizar tu perfil subiendo una foto. ¡Haz clic en tu avatar arriba para acceder!",
     targetTab: "social",
     position: "top",
     highlightElement: "avatar",
     arrowDirection: "up",
   },
   {
-    id: "profile-photo",
-    title: "📷 Tu Foto de Perfil",
-    description: "Haz clic en el botón de edición sobre tu avatar para subir una foto de perfil. ¡Personaliza tu cuenta!",
-    position: "top",
-    highlightElement: "profile-avatar",
-    arrowDirection: "up",
-  },
-  {
-    id: "cover-photo",
-    title: "🖼️ Tu Foto de Portada",
-    description: "Haz clic en la imagen de portada arriba para subir tu foto de fondo. ¡Dale estilo a tu perfil!",
-    position: "top",
-    highlightElement: "cover-photo",
-    arrowDirection: "up",
-  },
-  {
     id: "discover-partners",
-    title: "🏪 Descubre Negocios",
-    description: "En la pestaña 'Socios' encontrarás locales con descuentos exclusivos para estudiantes.",
+    title: "🏪 Sección Socios",
+    description: "Aquí encontrarás todos los locales con descuentos exclusivos para estudiantes. ¡Explora el mapa y las categorías!",
     targetTab: "partners",
-    position: "bottom",
-    highlightElement: "partners-tab",
-    arrowDirection: "down",
+    position: "center",
   },
   {
     id: "download-discounts",
     title: "🏷️ Cómo Descargar Descuentos",
-    description: "Entra en cualquier local, busca sus eventos y descarga el código QR. ¡Muéstralo para tu descuento!",
+    description: "Entra en cualquier local, busca sus eventos y descarga el código QR. ¡Muéstralo en el local para obtener tu descuento!",
     targetTab: "partners",
     position: "center",
   },
   {
     id: "wallet",
     title: "💼 Tu Wallet",
-    description: "Tus QR descargados están aquí en el Wallet. ¡Acceso rápido a todos tus descuentos!",
+    description: "Todos tus QR descargados se guardan aquí. ¡Acceso rápido a todos tus descuentos activos!",
     targetTab: "partners",
     position: "top",
     highlightElement: "wallet",
@@ -78,7 +60,7 @@ const ONBOARDING_STEPS: ClientOnboardingStep[] = [
   {
     id: "loyalty-cards",
     title: "🎁 Tarjetas de Fidelidad",
-    description: "Al usar QR de partners, acumulas sellos. ¡Al completar 10, ganas premios gratis!",
+    description: "Cada vez que uses un QR, acumulas sellos. ¡Al completar 10 sellos en un local, ganas premios gratis!",
     targetTab: "partners",
     position: "top",
     highlightElement: "loyalty-cards",
@@ -87,25 +69,21 @@ const ONBOARDING_STEPS: ClientOnboardingStep[] = [
   {
     id: "social-feed",
     title: "📱 Feed Social",
-    description: "Comparte fotos y videos con la comunidad. ¡Haz clic en + para publicar!",
+    description: "Comparte fotos y videos con la comunidad estudiantil. ¡Usa el botón + para publicar tu contenido!",
     targetTab: "social",
     position: "center",
-    highlightElement: "upload-button",
-    arrowDirection: "down",
   },
   {
     id: "chat",
     title: "💬 Chat",
-    description: "Envía mensajes a otros usuarios y partners. ¡Conecta con la comunidad!",
+    description: "Envía mensajes a otros usuarios y partners. ¡Conecta con toda la comunidad StudentsLife!",
     targetTab: "chats",
-    position: "bottom",
-    highlightElement: "chat-tab",
-    arrowDirection: "down",
+    position: "center",
   },
   {
     id: "complete",
-    title: "🎊 ¡Perfil Completado!",
-    description: "Ya conoces las funciones principales. ¡Disfruta de StudentsLife!",
+    title: "🎊 ¡Tutorial Completado!",
+    description: "Ya conoces todas las funciones. ¡Disfruta de tus descuentos exclusivos!",
     position: "center",
   },
 ];
@@ -137,7 +115,7 @@ export const useClientOnboarding = (userId: string | undefined) => {
   }, [userId]);
 
   // Build the steps list based on completion
-  const calculateSteps = useCallback((completion: ClientProfileCompletion) => {
+  const calculateSteps = useCallback(() => {
     const wasCompleted = localStorage.getItem(`client_onboarding_completed_${userId}`);
     
     // If already completed, don't show again
@@ -145,8 +123,7 @@ export const useClientOnboarding = (userId: string | undefined) => {
       return [];
     }
     
-    // Always show all steps for first time or returning user who hasn't completed
-    // Mark as started
+    // Always show all steps
     localStorage.setItem(`client_onboarding_started_${userId}`, "true");
     return ONBOARDING_STEPS;
   }, [userId]);
@@ -159,12 +136,10 @@ export const useClientOnboarding = (userId: string | undefined) => {
         return;
       }
 
-      const completion = await checkProfileCompletion();
-      if (completion) {
-        const stepsToShow = calculateSteps(completion);
-        setSteps(stepsToShow);
-        setIsOnboardingActive(stepsToShow.length > 0);
-      }
+      await checkProfileCompletion();
+      const stepsToShow = calculateSteps();
+      setSteps(stepsToShow);
+      setIsOnboardingActive(stepsToShow.length > 0);
       setIsLoading(false);
     };
 
@@ -179,31 +154,18 @@ export const useClientOnboarding = (userId: string | undefined) => {
     }
   }, [checkProfileCompletion]);
 
-  // Check if current step can proceed
+  // All steps are now demonstrative, always can proceed
   const canProceed = useCallback(() => {
-    const currentStepData = steps[currentStep];
-    if (!currentStepData) return true;
-    
-    // If step is required and has a checkField, verify it's complete
-    if (currentStepData.required && currentStepData.checkField && profileCompletion) {
-      return profileCompletion[currentStepData.checkField as keyof ClientProfileCompletion];
-    }
-    
     return true;
-  }, [currentStep, steps, profileCompletion]);
+  }, []);
 
   const nextStep = useCallback(() => {
-    // Check if can proceed (required steps must be completed)
-    if (!canProceed()) {
-      return false; // Cannot proceed
-    }
-    
     if (currentStep < steps.length - 1) {
       setCurrentStep((prev) => prev + 1);
       return true;
     }
     return true;
-  }, [currentStep, steps.length, canProceed]);
+  }, [currentStep, steps.length]);
 
   const prevStep = useCallback(() => {
     if (currentStep > 0) {
@@ -219,12 +181,6 @@ export const useClientOnboarding = (userId: string | undefined) => {
   }, [userId]);
 
   const skipCurrentStep = useCallback(() => {
-    const currentStepData = steps[currentStep];
-    // Cannot skip required steps
-    if (currentStepData?.required) {
-      return false;
-    }
-    
     if (currentStep < steps.length - 1) {
       setCurrentStep((prev) => prev + 1);
     } else {
