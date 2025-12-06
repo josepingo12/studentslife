@@ -6,123 +6,73 @@ export interface OnboardingStep {
   title: string;
   description: string;
   targetTab?: "social" | "events" | "gallery" | "scanner" | "stats" | "profile";
-  targetElement?: string;
-  action?: "navigate" | "highlight" | "form" | "upload";
-  requiresAction?: boolean;
-  position?: "center" | "top" | "bottom" | "left" | "right";
+  checkField?: string;
+  position?: "center" | "top" | "bottom";
+}
+
+export interface ProfileCompletion {
+  hasProfilePhoto: boolean;
+  hasCoverPhoto: boolean;
+  hasBusinessName: boolean;
+  hasBusinessAddress: boolean;
+  hasBusinessCategory: boolean;
+  hasGalleryPhotos: boolean;
+  hasEvents: boolean;
+  galleryCount: number;
+  eventsCount: number;
 }
 
 const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: "welcome",
     title: "¡Bienvenido a StudentsLife! 🎉",
-    description: "Te guiaremos paso a paso para configurar tu perfil de socio y empezar a conectar con miles de estudiantes. ¡Este tutorial solo tomará unos minutos!",
-    position: "center",
-  },
-  {
-    id: "profile-intro",
-    title: "Primero, tu Perfil Empresarial",
-    description: "Vamos a configurar tu perfil. Los estudiantes verán esta información cuando busquen socios en la app. ¡Hagamos que destaque!",
-    targetTab: "profile",
+    description: "Te guiaremos paso a paso para configurar tu perfil. ¡Solo tomará unos minutos!",
     position: "center",
   },
   {
     id: "profile-photo",
     title: "📷 Sube tu Logo o Foto de Perfil",
-    description: "Una imagen vale más que mil palabras. Sube el logo de tu negocio o una foto profesional que represente tu marca.",
+    description: "Los estudiantes te reconocerán por esta imagen. ¡Haz clic en el área de foto para subirla!",
     targetTab: "profile",
-    targetElement: "profile-photo-upload",
-    action: "upload",
-    requiresAction: false,
+    checkField: "hasProfilePhoto",
     position: "top",
   },
   {
     id: "cover-photo",
-    title: "🖼️ Foto de Portada Espectacular",
-    description: "La foto de portada es lo primero que verán los estudiantes. Sube una imagen atractiva de tu local, productos o servicio.",
+    title: "🖼️ Foto de Portada",
+    description: "Una portada atractiva aumenta las visitas. ¡Sube una imagen de tu local o productos!",
     targetTab: "profile",
-    targetElement: "cover-photo-upload",
-    action: "upload",
-    requiresAction: false,
+    checkField: "hasCoverPhoto",
     position: "top",
   },
   {
     id: "business-data",
-    title: "📝 Datos de tu Negocio",
-    description: "Completa la información de tu empresa: nombre, dirección, teléfono y categoría. Esto ayudará a los estudiantes a encontrarte.",
+    title: "📝 Completa tus Datos",
+    description: "Nombre del negocio, dirección y categoría son esenciales para que te encuentren.",
     targetTab: "profile",
-    targetElement: "business-form",
-    action: "form",
-    requiresAction: false,
+    checkField: "hasBusinessName",
     position: "top",
   },
   {
     id: "gallery-photos",
-    title: "📸 Galería de Fotos",
-    description: "Sube al menos 4 fotos de tu local, productos o servicios. Las galerías atractivas aumentan las visitas un 80%.",
+    title: "📸 Añade Fotos a tu Galería",
+    description: "Sube al menos 2 fotos de tu local. ¡Las galerías aumentan las visitas un 80%!",
     targetTab: "gallery",
-    action: "navigate",
-    position: "center",
-  },
-  {
-    id: "gallery-upload",
-    title: "¡Añade tus mejores fotos!",
-    description: "Haz clic en el botón + para subir fotos. Muestra tu ambiente, productos estrella y lo que te hace especial.",
-    targetTab: "gallery",
-    targetElement: "gallery-upload-btn",
-    action: "highlight",
-    requiresAction: false,
-    position: "bottom",
-  },
-  {
-    id: "events-intro",
-    title: "🏷️ ¡Hora de crear tu primer Descuento!",
-    description: "Los descuentos son la mejor forma de atraer estudiantes. Vamos a la sección de descuentos para crear tu primera oferta.",
-    targetTab: "events",
-    action: "navigate",
+    checkField: "hasGalleryPhotos",
     position: "center",
   },
   {
     id: "create-discount",
-    title: "Crea tu Primer Descuento",
-    description: "Pulsa 'Crear Nuevo Descuento' para configurar tu primera oferta. Define el porcentaje, fechas y añade una imagen atractiva.",
+    title: "🏷️ Crea tu Primer Descuento",
+    description: "Los descuentos atraen estudiantes. ¡Crea tu primera oferta ahora!",
     targetTab: "events",
-    targetElement: "create-event-btn",
-    action: "highlight",
-    requiresAction: false,
-    position: "bottom",
-  },
-  {
-    id: "loyalty-card",
-    title: "💳 Tarjeta de Fidelidad",
-    description: "¿Quieres fidelizar clientes? Activa la tarjeta de fidelidad. Los estudiantes acumularán sellos con cada visita y ganarán premios.",
-    targetTab: "events",
-    targetElement: "loyalty-card-section",
-    action: "highlight",
-    requiresAction: false,
-    position: "top",
-  },
-  {
-    id: "stats-intro",
-    title: "📊 Estadísticas en Tiempo Real",
-    description: "Vamos a ver la sección de estadísticas donde podrás monitorear el rendimiento de tu negocio.",
-    targetTab: "stats",
-    action: "navigate",
+    checkField: "hasEvents",
     position: "center",
   },
   {
-    id: "stats-explain",
-    title: "Métricas Importantes",
-    description: "Aquí verás: eventos activos, QR descargados, QR utilizados, tu calificación promedio y tasa de uso. ¡Datos para tomar mejores decisiones!",
-    targetTab: "stats",
-    targetElement: "stats-cards",
-    action: "highlight",
-    position: "top",
-  },
-  {
     id: "complete",
-    title: "🎊 ¡Felicidades! Tutorial Completado",
-    description: "Ya conoces todas las herramientas. Ahora configura tu perfil, crea descuentos irresistibles y conecta con miles de estudiantes. ¡Éxito!",
+    title: "🎊 ¡Perfil Completado!",
+    description: "Ya estás listo para conectar con miles de estudiantes. ¡Éxito!",
     position: "center",
   },
 ];
@@ -131,36 +81,133 @@ export const usePartnerOnboarding = (userId: string | undefined) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isOnboardingActive, setIsOnboardingActive] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [profileCompletion, setProfileCompletion] = useState<ProfileCompletion | null>(null);
+  const [missingSteps, setMissingSteps] = useState<OnboardingStep[]>([]);
 
-  // Check if onboarding was completed
+  // Check profile completion status
+  const checkProfileCompletion = useCallback(async () => {
+    if (!userId) return null;
+
+    // Get profile data
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    // Get gallery count
+    const { count: galleryCount } = await supabase
+      .from("gallery")
+      .select("*", { count: "exact", head: true })
+      .eq("partner_id", userId);
+
+    // Get events count
+    const { count: eventsCount } = await supabase
+      .from("events")
+      .select("*", { count: "exact", head: true })
+      .eq("partner_id", userId);
+
+    const completion: ProfileCompletion = {
+      hasProfilePhoto: !!profile?.profile_image_url,
+      hasCoverPhoto: !!profile?.cover_image_url,
+      hasBusinessName: !!profile?.business_name?.trim(),
+      hasBusinessAddress: !!profile?.business_address?.trim(),
+      hasBusinessCategory: !!profile?.business_category?.trim(),
+      hasGalleryPhotos: (galleryCount || 0) >= 2,
+      hasEvents: (eventsCount || 0) >= 1,
+      galleryCount: galleryCount || 0,
+      eventsCount: eventsCount || 0,
+    };
+
+    setProfileCompletion(completion);
+    return completion;
+  }, [userId]);
+
+  // Determine which steps are missing
+  const calculateMissingSteps = useCallback((completion: ProfileCompletion) => {
+    const missing: OnboardingStep[] = [];
+
+    // Always start with welcome if first time
+    const isFirstTime = !localStorage.getItem(`partner_onboarding_started_${userId}`);
+    if (isFirstTime) {
+      missing.push(ONBOARDING_STEPS[0]); // welcome
+      localStorage.setItem(`partner_onboarding_started_${userId}`, "true");
+    }
+
+    // Check each step that has a checkField
+    ONBOARDING_STEPS.forEach((step) => {
+      if (step.checkField) {
+        const isComplete = completion[step.checkField as keyof ProfileCompletion];
+        if (!isComplete) {
+          missing.push(step);
+        }
+      }
+    });
+
+    // If nothing is missing and user has seen welcome, add complete step
+    if (missing.length === 0 || (missing.length === 1 && missing[0].id === "welcome")) {
+      // Check if already completed before
+      const wasCompleted = localStorage.getItem(`partner_onboarding_completed_${userId}`);
+      if (!wasCompleted && missing.length > 0) {
+        missing.push(ONBOARDING_STEPS[ONBOARDING_STEPS.length - 1]); // complete
+      }
+    }
+
+    return missing;
+  }, [userId]);
+
+  // Initialize and check status
   useEffect(() => {
-    const checkOnboardingStatus = async () => {
+    const init = async () => {
       if (!userId) {
         setIsLoading(false);
         return;
       }
 
-      // Check localStorage first (faster)
-      const localCompleted = localStorage.getItem(`partner_onboarding_${userId}`);
-      if (localCompleted === "completed") {
-        setIsOnboardingActive(false);
-        setIsLoading(false);
-        return;
+      const completion = await checkProfileCompletion();
+      if (completion) {
+        const missing = calculateMissingSteps(completion);
+        setMissingSteps(missing);
+        setIsOnboardingActive(missing.length > 0);
       }
-
-      // If not in localStorage, show onboarding
-      setIsOnboardingActive(true);
       setIsLoading(false);
     };
 
-    checkOnboardingStatus();
-  }, [userId]);
+    init();
+  }, [userId, checkProfileCompletion, calculateMissingSteps]);
+
+  // Refresh completion status
+  const refreshCompletion = useCallback(async () => {
+    const completion = await checkProfileCompletion();
+    if (completion) {
+      const missing = calculateMissingSteps(completion);
+      setMissingSteps(missing);
+      
+      // Auto-advance if current step is now complete
+      if (missing.length > 0) {
+        const currentStepData = missingSteps[currentStep];
+        if (currentStepData?.checkField) {
+          const isNowComplete = completion[currentStepData.checkField as keyof ProfileCompletion];
+          if (isNowComplete) {
+            // Move to next step
+            if (currentStep < missing.length - 1) {
+              setCurrentStep(currentStep + 1);
+            }
+          }
+        }
+      }
+
+      if (missing.length === 0) {
+        setIsOnboardingActive(false);
+      }
+    }
+  }, [checkProfileCompletion, calculateMissingSteps, currentStep, missingSteps]);
 
   const nextStep = useCallback(() => {
-    if (currentStep < ONBOARDING_STEPS.length - 1) {
+    if (currentStep < missingSteps.length - 1) {
       setCurrentStep((prev) => prev + 1);
     }
-  }, [currentStep]);
+  }, [currentStep, missingSteps.length]);
 
   const prevStep = useCallback(() => {
     if (currentStep > 0) {
@@ -170,39 +217,42 @@ export const usePartnerOnboarding = (userId: string | undefined) => {
 
   const completeOnboarding = useCallback(() => {
     if (userId) {
-      localStorage.setItem(`partner_onboarding_${userId}`, "completed");
+      localStorage.setItem(`partner_onboarding_completed_${userId}`, "true");
     }
     setIsOnboardingActive(false);
   }, [userId]);
 
-  const resetOnboarding = useCallback(() => {
-    if (userId) {
-      localStorage.removeItem(`partner_onboarding_${userId}`);
+  const skipCurrentStep = useCallback(() => {
+    if (currentStep < missingSteps.length - 1) {
+      setCurrentStep((prev) => prev + 1);
+    } else {
+      completeOnboarding();
     }
-    setCurrentStep(0);
-    setIsOnboardingActive(true);
-  }, [userId]);
+  }, [currentStep, missingSteps.length, completeOnboarding]);
 
-  const getCurrentStep = (): OnboardingStep => {
-    return ONBOARDING_STEPS[currentStep];
+  const getCurrentStep = (): OnboardingStep | null => {
+    return missingSteps[currentStep] || null;
   };
 
   const getProgress = (): number => {
-    return ((currentStep + 1) / ONBOARDING_STEPS.length) * 100;
+    if (missingSteps.length === 0) return 100;
+    return ((currentStep + 1) / missingSteps.length) * 100;
   };
 
   return {
     currentStep,
-    totalSteps: ONBOARDING_STEPS.length,
+    totalSteps: missingSteps.length,
     isOnboardingActive,
     isLoading,
-    steps: ONBOARDING_STEPS,
+    steps: missingSteps,
+    profileCompletion,
     getCurrentStep,
     getProgress,
     nextStep,
     prevStep,
+    skipCurrentStep,
     completeOnboarding,
-    resetOnboarding,
+    refreshCompletion,
     setCurrentStep,
   };
 };

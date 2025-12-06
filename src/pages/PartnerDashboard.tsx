@@ -56,7 +56,9 @@ const PartnerDashboard = () => {
     getProgress,
     nextStep,
     prevStep,
+    skipCurrentStep,
     completeOnboarding,
+    refreshCompletion,
   } = usePartnerOnboarding(user?.id);
 
   useWebNotifications({ userId: user?.id });
@@ -70,6 +72,12 @@ const PartnerDashboard = () => {
       setActiveTab(tab as any);
     }
   }, []);
+
+  // Refresh onboarding status when profile/data changes
+  const handleProfileUpdate = useCallback(() => {
+    checkAuth();
+    refreshCompletion();
+  }, [refreshCompletion]);
 
   useEffect(() => {
     checkAuth();
@@ -238,7 +246,7 @@ const PartnerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Partner Onboarding Tutorial */}
+      {/* Partner Onboarding Tutorial - Non-blocking */}
       {isOnboardingActive && !isOnboardingLoading && (
         <PartnerOnboarding
           currentStep={currentStep}
@@ -247,6 +255,7 @@ const PartnerDashboard = () => {
           progress={getProgress()}
           onNext={nextStep}
           onPrev={prevStep}
+          onSkip={skipCurrentStep}
           onComplete={completeOnboarding}
           onNavigateTab={handleOnboardingNavigate}
         />
@@ -395,33 +404,33 @@ const PartnerDashboard = () => {
           </div>
         </div>
       ) : activeTab === "events" ? (
-        <div className="px-4 mt-4">
+        <div className="px-4 mt-4 pb-24">
           <PartnerEventsManager partnerId={user.id} />
         </div>
       ) : activeTab === "gallery" ? (
-        <div className="px-4 mt-4" id="gallery-section">
-          <PartnerGalleryManager partnerId={user.id} />
+        <div className="px-4 mt-4 pb-24">
+          <PartnerGalleryManager partnerId={user.id} onUploadComplete={refreshCompletion} />
         </div>
       ) : activeTab === "scanner" ? (
-        <div className="px-4 mt-4">
+        <div className="px-4 mt-4 pb-24">
           <QRScanner partnerId={user.id} />
         </div>
       ) : activeTab === "stats" ? (
-        <div className="px-4 mt-4" id="stats-section">
+        <div className="px-4 mt-4 pb-24">
           <PartnerStats partnerId={user.id} />
         </div>
       ) : (
-        <div className="mt-4">
+        <div className="mt-4 pb-24">
           {/* Profile Content */}
           {profileView === "social" ? (
             <PartnerSocialProfile
               profile={profile}
               userId={user.id}
-              onUpdate={checkAuth}
+              onUpdate={handleProfileUpdate}
               onSwitchToBusiness={() => setProfileView("business")}
             />
           ) : (
-            <div className="px-4" id="business-profile-section">
+            <div className="px-4">
               {/* Switch Back Button */}
               <div className="mb-4 flex justify-center">
                 <Button
@@ -434,14 +443,14 @@ const PartnerDashboard = () => {
                   {t('profile.socialProfile')}
                 </Button>
               </div>
-              <PartnerProfileEdit profile={profile} onUpdate={checkAuth} />
+              <PartnerProfileEdit profile={profile} onUpdate={handleProfileUpdate} />
             </div>
           )}
         </div>
       )}
 
       {/* Bottom Navigation - Modern iOS style */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t" style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom, 0.5rem))' }}>
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t z-10" style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom, 0.5rem))' }}>
         <div className="flex items-center justify-around px-2 pt-2 max-w-md mx-auto">
           <button
             onClick={() => setActiveTab("social")}

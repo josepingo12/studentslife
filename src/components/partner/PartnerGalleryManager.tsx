@@ -10,9 +10,10 @@ import ImageUploader from "@/components/shared/ImageUploader";
 
 interface PartnerGalleryManagerProps {
   partnerId: string;
+  onUploadComplete?: () => void;
 }
 
-const PartnerGalleryManager = ({ partnerId }: PartnerGalleryManagerProps) => {
+const PartnerGalleryManager = ({ partnerId, onUploadComplete }: PartnerGalleryManagerProps) => {
   const { toast } = useToast();
   const [images, setImages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,6 +72,7 @@ const PartnerGalleryManager = ({ partnerId }: PartnerGalleryManagerProps) => {
     setImageUrl(null);
     setCaption("");
     fetchGallery();
+    onUploadComplete?.();
   };
 
   const handleDelete = async (id: string) => {
