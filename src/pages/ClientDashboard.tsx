@@ -7,7 +7,7 @@ import { useWebNotifications } from "@/hooks/useWebNotifications";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Settings, User, Home, Users, MessageCircle, UserCircle, Plus, Search, X, Heart, Wallet } from "lucide-react";
+import { Settings, User, Home, Users, MessageCircle, UserCircle, Plus, Search, X, Heart, Wallet, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import CategoryCarousel from "@/components/client/CategoryCarousel";
 import PartnersList from "@/components/client/PartnersList";
@@ -23,6 +23,7 @@ import ChatsList from "@/components/chat/ChatsList";
 import NotificationsSheet from "@/components/social/NotificationsSheet";
 import ClientSettingsSheet from "@/components/client/ClientSettingsSheet";
 import WalletSheet from "@/components/client/WalletSheet";
+import LoyaltyCardsSheet from "@/components/client/LoyaltyCardsSheet";
 import { useTranslation } from "react-i18next";
 import { MapPin } from "lucide-react";
 // Rimuovi questi import se non usati per altro
@@ -47,6 +48,7 @@ const ClientDashboard = () => {
   const [searching, setSearching] = useState(false);
   const [settingsSheetOpen, setSettingsSheetOpen] = useState(false);
   const [walletSheetOpen, setWalletSheetOpen] = useState(false);
+  const [loyaltyCardsSheetOpen, setLoyaltyCardsSheetOpen] = useState(false);
   const totalUnread = useUnreadMessages(user?.id);
   const unreadNotifications = useUnreadNotifications(user?.id);
   const [userRole, setUserRole] = useState<string>();
@@ -411,7 +413,14 @@ const handlePartnerSearch = async (query: string) => {
             <p className="text-blue-100 text-sm">Encuentra partners cerca</p>
           </div>
 
-          <div className="relative">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setLoyaltyCardsSheetOpen(true)}
+              className="flex flex-col items-center gap-1 text-white hover:scale-105 transition-all"
+            >
+              <CreditCard className="w-5 h-6" />
+              <span className="text-xs font-semibold">Tarjetas</span>
+            </button>
             <button
               onClick={() => setWalletSheetOpen(true)}
               className="flex flex-col items-center gap-1 text-white hover:scale-105 transition-all"
@@ -648,7 +657,12 @@ const handlePartnerSearch = async (query: string) => {
         userId={user.id}
       />
 
-
+      {/* Loyalty Cards Sheet */}
+      <LoyaltyCardsSheet
+        open={loyaltyCardsSheetOpen}
+        onOpenChange={setLoyaltyCardsSheetOpen}
+        clientId={user.id}
+      />
     </div>
   );
 };
