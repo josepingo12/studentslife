@@ -196,21 +196,6 @@ const ClientOnboarding = ({
     }
   }, [step.id, step.targetTab, onNavigateTab, onOpenWallet, onOpenLoyaltyCards]);
 
-  // Auto-advance when wallet/loyalty sheets are closed
-  useEffect(() => {
-    if (step.id === "wallet" && walletOpen === false) {
-      // Wallet was closed, advance to next step
-      setTimeout(() => onNext(), 300);
-    }
-  }, [step.id, walletOpen, onNext]);
-
-  useEffect(() => {
-    if (step.id === "loyalty-cards" && loyaltyCardsOpen === false) {
-      // Loyalty cards was closed, advance to next step
-      setTimeout(() => onNext(), 300);
-    }
-  }, [step.id, loyaltyCardsOpen, onNext]);
-
   const triggerConfetti = () => {
     const duration = 4000;
     const animationEnd = Date.now() + duration;
@@ -393,7 +378,7 @@ const ClientOnboarding = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[90] pointer-events-none"
+          className="fixed inset-0 z-[150] pointer-events-none"
           style={{ 
             paddingTop: 'env(safe-area-inset-top)',
           }}
@@ -426,7 +411,7 @@ const ClientOnboarding = ({
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="fixed z-[92] cursor-pointer"
+            className="fixed z-[152] cursor-pointer"
             onClick={() => {
               onNavigateToProfile();
               onNext();
@@ -454,7 +439,7 @@ const ClientOnboarding = ({
               delay: 0.3,
               y: { repeat: Infinity, duration: 0.8, ease: "easeInOut" }
             }}
-            className="fixed z-[95]"
+            className="fixed z-[155]"
             style={{
               left: spotlightRect.x - 20,
               top: step.arrowDirection === "up" 
@@ -479,7 +464,7 @@ const ClientOnboarding = ({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -30, scale: 0.9 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          className={`fixed z-[100] mx-4 w-[calc(100%-2rem)] max-w-sm ${!spotlightRect ? getPositionClasses() : ''}`}
+          className={`fixed z-[160] mx-4 w-[calc(100%-2rem)] max-w-sm ${!spotlightRect ? getPositionClasses() : ''}`}
           style={getCardStyle()}
         >
           {/* Progress indicator */}
