@@ -8,6 +8,9 @@ export interface ClientOnboardingStep {
   targetTab?: "social" | "partners" | "chats";
   checkField?: string;
   position?: "center" | "top" | "bottom";
+  required?: boolean; // If true, user must complete this step to proceed
+  highlightElement?: string; // CSS selector or identifier for spotlight
+  arrowDirection?: "up" | "down" | "left" | "right";
 }
 
 export interface ClientProfileCompletion {
@@ -19,66 +22,73 @@ const ONBOARDING_STEPS: ClientOnboardingStep[] = [
   {
     id: "welcome",
     title: "¡Bienvenido a StudentsLife! 🎉",
-    description: "Te guiaremos para sacar el máximo provecho de la app. ¡Solo unos segundos!",
+    description: "Te guiaremos para configurar tu perfil. ¡Solo unos segundos!",
     position: "center",
   },
   {
     id: "profile-photo",
-    title: "📷 Tu Foto de Perfil",
-    description: "Sube una foto para que otros te reconozcan. ¡Haz clic en tu avatar en la esquina superior!",
+    title: "📷 Sube tu Foto de Perfil",
+    description: "Haz clic en tu avatar arriba a la derecha para ir a tu perfil y subir una foto. ¡Es obligatorio!",
     targetTab: "social",
     checkField: "hasProfilePhoto",
     position: "top",
+    required: true,
+    highlightElement: "avatar",
+    arrowDirection: "up",
   },
   {
     id: "cover-photo",
-    title: "🖼️ Tu Foto de Portada",
-    description: "Personaliza tu perfil con una portada. Ve a tu perfil haciendo clic en tu avatar.",
+    title: "🖼️ Ahora tu Foto de Portada",
+    description: "Haz clic en tu avatar y sube una foto de portada para personalizar tu perfil. ¡También es obligatorio!",
     targetTab: "social",
     checkField: "hasCoverPhoto",
     position: "top",
+    required: true,
+    highlightElement: "avatar",
+    arrowDirection: "up",
   },
   {
     id: "discover-partners",
     title: "🏪 Descubre Negocios",
-    description: "En la pestaña 'Socios' encontrarás todos los locales con descuentos exclusivos para estudiantes.",
+    description: "En la pestaña 'Socios' encontrarás locales con descuentos exclusivos para estudiantes.",
     targetTab: "partners",
     position: "bottom",
+    highlightElement: "partners-tab",
+    arrowDirection: "down",
   },
   {
     id: "download-discounts",
-    title: "🏷️ Descarga Descuentos",
-    description: "Entra en cualquier local, busca eventos activos y descarga el QR. ¡Muéstralo para obtener tu descuento!",
+    title: "🏷️ Cómo Descargar Descuentos",
+    description: "Entra en cualquier local, busca sus eventos y descarga el código QR. ¡Muéstralo para tu descuento!",
     targetTab: "partners",
     position: "center",
   },
   {
     id: "wallet",
     title: "💼 Tu Wallet",
-    description: "Todos tus QR descargados están en el Wallet (ícono de monedero). ¡Acceso rápido a tus descuentos!",
+    description: "Tus QR descargados están aquí en el Wallet. ¡Acceso rápido a todos tus descuentos!",
     targetTab: "partners",
     position: "top",
+    highlightElement: "wallet",
+    arrowDirection: "up",
   },
   {
     id: "loyalty-cards",
     title: "🎁 Tarjetas de Fidelidad",
-    description: "Al escanear QR de partners, acumulas sellos. ¡Al completar 10, ganas premios gratis!",
+    description: "Al usar QR de partners, acumulas sellos. ¡Al completar 10, ganas premios gratis!",
     targetTab: "partners",
     position: "top",
+    highlightElement: "loyalty-cards",
+    arrowDirection: "up",
   },
   {
     id: "social-feed",
     title: "📱 Feed Social",
-    description: "Comparte fotos y videos con la comunidad estudiantil. ¡Haz clic en + para publicar!",
+    description: "Comparte fotos y videos con la comunidad. ¡Haz clic en + para publicar!",
     targetTab: "social",
     position: "center",
-  },
-  {
-    id: "stories",
-    title: "📖 Historias",
-    description: "Las historias desaparecen en 24h. ¡Comparte tus mejores momentos!",
-    targetTab: "social",
-    position: "top",
+    highlightElement: "upload-button",
+    arrowDirection: "down",
   },
   {
     id: "chat",
@@ -86,10 +96,12 @@ const ONBOARDING_STEPS: ClientOnboardingStep[] = [
     description: "Envía mensajes a otros usuarios y partners. ¡Conecta con la comunidad!",
     targetTab: "chats",
     position: "bottom",
+    highlightElement: "chat-tab",
+    arrowDirection: "down",
   },
   {
     id: "complete",
-    title: "🎊 ¡Todo Listo!",
+    title: "🎊 ¡Perfil Completado!",
     description: "Ya conoces las funciones principales. ¡Disfruta de StudentsLife!",
     position: "center",
   },
@@ -137,7 +149,7 @@ export const useClientOnboarding = (userId: string | undefined) => {
       return ONBOARDING_STEPS;
     }
 
-    // If returning user, only show missing profile steps
+    // If returning user, only show missing required steps
     const missingSteps: ClientOnboardingStep[] = [];
     
     if (!completion.hasProfilePhoto) {
@@ -170,25 +182,48 @@ export const useClientOnboarding = (userId: string | undefined) => {
     init();
   }, [userId, checkProfileCompletion, calculateSteps]);
 
-  // Refresh completion status
+  // Refresh completion status - auto advance if required step is completed
   const refreshCompletion = useCallback(async () => {
     const completion = await checkProfileCompletion();
     if (completion) {
+      setProfileCompletion(completion);
       const currentStepData = steps[currentStep];
+      
       if (currentStepData?.checkField) {
         const isNowComplete = completion[currentStepData.checkField as keyof ClientProfileCompletion];
         if (isNowComplete && currentStep < steps.length - 1) {
+          // Auto advance when required step is completed
           setCurrentStep(currentStep + 1);
         }
       }
     }
   }, [checkProfileCompletion, currentStep, steps]);
 
+  // Check if current step can proceed
+  const canProceed = useCallback(() => {
+    const currentStepData = steps[currentStep];
+    if (!currentStepData) return true;
+    
+    // If step is required and has a checkField, verify it's complete
+    if (currentStepData.required && currentStepData.checkField && profileCompletion) {
+      return profileCompletion[currentStepData.checkField as keyof ClientProfileCompletion];
+    }
+    
+    return true;
+  }, [currentStep, steps, profileCompletion]);
+
   const nextStep = useCallback(() => {
+    // Check if can proceed (required steps must be completed)
+    if (!canProceed()) {
+      return false; // Cannot proceed
+    }
+    
     if (currentStep < steps.length - 1) {
       setCurrentStep((prev) => prev + 1);
+      return true;
     }
-  }, [currentStep, steps.length]);
+    return true;
+  }, [currentStep, steps.length, canProceed]);
 
   const prevStep = useCallback(() => {
     if (currentStep > 0) {
@@ -204,12 +239,19 @@ export const useClientOnboarding = (userId: string | undefined) => {
   }, [userId]);
 
   const skipCurrentStep = useCallback(() => {
+    const currentStepData = steps[currentStep];
+    // Cannot skip required steps
+    if (currentStepData?.required) {
+      return false;
+    }
+    
     if (currentStep < steps.length - 1) {
       setCurrentStep((prev) => prev + 1);
     } else {
       completeOnboarding();
     }
-  }, [currentStep, steps.length, completeOnboarding]);
+    return true;
+  }, [currentStep, steps, completeOnboarding]);
 
   const getCurrentStep = (): ClientOnboardingStep | null => {
     return steps[currentStep] || null;
@@ -235,5 +277,6 @@ export const useClientOnboarding = (userId: string | undefined) => {
     completeOnboarding,
     refreshCompletion,
     setCurrentStep,
+    canProceed,
   };
 };

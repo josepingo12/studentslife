@@ -74,6 +74,7 @@ const [partnerSearching, setPartnerSearching] = useState(false);
     skipCurrentStep,
     completeOnboarding,
     refreshCompletion,
+    canProceed,
   } = useClientOnboarding(user?.id);
 
   const markAllNotificationsAsRead = async () => {
@@ -677,6 +678,7 @@ const handlePartnerSearch = async (query: string) => {
           onSkip={skipCurrentStep}
           onComplete={completeOnboarding}
           onNavigateTab={(tab) => setActiveTab(tab as "social" | "partners" | "chats")}
+          canProceed={canProceed()}
         />
       )}
     </div>
