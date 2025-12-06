@@ -13,7 +13,7 @@ import CategoryCarousel from "@/components/client/CategoryCarousel";
 import PartnersList from "@/components/client/PartnersList";
 import RecentPartners from "@/components/client/RecentPartners";
 import PartnersMap from "@/components/client/PartnersMap";
-import CreatePost from "@/components/social/CreatePost";
+
 import PostCard from "@/components/social/PostCard";
 import UploadSheet from "@/components/shared/UploadSheet";
 import NotificationBadge from "@/components/chat/NotificationBadge";
@@ -364,15 +364,6 @@ const handlePartnerSearch = async (query: string) => {
             )}
           </div>
 
-
-          {/* Create Post */}
-          <div className="mx-4 mt-4">
-            <CreatePost
-              userId={user.id}
-              userProfile={profile}
-              onPostCreated={handlePostCreated}
-            />
-          </div>
 
           {/* Posts Feed */}
           <div className="mx-4 mt-4 space-y-4">
