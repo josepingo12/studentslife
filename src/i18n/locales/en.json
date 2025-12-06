@@ -361,7 +361,8 @@
     "sharedSuccess": "The reel has been sent successfully",
     "sendTo": "Send to",
     "views": "views",
-    "allUsers": "Users"
+    "allUsers": "Users",
+    "postNotFound": "Post not available"
   },
   "chat": {
     "chats": "Chats",

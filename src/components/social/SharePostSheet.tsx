@@ -154,12 +154,11 @@ const SharePostSheet = ({ open, onOpenChange, postId, currentUserId, onShareComp
           ]);
         }
 
-        // Send message with post link
-        const postUrl = `${window.location.origin}/#/social?post=${postId}`;
+        // Send message with post reference (using special format)
         await supabase.from("messages").insert({
           conversation_id: conversationId,
           sender_id: currentUserId,
-          content: `📹 ${t('social.sharedReel')}: ${postUrl}`,
+          content: `[shared_post:${postId}]`,
           status: 'approved'
         });
 

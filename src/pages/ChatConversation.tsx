@@ -15,6 +15,7 @@ import MediaUploadSheet from "@/components/chat/MediaUploadSheet";
 import VoiceRecorderButton from "@/components/chat/VoiceRecorderButton";
 import VoiceMessagePlayer from "@/components/chat/VoiceMessagePlayer";
 import ImageViewer from "@/components/social/ImageViewer";
+import SharedPostPreview from "@/components/chat/SharedPostPreview";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
@@ -545,7 +546,17 @@ const ChatConversation = () => {
                     )}
                   </div>
                 )}
-                {message.content && <p className="break-words overflow-wrap-anywhere whitespace-pre-wrap">{message.content}</p>}
+                {message.content && (
+                  // Check if it's a shared post
+                  message.content.match(/^\[shared_post:([a-f0-9-]+)\]$/) ? (
+                    <SharedPostPreview 
+                      postId={message.content.match(/^\[shared_post:([a-f0-9-]+)\]$/)?.[1] || ''} 
+                      isOwn={isOwn}
+                    />
+                  ) : (
+                    <p className="break-words overflow-wrap-anywhere whitespace-pre-wrap">{message.content}</p>
+                  )
+                )}
                 <div className="flex items-center justify-end gap-1 mt-1">
                   <span className={`text-xs ${isOwn ? "opacity-70" : "text-muted-foreground"}`}>
                     {formatDistanceToNow(new Date(message.created_at), {
