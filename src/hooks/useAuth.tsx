@@ -27,6 +27,14 @@ export const useAuth = () => {
     }
   };
 
+  const logAccess = async (userId: string) => {
+    try {
+      await supabase.from('access_logs').insert({ user_id: userId });
+    } catch (error) {
+      console.error('Error logging access:', error);
+    }
+  };
+
   useEffect(() => {
     // PRIMA imposta il listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -40,6 +48,10 @@ export const useAuth = () => {
           // Defer async calls to avoid deadlocks on native (iOS)
           setTimeout(() => {
             fetchUserRole(session.user!.id);
+            // Log access on SIGNED_IN event
+            if (event === 'SIGNED_IN') {
+              logAccess(session.user!.id);
+            }
           }, 0);
         } else {
           setUserRole(null);
