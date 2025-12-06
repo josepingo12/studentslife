@@ -16,7 +16,6 @@ import {
   BookOpen,
   PartyPopper,
   X,
-  SkipForward,
   Share2
 } from "lucide-react";
 import { ClientOnboardingStep } from "@/hooks/useClientOnboarding";
@@ -76,11 +75,9 @@ const ClientOnboarding = ({
   const handleAction = () => {
     if (isLastStep) {
       onComplete();
-    } else if (isWelcome) {
-      onNext();
     } else {
-      // For action steps, minimize tooltip so user can interact
-      setIsVisible(false);
+      // Always advance to next step, stay visible
+      onNext();
     }
   };
 
@@ -181,18 +178,15 @@ const ClientOnboarding = ({
                 
                 <div className="flex-1" />
 
-                {!isWelcome && !isLastStep && (
+                {!isLastStep && !isWelcome && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
-                      setIsVisible(false);
-                      onNext();
-                    }}
+                    onClick={onSkip}
                     className="gap-1 text-muted-foreground"
                   >
-                    Siguiente
-                    <SkipForward className="w-4 h-4" />
+                    Saltar todo
+                    <X className="w-4 h-4" />
                   </Button>
                 )}
 
@@ -206,14 +200,9 @@ const ClientOnboarding = ({
                       ¡Empezar!
                       <PartyPopper className="w-4 h-4" />
                     </>
-                  ) : isWelcome ? (
-                    <>
-                      Vamos
-                      <ChevronRight className="w-4 h-4" />
-                    </>
                   ) : (
                     <>
-                      OK
+                      Siguiente
                       <ChevronRight className="w-4 h-4" />
                     </>
                   )}
