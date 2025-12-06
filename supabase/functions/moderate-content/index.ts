@@ -35,8 +35,32 @@ serve(async (req) => {
 
     console.log('Moderating content:', { contentType, hasMedia: !!mediaUrl });
 
+    // Check if it's a video - we can only moderate the text description
+    const isVideo = mediaUrl && (
+      mediaUrl.includes('.mp4') || 
+      mediaUrl.includes('.mov') || 
+      mediaUrl.includes('.webm') || 
+      mediaUrl.includes('.ogg') ||
+      mediaUrl.toLowerCase().includes('.mp4') ||
+      mediaUrl.toLowerCase().includes('.mov')
+    );
+
+    // If it's a video with no text or safe text, approve it automatically
+    // Since we cannot analyze video content, we only check the text description
+    if (isVideo && (!content || content.trim().length < 5)) {
+      console.log('Video with minimal text - auto-approving');
+      return new Response(JSON.stringify({
+        approved: true,
+        score: 0,
+        category: 'safe',
+        reason: 'Video aprobado - contenido multimedia'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Build system prompt for moderation
-    const systemPrompt = `You are a content moderation AI. Analyze the provided content and determine if it violates any of these policies:
+    const systemPrompt = `You are a content moderation AI. Analyze the provided TEXT content and determine if it violates any of these policies:
 
 1. Contenuti diffamatori, discriminatori o malevoli (religione, razza, orientamento sessuale, genere, origine)
 2. Rappresentazioni realistiche di violenza, mutilazione, tortura o abuso
@@ -45,17 +69,20 @@ serve(async (req) => {
 5. Informazioni false o fuorvianti, funzionalità ingannevoli
 6. Contenuti dannosi che capitalizzano su eventi recenti (conflitti, terrorismo, epidemie)
 
+IMPORTANT: Only analyze the TEXT content. If the text is safe or empty, approve it.
+Be permissive - only reject clearly offensive content.
+
 Respond ONLY with a JSON object in this exact format:
 {
   "approved": true/false,
   "score": 0-100 (0=safe, 100=extremely harmful),
   "category": "one of: hate_speech, violence, weapons, sexual_content, misinformation, harmful_exploitation, safe",
-  "reason": "brief explanation in Italian"
+  "reason": "brief explanation in Spanish"
 }`;
 
     const messages = [
       { role: 'system', content: systemPrompt },
-      { role: 'user', content: `Analyze this content:\n\n${content || '(no text content)'}${mediaUrl ? `\n\nMedia URL: ${mediaUrl}` : ''}` }
+      { role: 'user', content: `Analyze this text content:\n\n${content || '(contenido vacío - aprobar)'}` }
     ];
 
     // Call Lovable AI for moderation
