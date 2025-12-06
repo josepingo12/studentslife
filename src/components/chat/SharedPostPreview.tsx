@@ -32,6 +32,7 @@ const SharedPostPreview = ({ postId, isOwn }: SharedPostPreviewProps) => {
   const [commentsCount, setCommentsCount] = useState(0);
   const [viewsCount, setViewsCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
 
   useEffect(() => {
     loadPost();
@@ -72,6 +73,68 @@ const SharedPostPreview = ({ postId, isOwn }: SharedPostPreviewProps) => {
       setLoading(false);
     }
   };
+
+  // Generate thumbnail from video for mobile compatibility
+  const generateVideoThumbnail = (videoUrl: string) => {
+    const video = document.createElement('video');
+    video.crossOrigin = 'anonymous';
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = 'auto';
+    video.setAttribute('webkit-playsinline', 'true');
+    
+    video.onloadeddata = () => {
+      // Wait a bit then seek to get a frame
+      setTimeout(() => {
+        video.currentTime = 0.5;
+      }, 100);
+    };
+    
+    video.onseeked = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth || 200;
+        canvas.height = video.videoHeight || 356;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const thumbnail = canvas.toDataURL('image/jpeg', 0.8);
+          setVideoThumbnail(thumbnail);
+        }
+      } catch (e) {
+        console.error('Error generating thumbnail:', e);
+      }
+      video.pause();
+      video.src = '';
+      video.load();
+    };
+    
+    video.onerror = () => {
+      console.error('Error loading video for thumbnail');
+    };
+    
+    // For iOS - need to actually play briefly
+    video.src = videoUrl;
+    video.load();
+    
+    // Force play attempt for mobile (will be muted)
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        video.pause();
+        video.currentTime = 0.5;
+      }).catch(() => {
+        // Autoplay was prevented, try just loading
+        video.load();
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (post?.video_url && !videoThumbnail) {
+      generateVideoThumbnail(post.video_url);
+    }
+  }, [post?.video_url]);
 
   const handleClick = async () => {
     // Record view when clicking
@@ -125,14 +188,17 @@ const SharedPostPreview = ({ postId, isOwn }: SharedPostPreviewProps) => {
       <div className="relative aspect-[9/16] bg-black">
         {isVideo ? (
           <>
-            <video 
-              src={mediaUrl}
-              className="w-full h-full object-cover"
-              muted
-              playsInline
-              preload="metadata"
-              poster=""
-            />
+            {videoThumbnail ? (
+              <img 
+                src={videoThumbnail}
+                alt=""
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-muted flex items-center justify-center">
+                <Play className="w-8 h-8 text-muted-foreground animate-pulse" />
+              </div>
+            )}
             <div className="absolute inset-0 flex items-center justify-center bg-black/30">
               <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
                 <Play className="w-5 h-5 text-primary ml-1" fill="currentColor" />
