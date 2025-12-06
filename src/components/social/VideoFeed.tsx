@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import VideoViewer from "./VideoViewer";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface VideoFeedProps {
   open: boolean;
@@ -10,21 +11,23 @@ interface VideoFeedProps {
   onLikeToggle: (postId: string, isLiked: boolean) => void;
 }
 
-const SWIPE_THRESHOLD = 50; // Minimum distance for a swipe
-const SWIPE_VELOCITY_THRESHOLD = 0.3; // Minimum velocity for a swipe
+const SWIPE_THRESHOLD = 30; // Reduced for more sensitivity
+const SWIPE_VELOCITY_THRESHOLD = 0.2; // Reduced for faster response
 
 const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggle }: VideoFeedProps) => {
   const [posts, setPosts] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [direction, setDirection] = useState(0); // 1 = next, -1 = prev
   const containerRef = useRef<HTMLDivElement>(null);
   
   // Touch tracking
   const touchStartY = useRef(0);
   const touchStartTime = useRef(0);
   const touchCurrentY = useRef(0);
-  const isTouching = useRef(false);
+  const isSwiping = useRef(false);
+  const swipeHandled = useRef(false);
 
   useEffect(() => {
     if (open && initialPost) {
@@ -63,36 +66,51 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
   const goToNext = useCallback(() => {
     if (currentIndex < posts.length - 1 && !isTransitioning) {
       setIsTransitioning(true);
+      setDirection(1);
       setCurrentIndex(prev => prev + 1);
-      setTimeout(() => setIsTransitioning(false), 300);
+      setTimeout(() => setIsTransitioning(false), 400);
     }
   }, [currentIndex, posts.length, isTransitioning]);
 
   const goToPrev = useCallback(() => {
     if (currentIndex > 0 && !isTransitioning) {
       setIsTransitioning(true);
+      setDirection(-1);
       setCurrentIndex(prev => prev - 1);
-      setTimeout(() => setIsTransitioning(false), 300);
+      setTimeout(() => setIsTransitioning(false), 400);
     }
   }, [currentIndex, isTransitioning]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    // Don't interfere with touches on interactive elements
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('[role="button"]') || target.closest('input') || target.closest('textarea')) {
+      isSwiping.current = false;
+      return;
+    }
+    
     touchStartY.current = e.touches[0].clientY;
     touchStartTime.current = Date.now();
     touchCurrentY.current = e.touches[0].clientY;
-    isTouching.current = true;
+    isSwiping.current = true;
+    swipeHandled.current = false;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isTouching.current) return;
+    if (!isSwiping.current || swipeHandled.current) return;
+    
     touchCurrentY.current = e.touches[0].clientY;
-    // Prevent default to stop scroll interference
-    e.preventDefault();
+    const deltaY = touchStartY.current - touchCurrentY.current;
+    
+    // Prevent scroll if we're swiping vertically
+    if (Math.abs(deltaY) > 10) {
+      e.preventDefault();
+    }
   };
 
   const handleTouchEnd = () => {
-    if (!isTouching.current) return;
-    isTouching.current = false;
+    if (!isSwiping.current || swipeHandled.current) return;
+    isSwiping.current = false;
 
     const deltaY = touchStartY.current - touchCurrentY.current;
     const deltaTime = Date.now() - touchStartTime.current;
@@ -100,6 +118,7 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
 
     // Check if swipe is strong enough (distance or velocity)
     if (Math.abs(deltaY) > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD) {
+      swipeHandled.current = true;
       if (deltaY > 0) {
         // Swipe up - go to next
         goToNext();
@@ -114,9 +133,9 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
     e.preventDefault();
     if (isTransitioning) return;
     
-    if (e.deltaY > 0) {
+    if (e.deltaY > 30) {
       goToNext();
-    } else if (e.deltaY < 0) {
+    } else if (e.deltaY < -30) {
       goToPrev();
     }
   };
@@ -125,45 +144,76 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
 
   const currentPost = posts[currentIndex];
 
+  // Animation variants for smooth transitions
+  const slideVariants = {
+    enter: (dir: number) => ({
+      y: dir > 0 ? '100%' : '-100%',
+      opacity: 0,
+    }),
+    center: {
+      y: 0,
+      opacity: 1,
+    },
+    exit: (dir: number) => ({
+      y: dir > 0 ? '-100%' : '100%',
+      opacity: 0,
+    }),
+  };
+
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 bg-black z-[100] touch-none"
+      className="fixed inset-0 bg-black z-[100] touch-none overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onWheel={handleWheel}
     >
       {/* Position indicator */}
-      <div className="absolute top-4 right-4 z-20 bg-black/50 rounded-full px-3 py-1" style={{ top: 'calc(env(safe-area-inset-top, 16px) + 8px)' }}>
+      <div 
+        className="absolute right-4 z-[110] bg-black/50 rounded-full px-3 py-1" 
+        style={{ top: 'calc(env(safe-area-inset-top, 16px) + 8px)' }}
+      >
         <span className="text-white text-sm">
           {currentIndex + 1} / {posts.length}
         </span>
       </div>
 
-      {/* Current video */}
-      <VideoViewer
-        open={true}
-        onOpenChange={onOpenChange}
-        post={currentPost}
-        currentUserId={currentUserId}
-        onLikeToggle={onLikeToggle}
-      />
+      {/* Current video with animation */}
+      <AnimatePresence mode="wait" custom={direction}>
+        <motion.div
+          key={currentPost.id}
+          custom={direction}
+          variants={slideVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{
+            y: { type: "spring", stiffness: 300, damping: 30 },
+            opacity: { duration: 0.2 },
+          }}
+          className="absolute inset-0"
+        >
+          <VideoViewer
+            open={true}
+            onOpenChange={onOpenChange}
+            post={currentPost}
+            currentUserId={currentUserId}
+            onLikeToggle={onLikeToggle}
+          />
+        </motion.div>
+      </AnimatePresence>
 
-      {/* Scroll indicators */}
+      {/* Scroll indicators - subtle bars */}
       {currentIndex > 0 && (
-        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 pointer-events-none">
-          <div className="text-white/40 text-xs flex flex-col items-center gap-1">
-            <div className="w-6 h-1 bg-white/30 rounded-full" />
-          </div>
+        <div className="absolute top-24 left-1/2 transform -translate-x-1/2 pointer-events-none z-[110]">
+          <div className="w-8 h-1 bg-white/30 rounded-full" />
         </div>
       )}
 
       {currentIndex < posts.length - 1 && (
-        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 pointer-events-none">
-          <div className="text-white/40 text-xs flex flex-col items-center gap-1">
-            <div className="w-6 h-1 bg-white/30 rounded-full animate-pulse" />
-          </div>
+        <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 pointer-events-none z-[110]">
+          <div className="w-8 h-1 bg-white/30 rounded-full animate-pulse" />
         </div>
       )}
     </div>
