@@ -261,11 +261,11 @@ const PartnerDashboard = () => {
         />
       )}
 
-      {/* Modern iOS-style header - AZZURRO E MODERNO */}
-      <header className="sticky top-0 z-10" style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))' }}>
+      {/* Modern iOS-style header - AZZURRO E MODERNO - Non sticky */}
+      <header style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))' }}>
         <div className="mx-4 mb-2 relative">
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl px-6 py-4 shadow-lg flex flex-col gap-3">
-            {/* Top row: Menu, Title, Chat, Avatar */}
+            {/* Top row: Menu, Title, Avatar */}
             <div className="flex items-center justify-between">
               {/* Menu hamburger a sinistra */}
               <button
@@ -287,31 +287,18 @@ const PartnerDashboard = () => {
                 {activeTab === "profile" && t('navigation.profile')}
               </h1>
 
-              {/* Right side: Chat + Avatar */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => navigate("/chats")}
-                  className="relative p-2 hover:bg-white/10 rounded-full transition-colors"
-                >
-                  <MessageCircle className="w-5 h-5 text-white" />
-                  {totalUnread > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
-                      {totalUnread}
-                    </span>
-                  )}
-                </button>
-                <button
-                  onClick={() => setActiveTab("profile")}
-                  className="hover:scale-105 transition-transform"
-                >
-                  <Avatar className="h-10 w-10 ring-2 ring-white/30">
-                    <AvatarImage src={profile?.profile_image_url} />
-                    <AvatarFallback className="bg-white text-blue-500 font-semibold">
-                      {getDisplayName(profile)[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </button>
-              </div>
+              {/* Right side: Avatar only */}
+              <button
+                onClick={() => setActiveTab("profile")}
+                className="hover:scale-105 transition-transform"
+              >
+                <Avatar className="h-10 w-10 ring-2 ring-white/30">
+                  <AvatarImage src={profile?.profile_image_url} />
+                  <AvatarFallback className="bg-white text-blue-500 font-semibold">
+                    {getDisplayName(profile)[0].toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </button>
             </div>
 
             {/* Bottom row: Search bar - only on social tab */}
