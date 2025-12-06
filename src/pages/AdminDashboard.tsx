@@ -3,18 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Users, BarChart3, FolderOpen, MessageCircle, Flag, Home, Settings, Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { LogOut, Users, BarChart3, FolderOpen, MessageCircle, Flag, Home, Plus, Search, X } from "lucide-react";
 import UsersManagement from "@/components/admin/UsersManagement";
 import Statistics from "@/components/admin/Statistics";
 import CategoriesManagement from "@/components/admin/CategoriesManagement";
 import AdminChats from "@/components/admin/AdminChats";
 import ModerationPanel from "@/components/admin/ModerationPanel";
 import PostCard from "@/components/social/PostCard";
-import StoriesCarousel from "@/components/social/StoriesCarousel";
 import UploadSheet from "@/components/shared/UploadSheet";
 import NotificationBadge from "@/components/chat/NotificationBadge";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useTranslation } from "react-i18next";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type AdminTab = "social" | "users" | "stats" | "categories" | "moderation" | "chats";
 
@@ -26,6 +27,9 @@ const AdminDashboard = () => {
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
   const totalUnread = useUnreadMessages(user?.id);
@@ -198,6 +202,30 @@ const AdminDashboard = () => {
     setPosts(posts.filter(post => post.id !== postId));
   };
 
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    if (query.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, business_name, profile_image_url, email")
+        .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,business_name.ilike.%${query}%,email.ilike.%${query}%`)
+        .limit(8);
+
+      if (error) throw error;
+      setSearchResults(data || []);
+    } catch (error) {
+      console.error("Error searching users:", error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -211,11 +239,73 @@ const AdminDashboard = () => {
       case "social":
         return (
           <div className="space-y-4">
-            <StoriesCarousel currentUserId={user?.id} />
+            {/* Modern Search Bar */}
+            <div className="relative">
+              <div className="relative flex items-center">
+                <Search className="absolute left-4 w-5 h-5 text-muted-foreground pointer-events-none" />
+                <Input
+                  type="text"
+                  placeholder={t('search.searchUsers', 'Buscar usuarios...')}
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  className="pl-12 pr-10 h-12 rounded-2xl bg-muted/50 border-0 text-base placeholder:text-muted-foreground/60 focus-visible:ring-2 focus-visible:ring-primary/30"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => { setSearchQuery(""); setSearchResults([]); }}
+                    className="absolute right-3 p-1 rounded-full hover:bg-muted"
+                  >
+                    <X className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
+
+              {/* Search Results Dropdown */}
+              {searchQuery.length >= 2 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-background border border-border/50 rounded-2xl shadow-xl overflow-hidden z-50">
+                  {isSearching ? (
+                    <div className="p-4 text-center text-muted-foreground text-sm">
+                      {t('search.searching', 'Buscando...')}
+                    </div>
+                  ) : searchResults.length === 0 ? (
+                    <div className="p-4 text-center text-muted-foreground text-sm">
+                      {t('search.noResults', 'No se encontraron usuarios')}
+                    </div>
+                  ) : (
+                    <div className="max-h-80 overflow-y-auto">
+                      {searchResults.map((result) => (
+                        <button
+                          key={result.id}
+                          onClick={() => {
+                            navigate(`/profile/${result.id}`);
+                            setSearchQuery("");
+                            setSearchResults([]);
+                          }}
+                          className="w-full flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors"
+                        >
+                          <Avatar className="h-10 w-10 ring-2 ring-border/30">
+                            <AvatarImage src={result.profile_image_url} />
+                            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-medium">
+                              {(result.first_name?.[0] || result.business_name?.[0] || "U").toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 text-left">
+                            <p className="font-medium text-foreground text-sm">
+                              {result.business_name || `${result.first_name || ""} ${result.last_name || ""}`.trim() || "Usuario"}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">{result.email}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
             
             {loadingPosts ? (
               <div className="flex justify-center py-8">
-                <div className="animate-pulse text-muted-foreground">Caricamento post...</div>
+                <div className="animate-pulse text-muted-foreground">Cargando posts...</div>
               </div>
             ) : posts.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
@@ -281,50 +371,68 @@ const AdminDashboard = () => {
         </div>
       </main>
 
-      {/* Bottom Navigation - iOS Style */}
+      {/* Bottom Navigation - iOS Style - Single Row */}
       <div 
         className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border/50"
         style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom, 0.5rem))' }}
       >
-        <div className="flex items-center justify-around px-2 py-2">
+        <div className="flex items-center justify-between px-1 py-2">
           {/* Social */}
           <button
             onClick={() => setActiveTab("social")}
-            className={`flex flex-col items-center gap-1 p-2 rounded-2xl transition-all min-w-[60px] ${
+            className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all flex-1 ${
               activeTab === "social"
                 ? "bg-primary/10 text-primary"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <Home className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Social</span>
+            <span className="text-[9px] font-medium">Social</span>
           </button>
 
           {/* Users */}
           <button
             onClick={() => setActiveTab("users")}
-            className={`flex flex-col items-center gap-1 p-2 rounded-2xl transition-all min-w-[60px] ${
+            className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all flex-1 ${
               activeTab === "users"
                 ? "bg-primary/10 text-primary"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <Users className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Usuarios</span>
+            <span className="text-[9px] font-medium">Usuarios</span>
           </button>
 
-          {/* Upload Button - Central */}
+          {/* Stats */}
           <button
-            onClick={() => setUploadSheetOpen(true)}
-            className="relative -mt-6 h-14 w-14 rounded-full bg-gradient-to-br from-red-500 to-pink-600 text-white shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
+            onClick={() => setActiveTab("stats")}
+            className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all flex-1 ${
+              activeTab === "stats"
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
           >
-            <Plus className="w-7 h-7" />
+            <BarChart3 className="w-5 h-5" />
+            <span className="text-[9px] font-medium">Stats</span>
+          </button>
+
+          {/* Categories */}
+          <button
+            onClick={() => setActiveTab("categories")}
+            className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all flex-1 ${
+              activeTab === "categories"
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <FolderOpen className="w-5 h-5" />
+            <span className="text-[9px] font-medium">Categ</span>
           </button>
 
           {/* Moderation */}
           <button
             onClick={() => setActiveTab("moderation")}
-            className={`flex flex-col items-center gap-1 p-2 rounded-2xl transition-all min-w-[60px] relative ${
+            className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all flex-1 relative ${
               activeTab === "moderation"
                 ? "bg-primary/10 text-primary"
                 : "text-muted-foreground hover:text-foreground"
@@ -335,19 +443,19 @@ const AdminDashboard = () => {
               {pendingFlags > 0 && (
                 <Badge 
                   variant="destructive" 
-                  className="absolute -top-2 -right-2 h-4 min-w-[16px] rounded-full p-0 flex items-center justify-center text-[9px]"
+                  className="absolute -top-1.5 -right-1.5 h-3.5 min-w-[14px] rounded-full p-0 flex items-center justify-center text-[8px]"
                 >
                   {pendingFlags > 99 ? "99+" : pendingFlags}
                 </Badge>
               )}
             </div>
-            <span className="text-[10px] font-medium">Mod</span>
+            <span className="text-[9px] font-medium">Mod</span>
           </button>
 
           {/* Chat */}
           <button
             onClick={() => setActiveTab("chats")}
-            className={`flex flex-col items-center gap-1 p-2 rounded-2xl transition-all min-w-[60px] relative ${
+            className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all flex-1 relative ${
               activeTab === "chats"
                 ? "bg-primary/10 text-primary"
                 : "text-muted-foreground hover:text-foreground"
@@ -357,34 +465,7 @@ const AdminDashboard = () => {
               <MessageCircle className="w-5 h-5" />
               <NotificationBadge count={totalUnread} />
             </div>
-            <span className="text-[10px] font-medium">Chat</span>
-          </button>
-        </div>
-
-        {/* Secondary Nav Row */}
-        <div className="flex items-center justify-center gap-8 px-4 py-2 border-t border-border/30">
-          <button
-            onClick={() => setActiveTab("stats")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all text-sm ${
-              activeTab === "stats"
-                ? "bg-primary/10 text-primary font-medium"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <BarChart3 className="w-4 h-4" />
-            <span>Estadísticas</span>
-          </button>
-          
-          <button
-            onClick={() => setActiveTab("categories")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all text-sm ${
-              activeTab === "categories"
-                ? "bg-primary/10 text-primary font-medium"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <FolderOpen className="w-4 h-4" />
-            <span>Categorías</span>
+            <span className="text-[9px] font-medium">Chat</span>
           </button>
         </div>
       </div>
