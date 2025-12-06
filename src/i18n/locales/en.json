@@ -374,7 +374,12 @@
     "offline": "Offline",
     "searchContacts": "Search contacts...",
     "favorites": "Favorites",
-    "recentChats": "Recent chats"
+    "recentChats": "Recent chats",
+    "sharedVideoFrom": "Shared a video from",
+    "voiceMessage": "Voice message",
+    "photo": "Photo",
+    "video": "Video",
+    "file": "File"
   },
   "common": {
     "save": "Save",
@@ -396,6 +401,7 @@
     "message": "Message",
     "code": "Code",
     "tip": "Tip",
+    "you": "You",
     "person": "person",
     "people": "people"
   }

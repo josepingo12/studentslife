@@ -383,7 +383,12 @@
     "offline": "Desconectado",
     "searchContacts": "Buscar contactos...",
     "favorites": "Favoritos",
-    "recentChats": "Chats recientes"
+    "recentChats": "Chats recientes",
+    "sharedVideoFrom": "Compartió un video de",
+    "voiceMessage": "Mensaje de voz",
+    "photo": "Foto",
+    "video": "Video",
+    "file": "Archivo"
   },
   "common": {
     "save": "Guardar",
@@ -405,6 +410,7 @@
     "message": "Mensaje",
     "code": "Código",
     "tip": "Sugerencia",
+    "you": "Tú",
     "person": "persona",
     "people": "personas"
   }

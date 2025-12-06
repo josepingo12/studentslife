@@ -1,8 +1,11 @@
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { it } from "date-fns/locale";
+import { it, es, enUS, fr, de } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UserListItemProps {
   user: any;
@@ -23,11 +26,89 @@ const UserListItem = ({
   onUserClick,
   onToggleFavorite,
 }: UserListItemProps) => {
+  const { t, i18n } = useTranslation();
+  const [sharedPostAuthor, setSharedPostAuthor] = useState<string | null>(null);
+
+  const getDateLocale = () => {
+    switch (i18n.language) {
+      case 'en': return enUS;
+      case 'es': return es;
+      case 'fr': return fr;
+      case 'de': return de;
+      default: return it;
+    }
+  };
+
   const getDisplayName = () => {
     if (user.first_name) {
       return `${user.first_name} ${user.last_name || ""}`.trim();
     }
-    return user.business_name || "Utente";
+    return user.business_name || t('common.user');
+  };
+
+  // Check if message is a shared post and load author name
+  useEffect(() => {
+    const loadSharedPostAuthor = async () => {
+      if (!lastMessage?.content) return;
+      
+      const match = lastMessage.content.match(/\[shared_post:([a-f0-9-]+)\]/);
+      if (match) {
+        const postId = match[1];
+        const { data: post } = await supabase
+          .from("posts")
+          .select("user_id, profiles:user_id(first_name, last_name, business_name)")
+          .eq("id", postId)
+          .single();
+        
+        if (post?.profiles) {
+          const profile = post.profiles as any;
+          const name = profile.first_name 
+            ? `${profile.first_name} ${profile.last_name || ""}`.trim()
+            : profile.business_name || t('common.user');
+          setSharedPostAuthor(name);
+        }
+      } else {
+        setSharedPostAuthor(null);
+      }
+    };
+
+    loadSharedPostAuthor();
+  }, [lastMessage?.content, t]);
+
+  const getMessagePreview = () => {
+    if (!lastMessage?.content) return null;
+    
+    // Check if it's a shared post
+    const match = lastMessage.content.match(/\[shared_post:([a-f0-9-]+)\]/);
+    if (match && sharedPostAuthor) {
+      const prefix = lastMessage.sender_id === currentUserId ? `${t('common.you')}: ` : "";
+      return `${prefix}🎬 ${t('chat.sharedVideoFrom')} @${sharedPostAuthor}`;
+    }
+    
+    // Check for media types
+    if (lastMessage.media_type === 'audio') {
+      const prefix = lastMessage.sender_id === currentUserId ? `${t('common.you')}: ` : "";
+      return `${prefix}🎤 ${t('chat.voiceMessage')}`;
+    }
+    
+    if (lastMessage.media_type === 'image') {
+      const prefix = lastMessage.sender_id === currentUserId ? `${t('common.you')}: ` : "";
+      return `${prefix}📷 ${t('chat.photo')}`;
+    }
+    
+    if (lastMessage.media_type === 'video') {
+      const prefix = lastMessage.sender_id === currentUserId ? `${t('common.you')}: ` : "";
+      return `${prefix}🎥 ${t('chat.video')}`;
+    }
+    
+    if (lastMessage.media_type === 'file') {
+      const prefix = lastMessage.sender_id === currentUserId ? `${t('common.you')}: ` : "";
+      return `${prefix}📎 ${t('chat.file')}`;
+    }
+    
+    // Regular text message
+    const prefix = lastMessage.sender_id === currentUserId ? `${t('common.you')}: ` : "";
+    return `${prefix}${lastMessage.content}`;
   };
 
  return (
@@ -54,7 +135,7 @@ const UserListItem = ({
               <span className="text-xs text-muted-foreground flex-shrink-0">
                 {formatDistanceToNow(new Date(lastMessage.created_at), {
                   addSuffix: false,
-                  locale: it,
+                  locale: getDateLocale(),
                 })}
               </span>
             )}
@@ -63,8 +144,7 @@ const UserListItem = ({
           {lastMessage && (
             <div className="mt-1 overflow-hidden">
               <p className="text-sm text-muted-foreground truncate">
-                {lastMessage.sender_id === currentUserId && "Tu: "}
-                {lastMessage.content}
+                {getMessagePreview()}
               </p>
             </div>
           )}
