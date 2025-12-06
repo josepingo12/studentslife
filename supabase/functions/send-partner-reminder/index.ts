@@ -11,6 +11,14 @@ const corsHeaders = {
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Anti-spam email headers
+const getEmailHeaders = (userEmail: string) => ({
+  "List-Unsubscribe": `<mailto:unsubscribe@studentslife.es?subject=Unsubscribe%20${encodeURIComponent(userEmail)}>`,
+  "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+  "X-Entity-Ref-ID": crypto.randomUUID(),
+  "Precedence": "bulk",
+});
+
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -19,7 +27,6 @@ serve(async (req: Request) => {
   try {
     console.log("Starting partner reminder email job...");
 
-    // Check for test mode
     let testEmail: string | null = null;
     try {
       const body = await req.json();
@@ -36,7 +43,6 @@ serve(async (req: Request) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get all partners
     const { data: partnerRoles } = await supabase
       .from("user_roles")
       .select("user_id")
@@ -53,7 +59,6 @@ serve(async (req: Request) => {
     const partnerIds = partnerRoles.map(r => r.user_id);
     console.log(`Found ${partnerIds.length} partners`);
 
-    // Get partner profiles
     const { data: partners } = await supabase
       .from("profiles")
       .select("id, email, business_name, profile_image_url, cover_image_url, account_status")
@@ -68,7 +73,6 @@ serve(async (req: Request) => {
       );
     }
 
-    // Get events count per partner
     const { data: events } = await supabase
       .from("events")
       .select("partner_id");
@@ -78,7 +82,6 @@ serve(async (req: Request) => {
       eventCountMap.set(e.partner_id, (eventCountMap.get(e.partner_id) || 0) + 1);
     });
 
-    // Get gallery count per partner
     const { data: gallery } = await supabase
       .from("gallery")
       .select("partner_id");
@@ -88,7 +91,6 @@ serve(async (req: Request) => {
       galleryCountMap.set(g.partner_id, (galleryCountMap.get(g.partner_id) || 0) + 1);
     });
 
-    // Find partners with missing content
     const partnersNeedingReminder: Array<{
       id: string;
       email: string;
@@ -101,7 +103,6 @@ serve(async (req: Request) => {
       const eventCount = eventCountMap.get(partner.id) || 0;
       const galleryCount = galleryCountMap.get(partner.id) || 0;
       const hasProfileImage = !!partner.profile_image_url;
-      const hasCoverImage = !!partner.cover_image_url;
 
       const hasNoEvents = eventCount === 0;
       const hasNoImages = !hasProfileImage && galleryCount === 0;
@@ -126,15 +127,17 @@ serve(async (req: Request) => {
       );
     }
 
-    // Test mode - send only to test email
     if (testEmail) {
       const testPartner = partnersNeedingReminder[0] || { hasNoEvents: true, hasNoImages: true };
       
       try {
         const { error: emailError } = await resend.emails.send({
           from: "StudentsLife <noreply@studentslife.es>",
+          reply_to: "info@studentslife.es",
           to: [testEmail],
-          subject: "🚀 ¡Completa tu perfil de partner en StudentsLife!",
+          subject: "Completa tu perfil de partner en StudentsLife",
+          headers: getEmailHeaders(testEmail),
+          text: buildReminderText("Partner Test", testPartner.hasNoEvents, testPartner.hasNoImages),
           html: buildReminderEmail("Partner Test", testPartner.hasNoEvents, testPartner.hasNoImages),
         });
 
@@ -160,7 +163,6 @@ serve(async (req: Request) => {
       }
     }
 
-    // Production mode - send to all partners needing reminder
     let sentCount = 0;
     let errorCount = 0;
 
@@ -170,8 +172,11 @@ serve(async (req: Request) => {
       try {
         const { error: emailError } = await resend.emails.send({
           from: "StudentsLife <noreply@studentslife.es>",
+          reply_to: "info@studentslife.es",
           to: [partner.email],
-          subject: "🚀 ¡Completa tu perfil de partner en StudentsLife!",
+          subject: "Completa tu perfil de partner en StudentsLife",
+          headers: getEmailHeaders(partner.email),
+          text: buildReminderText(partnerName, partner.hasNoEvents, partner.hasNoImages),
           html: buildReminderEmail(partnerName, partner.hasNoEvents, partner.hasNoImages),
         });
 
@@ -211,15 +216,46 @@ serve(async (req: Request) => {
   }
 });
 
+function buildReminderText(partnerName: string, hasNoEvents: boolean, hasNoImages: boolean): string {
+  const steps: string[] = [];
+  
+  if (hasNoEvents) {
+    steps.push("- Crea tu primer evento/descuento para atraer estudiantes");
+  }
+  if (hasNoImages) {
+    steps.push("- Añade fotos de tu negocio para mejorar tu visibilidad");
+  }
+
+  return `
+Hola ${partnerName},
+
+Hemos notado que tu perfil de partner en StudentsLife aún no está completo.
+
+Pasos pendientes:
+${steps.join('\n')}
+
+Los partners con perfil completo reciben un 80% más de visitas de estudiantes.
+
+Accede a tu panel: https://studentslife.es/#/partner
+
+---
+StudentsLife - Panel de Partners
+Calle Universidad 1, Valladolid, España
+
+Este email fue enviado porque eres partner en StudentsLife.
+Para dejar de recibir estos emails, responde con "Cancelar suscripción" en el asunto.
+  `.trim();
+}
+
 function buildReminderEmail(partnerName: string, hasNoEvents: boolean, hasNoImages: boolean): string {
   const missingItems: string[] = [];
   
   if (hasNoEvents) {
     missingItems.push(`
       <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; border-left: 4px solid #f59e0b;">
-        <h3 style="color: #111827; margin: 0 0 10px 0; font-size: 16px;">📅 Crea tu primer evento/descuento</h3>
+        <h3 style="color: #111827; margin: 0 0 10px 0; font-size: 16px;">Crea tu primer evento/descuento</h3>
         <p style="color: #6b7280; font-size: 14px; margin: 0; line-height: 1.5;">
-          Los estudiantes buscan ofertas y descuentos. ¡Crea tu primera promoción para atraer más clientes!
+          Los estudiantes buscan ofertas y descuentos. Crea tu primera promoción para atraer más clientes.
         </p>
       </div>
     `);
@@ -228,9 +264,9 @@ function buildReminderEmail(partnerName: string, hasNoEvents: boolean, hasNoImag
   if (hasNoImages) {
     missingItems.push(`
       <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; border-left: 4px solid #8b5cf6;">
-        <h3 style="color: #111827; margin: 0 0 10px 0; font-size: 16px;">📸 Añade fotos de tu negocio</h3>
+        <h3 style="color: #111827; margin: 0 0 10px 0; font-size: 16px;">Añade fotos de tu negocio</h3>
         <p style="color: #6b7280; font-size: 14px; margin: 0; line-height: 1.5;">
-          Un perfil con imágenes atractivas recibe hasta 3x más visitas. ¡Sube tu logo y fotos de tu local!
+          Un perfil con imágenes atractivas recibe hasta 3x más visitas. Sube tu logo y fotos de tu local.
         </p>
       </div>
     `);
@@ -238,23 +274,26 @@ function buildReminderEmail(partnerName: string, hasNoEvents: boolean, hasNoImag
 
   return `
     <!DOCTYPE html>
-    <html>
+    <html lang="es">
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="x-apple-disable-message-reformatting">
+      <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+      <title>Completa tu perfil en StudentsLife</title>
     </head>
-    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
       <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
         <!-- Header with Logo -->
         <div style="text-align: center; margin-bottom: 30px;">
           <img src="https://fkarwrqwwnssnfioiaau.supabase.co/storage/v1/object/public/avatars/logo.png" alt="StudentsLife" style="width: 120px; height: auto; margin-bottom: 15px;" />
-          <h1 style="background: linear-gradient(135deg, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 32px; margin: 0;">StudentsLife</h1>
-          <p style="color: #6b7280; margin-top: 10px;">Panel de Partners</p>
+          <h1 style="color: #ec4899; font-size: 28px; margin: 0;">StudentsLife</h1>
+          <p style="color: #6b7280; margin-top: 10px; font-size: 14px;">Panel de Partners</p>
         </div>
 
         <!-- Main Content -->
         <div style="background: linear-gradient(135deg, #fef3c7, #fdf2f8); border-radius: 24px; padding: 30px; margin-bottom: 30px;">
-          <h2 style="color: #111827; margin: 0 0 15px 0; font-size: 24px;">¡Hola ${partnerName}! 👋</h2>
+          <h2 style="color: #111827; margin: 0 0 15px 0; font-size: 22px;">Hola ${partnerName},</h2>
           <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0;">
             Hemos notado que tu perfil aún no está completo. Completa estos pasos para empezar a recibir más clientes:
           </p>
@@ -262,21 +301,28 @@ function buildReminderEmail(partnerName: string, hasNoEvents: boolean, hasNoImag
 
         <!-- Missing Items -->
         <div style="margin-bottom: 30px;">
-          <h3 style="color: #111827; font-size: 18px; margin-bottom: 15px;">📋 Pasos pendientes:</h3>
+          <h3 style="color: #111827; font-size: 18px; margin-bottom: 15px;">Pasos pendientes:</h3>
           ${missingItems.join('')}
         </div>
 
         <!-- Stats -->
         <div style="background: linear-gradient(135deg, #dbeafe, #e0e7ff); border-radius: 16px; padding: 20px; margin-bottom: 30px; text-align: center;">
           <p style="color: #1e40af; font-size: 14px; margin: 0; font-weight: 600;">
-            💡 Los partners con perfil completo reciben un 80% más de visitas de estudiantes
+            Los partners con perfil completo reciben un 80% más de visitas de estudiantes
           </p>
         </div>
 
-        <!-- Footer -->
-        <div style="text-align: center; color: #9ca3af; font-size: 12px;">
-          <p>Recibiste este email porque eres partner en StudentsLife.</p>
-          <p>© 2024 StudentsLife. Todos los derechos reservados.</p>
+        <!-- Footer with physical address (anti-spam requirement) -->
+        <div style="text-align: center; color: #9ca3af; font-size: 11px; border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 20px;">
+          <p style="margin: 0 0 10px 0;"><strong>StudentsLife</strong></p>
+          <p style="margin: 0 0 10px 0;">Calle Universidad 1, 47002 Valladolid, España</p>
+          <p style="margin: 0 0 10px 0;">Recibiste este email porque eres partner en StudentsLife.</p>
+          <p style="margin: 0;">
+            <a href="mailto:unsubscribe@studentslife.es?subject=Cancelar%20suscripcion" style="color: #6b7280; text-decoration: underline;">Cancelar suscripción</a>
+            &nbsp;|&nbsp;
+            <a href="https://studentslife.es/#/partner" style="color: #6b7280; text-decoration: underline;">Ir al panel</a>
+          </p>
+          <p style="margin: 10px 0 0 0;">© 2024 StudentsLife. Todos los derechos reservados.</p>
         </div>
       </div>
     </body>
