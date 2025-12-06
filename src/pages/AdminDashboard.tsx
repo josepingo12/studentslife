@@ -27,12 +27,26 @@ const AdminDashboard = () => {
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
   const totalUnread = useUnreadMessages(user?.id);
+
+  const loadUserProfile = async (userId: string) => {
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("profile_image_url, first_name, last_name")
+        .eq("id", userId)
+        .single();
+      if (data) setUserProfile(data);
+    } catch (error) {
+      console.error("Error loading profile:", error);
+    }
+  };
 
   useEffect(() => {
     checkAdminAccess();
@@ -98,6 +112,7 @@ const AdminDashboard = () => {
       }
 
       setUser(authUser);
+      loadUserProfile(authUser.id);
       setLoading(false);
     } catch (error) {
       navigate("/");
@@ -350,9 +365,12 @@ const AdminDashboard = () => {
       >
         <div className="px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">A</span>
-            </div>
+            <Avatar className="h-11 w-11 ring-2 ring-primary/30 shadow-lg">
+              <AvatarImage src={userProfile?.profile_image_url} />
+              <AvatarFallback className="bg-gradient-to-br from-red-500 to-pink-600 text-white font-bold">
+                {userProfile?.first_name?.[0]?.toUpperCase() || "A"}
+              </AvatarFallback>
+            </Avatar>
             <div>
               <h1 className="text-lg font-bold text-foreground">Admin Panel</h1>
               <p className="text-xs text-muted-foreground">StudentsLife</p>
@@ -365,108 +383,145 @@ const AdminDashboard = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pb-24">
+      <main className="flex-1 overflow-y-auto pb-28">
         <div className="px-4 py-4">
           {renderContent()}
         </div>
       </main>
 
-      {/* Bottom Navigation - iOS Style - Single Row */}
+      {/* Bottom Navigation - Modern Glass Style */}
       <div 
-        className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border/50"
-        style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom, 0.5rem))' }}
+        className="fixed bottom-0 left-0 right-0 z-50"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
-        <div className="flex items-center justify-between px-1 py-2">
+        {/* Glass background */}
+        <div className="bg-background/80 backdrop-blur-xl border-t border-white/10 shadow-2xl shadow-black/20">
+          <div className="flex items-end justify-around px-2 pt-2 pb-3">
           {/* Social */}
           <button
             onClick={() => setActiveTab("social")}
-            className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all flex-1 ${
+            className={`flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-2xl transition-all duration-300 ${
               activeTab === "social"
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:text-foreground"
+                ? "text-primary"
+                : "text-muted-foreground/70 hover:text-foreground"
             }`}
           >
-            <Home className="w-5 h-5" />
-            <span className="text-[9px] font-medium">Social</span>
+            <div className={`p-2 rounded-xl transition-all duration-300 ${activeTab === "social" ? "bg-primary/15 scale-110" : ""}`}>
+              <Home className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-semibold tracking-tight">Social</span>
           </button>
 
           {/* Users */}
           <button
             onClick={() => setActiveTab("users")}
-            className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all flex-1 ${
+            className={`flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-2xl transition-all duration-300 ${
               activeTab === "users"
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:text-foreground"
+                ? "text-primary"
+                : "text-muted-foreground/70 hover:text-foreground"
             }`}
           >
-            <Users className="w-5 h-5" />
-            <span className="text-[9px] font-medium">Usuarios</span>
+            <div className={`p-2 rounded-xl transition-all duration-300 ${activeTab === "users" ? "bg-primary/15 scale-110" : ""}`}>
+              <Users className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-semibold tracking-tight">Usuarios</span>
+          </button>
+
+          {/* Central Upload Button */}
+          <button
+            onClick={() => setUploadSheetOpen(true)}
+            className="relative -mt-8 flex items-center justify-center"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-pink-600 rounded-full blur-lg opacity-50 animate-pulse" />
+            <div className="relative h-16 w-16 rounded-full bg-gradient-to-br from-red-500 via-pink-500 to-pink-600 text-white shadow-xl shadow-pink-500/30 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform duration-200 ring-4 ring-background">
+              <Plus className="w-7 h-7" strokeWidth={2.5} />
+            </div>
           </button>
 
           {/* Stats */}
           <button
             onClick={() => setActiveTab("stats")}
-            className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all flex-1 ${
+            className={`flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-2xl transition-all duration-300 ${
               activeTab === "stats"
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:text-foreground"
+                ? "text-primary"
+                : "text-muted-foreground/70 hover:text-foreground"
             }`}
           >
-            <BarChart3 className="w-5 h-5" />
-            <span className="text-[9px] font-medium">Stats</span>
+            <div className={`p-2 rounded-xl transition-all duration-300 ${activeTab === "stats" ? "bg-primary/15 scale-110" : ""}`}>
+              <BarChart3 className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-semibold tracking-tight">Stats</span>
           </button>
 
-          {/* Categories */}
-          <button
-            onClick={() => setActiveTab("categories")}
-            className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all flex-1 ${
-              activeTab === "categories"
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <FolderOpen className="w-5 h-5" />
-            <span className="text-[9px] font-medium">Categ</span>
-          </button>
-
-          {/* Moderation */}
+          {/* Moderation + Chat Combined as More */}
           <button
             onClick={() => setActiveTab("moderation")}
-            className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all flex-1 relative ${
-              activeTab === "moderation"
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:text-foreground"
+            className={`flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-2xl transition-all duration-300 relative ${
+              activeTab === "moderation" || activeTab === "chats" || activeTab === "categories"
+                ? "text-primary"
+                : "text-muted-foreground/70 hover:text-foreground"
             }`}
           >
-            <div className="relative">
+            <div className={`p-2 rounded-xl transition-all duration-300 relative ${activeTab === "moderation" || activeTab === "chats" || activeTab === "categories" ? "bg-primary/15 scale-110" : ""}`}>
               <Flag className="w-5 h-5" />
-              {pendingFlags > 0 && (
-                <Badge 
-                  variant="destructive" 
-                  className="absolute -top-1.5 -right-1.5 h-3.5 min-w-[14px] rounded-full p-0 flex items-center justify-center text-[8px]"
-                >
-                  {pendingFlags > 99 ? "99+" : pendingFlags}
-                </Badge>
+              {(pendingFlags > 0 || totalUnread > 0) && (
+                <span className="absolute -top-1 -right-1 h-4 min-w-4 rounded-full bg-red-500 text-[9px] text-white font-bold flex items-center justify-center px-1">
+                  {(pendingFlags + totalUnread) > 99 ? "99+" : pendingFlags + totalUnread}
+                </span>
               )}
             </div>
-            <span className="text-[9px] font-medium">Mod</span>
+            <span className="text-[10px] font-semibold tracking-tight">Más</span>
           </button>
+        </div>
 
-          {/* Chat */}
-          <button
-            onClick={() => setActiveTab("chats")}
-            className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all flex-1 relative ${
-              activeTab === "chats"
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <div className="relative">
-              <MessageCircle className="w-5 h-5" />
-              <NotificationBadge count={totalUnread} />
-            </div>
-            <span className="text-[9px] font-medium">Chat</span>
-          </button>
+        {/* Secondary Quick Access Bar */}
+        {(activeTab === "moderation" || activeTab === "chats" || activeTab === "categories") && (
+          <div className="flex items-center justify-center gap-2 px-4 pb-3 pt-1">
+            <button
+              onClick={() => setActiveTab("moderation")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-all ${
+                activeTab === "moderation"
+                  ? "bg-primary text-primary-foreground shadow-lg"
+                  : "bg-muted/50 text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              <Flag className="w-3.5 h-3.5" />
+              Mod
+              {pendingFlags > 0 && (
+                <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
+                  {pendingFlags}
+                </Badge>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("chats")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-all ${
+                activeTab === "chats"
+                  ? "bg-primary text-primary-foreground shadow-lg"
+                  : "bg-muted/50 text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              Chat
+              {totalUnread > 0 && (
+                <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
+                  {totalUnread}
+                </Badge>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("categories")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-all ${
+                activeTab === "categories"
+                  ? "bg-primary text-primary-foreground shadow-lg"
+                  : "bg-muted/50 text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              <FolderOpen className="w-3.5 h-3.5" />
+              Categ
+            </button>
+          </div>
+        )}
         </div>
       </div>
 
