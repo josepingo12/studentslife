@@ -353,5 +353,48 @@
     "coordinatesHelper": "You can find your coordinates on Google Maps: right-click on your location and select the coordinates to copy them.",
     "invalidLatitude": "Latitude must be between -90 and 90",
     "invalidLongitude": "Longitude must be between -180 and 180"
+  },
+  "social": {
+    "share": "Share",
+    "sharedReel": "Shared reel",
+    "shared": "Shared!",
+    "sharedSuccess": "The reel has been sent successfully",
+    "sendTo": "Send to",
+    "views": "views"
+  },
+  "chat": {
+    "chats": "Chats",
+    "newMessage": "New Message",
+    "typeMessage": "Type a message...",
+    "send": "Send",
+    "noMessages": "No messages yet",
+    "online": "Online",
+    "offline": "Offline",
+    "searchContacts": "Search contacts...",
+    "favorites": "Favorites",
+    "recentChats": "Recent chats"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "Error",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "upload": "Upload",
+    "search": "Search",
+    "user": "User",
+    "close": "Close",
+    "view": "View",
+    "send": "Send",
+    "message": "Message",
+    "code": "Code",
+    "tip": "Tip",
+    "person": "person",
+    "people": "people"
   }
 }

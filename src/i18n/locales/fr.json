@@ -353,5 +353,48 @@
     "coordinatesHelper": "Vous pouvez trouver vos coordonnées sur Google Maps : faites un clic droit sur votre emplacement et sélectionnez les coordonnées pour les copier.",
     "invalidLatitude": "La latitude doit être entre -90 et 90",
     "invalidLongitude": "La longitude doit être entre -180 et 180"
+  },
+  "social": {
+    "share": "Partager",
+    "sharedReel": "Reel partagé",
+    "shared": "Partagé !",
+    "sharedSuccess": "Le reel a été envoyé avec succès",
+    "sendTo": "Envoyer à",
+    "views": "vues"
+  },
+  "chat": {
+    "chats": "Discussions",
+    "newMessage": "Nouveau Message",
+    "typeMessage": "Écrivez un message...",
+    "send": "Envoyer",
+    "noMessages": "Aucun message encore",
+    "online": "En ligne",
+    "offline": "Hors ligne",
+    "searchContacts": "Rechercher des contacts...",
+    "favorites": "Favoris",
+    "recentChats": "Discussions récentes"
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "loading": "Chargement...",
+    "success": "Succès",
+    "error": "Erreur",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "next": "Suivant",
+    "upload": "Télécharger",
+    "search": "Rechercher",
+    "user": "Utilisateur",
+    "close": "Fermer",
+    "view": "Voir",
+    "send": "Envoyer",
+    "message": "Message",
+    "code": "Code",
+    "tip": "Conseil",
+    "person": "personne",
+    "people": "personnes"
   }
 }

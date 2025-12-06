@@ -353,5 +353,48 @@
     "coordinatesHelper": "Puoi trovare le tue coordinate su Google Maps: fai clic destro sulla tua posizione e seleziona le coordinate per copiarle.",
     "invalidLatitude": "La latitudine deve essere tra -90 e 90",
     "invalidLongitude": "La longitudine deve essere tra -180 e 180"
+  },
+  "social": {
+    "share": "Condividi",
+    "sharedReel": "Reel condiviso",
+    "shared": "Condiviso!",
+    "sharedSuccess": "Il reel è stato inviato correttamente",
+    "sendTo": "Invia a",
+    "views": "visualizzazioni"
+  },
+  "chat": {
+    "chats": "Chat",
+    "newMessage": "Nuovo Messaggio",
+    "typeMessage": "Scrivi un messaggio...",
+    "send": "Invia",
+    "noMessages": "Nessun messaggio ancora",
+    "online": "Online",
+    "offline": "Offline",
+    "searchContacts": "Cerca contatti...",
+    "favorites": "Preferiti",
+    "recentChats": "Chat recenti"
+  },
+  "common": {
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "loading": "Caricamento...",
+    "success": "Successo",
+    "error": "Errore",
+    "confirm": "Conferma",
+    "back": "Indietro",
+    "next": "Avanti",
+    "upload": "Carica",
+    "search": "Cerca",
+    "user": "Utente",
+    "close": "Chiudi",
+    "view": "Visualizza",
+    "send": "Invia",
+    "message": "Messaggio",
+    "code": "Codice",
+    "tip": "Suggerimento",
+    "person": "persona",
+    "people": "persone"
   }
 }

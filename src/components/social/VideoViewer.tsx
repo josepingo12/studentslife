@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Bookmark, ArrowLeft, VolumeX, Volume2, MoreVertical } from "lucide-react";
+import { Heart, MessageCircle, Bookmark, ArrowLeft, VolumeX, Volume2, MoreVertical, Send, Eye } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import ReportContentDialog from "@/components/moderation/ReportContentDialog";
@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { formatDistanceToNow } from "date-fns";
 import { it, enUS, es, fr, de } from "date-fns/locale";
 import CommentsSheet from "./CommentsSheet";
+import SharePostSheet from "./SharePostSheet";
 
 interface VideoViewerProps {
   open: boolean;
@@ -31,8 +32,11 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
   const [currentTime, setCurrentTime] = useState(0);
   const [likesCount, setLikesCount] = useState(0);
   const [commentsCount, setCommentsCount] = useState(0);
+  const [viewsCount, setViewsCount] = useState(0);
+  const [sharesCount, setSharesCount] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
 
   // Reset and reload counters when post changes
@@ -42,11 +46,14 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
       setLikesCount(post?.likes?.length || 0);
       setIsLiked(post?.likes?.some((like: any) => like.user_id === currentUserId) || false);
       setCommentsCount(0);
+      setViewsCount(0);
       setIsSaved(false);
       
       // Load fresh data
       loadCommentsCount();
+      loadViewsCount();
       checkIfSaved();
+      recordView();
     }
   }, [open, post?.id, currentUserId]);
 
@@ -78,6 +85,34 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
       .select("*", { count: "exact", head: true })
       .eq("post_id", post.id);
     setCommentsCount(count || 0);
+  };
+
+  const loadViewsCount = async () => {
+    if (!post?.id) return;
+    const { count } = await supabase
+      .from("post_views")
+      .select("*", { count: "exact", head: true })
+      .eq("post_id", post.id);
+    setViewsCount(count || 0);
+  };
+
+  const recordView = async () => {
+    if (!post?.id || !currentUserId) return;
+    // Check if already viewed
+    const { data: existing } = await supabase
+      .from("post_views")
+      .select("id")
+      .eq("post_id", post.id)
+      .eq("viewer_id", currentUserId)
+      .maybeSingle();
+    
+    if (!existing) {
+      await supabase.from("post_views").insert({
+        post_id: post.id,
+        viewer_id: currentUserId
+      });
+      setViewsCount(prev => prev + 1);
+    }
   };
 
   const checkIfSaved = async () => {
@@ -179,10 +214,20 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
     }
   };
 
+  const handleShareComplete = () => {
+    setSharesCount(prev => prev + 1);
+  };
+
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const formatCount = (count: number) => {
+    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return count.toString();
   };
 
   const getDateLocale = () => {
@@ -205,170 +250,202 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
 
   return (
     <div className="fixed inset-0 bg-black z-50 flex items-center justify-center" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-     {/* Header */}
-         <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/50 to-transparent" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 1rem)', paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem' }}>
-           <div className="flex items-center justify-between text-white">
-             <Button
-               variant="ghost"
-               size="icon"
-               onClick={() => onOpenChange(false)}
-               className="text-white hover:bg-white/20 rounded-full"
-             >
-               <ArrowLeft className="w-6 h-6" />
-             </Button>
+      {/* Header */}
+      <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/50 to-transparent" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 1rem)', paddingLeft: '1rem', paddingRight: '1rem', paddingBottom: '1rem' }}>
+        <div className="flex items-center justify-between text-white">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onOpenChange(false)}
+            className="text-white hover:bg-white/20 rounded-full"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </Button>
 
-             <div className="flex items-center gap-3">
-               <Avatar className="h-8 w-8">
-                 <AvatarImage src={post.public_profiles?.profile_image_url} />
-                 <AvatarFallback className="bg-white/20 text-white text-sm">
-                   {displayName[0]}
-                 </AvatarFallback>
-               </Avatar>
-               <div>
-                 <p className="font-semibold text-sm">{displayName}</p>
-                 <p className="text-xs text-white/70">
-                   {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: getDateLocale() })}
-                 </p>
-               </div>
-             </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleToggleMute}
-                  className="text-white hover:bg-white/20 rounded-full"
-                >
-                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                </Button>
-                
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-white hover:bg-white/20 rounded-full"
-                    >
-                      <MoreVertical className="w-5 h-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-black/90 text-white border-white/20">
-                    <ReportContentDialog
-                      contentId={post.id}
-                      contentType="video"
-                      trigger={
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-white focus:text-white focus:bg-white/20">
-                        {t('moderation.reportVideo')}
-                      </DropdownMenuItem>
-                      }
-                    />
-                    <BlockUserButton
-                      userId={post.user_id}
-                      userName={displayName}
-                      trigger={
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-white focus:text-white focus:bg-white/20">
-                        {t('moderation.blockUser')}
-                      </DropdownMenuItem>
-                      }
-                    />
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+          <div className="flex items-center gap-3">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={post.public_profiles?.profile_image_url} />
+              <AvatarFallback className="bg-white/20 text-white text-sm">
+                {displayName[0]}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="font-semibold text-sm">{displayName}</p>
+              <p className="text-xs text-white/70">
+                {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: getDateLocale() })}
+              </p>
             </div>
           </div>
 
-         {/* Video */}
-         <video
-           ref={videoRef}
-           src={videoSrc}
-           className="w-full h-full object-contain"
-           autoPlay
-           loop
-           muted={isMuted}
-           playsInline
-           controls={false}
-           onClick={handleVideoClick}
-         />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleToggleMute}
+              className="text-white hover:bg-white/20 rounded-full"
+            >
+              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:bg-white/20 rounded-full"
+                >
+                  <MoreVertical className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-black/90 text-white border-white/20">
+                <ReportContentDialog
+                  contentId={post.id}
+                  contentType="video"
+                  trigger={
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-white focus:text-white focus:bg-white/20">
+                      {t('moderation.reportVideo')}
+                    </DropdownMenuItem>
+                  }
+                />
+                <BlockUserButton
+                  userId={post.user_id}
+                  userName={displayName}
+                  trigger={
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-white focus:text-white focus:bg-white/20">
+                      {t('moderation.blockUser')}
+                    </DropdownMenuItem>
+                  }
+                />
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </div>
 
-         {/* Controls Right Side - ICONE CENTRALI */}
-               <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col items-center gap-6 z-10">
-                 {/* Like Button */}
-                 <div className="flex flex-col items-center">
-                   <Button
-                     variant="ghost"
-                     size="icon"
-                     className="text-white hover:bg-white/20 rounded-full h-14 w-14"
-                     onClick={handleLike}
-                     disabled={loading}
-                   >
-                     <Heart
-                       className={`w-7 h-7 ${isLiked ? "fill-red-500 text-red-500" : ""}`}
-                     />
-                   </Button>
-                   <span className="text-white text-xs font-semibold">{likesCount}</span>
-                 </div>
+      {/* Video */}
+      <video
+        ref={videoRef}
+        src={videoSrc}
+        className="w-full h-full object-contain"
+        autoPlay
+        loop
+        muted={isMuted}
+        playsInline
+        controls={false}
+        onClick={handleVideoClick}
+      />
 
-                 {/* Comment Button */}
-                 <div className="flex flex-col items-center">
-                   <Button
-                     variant="ghost"
-                     size="icon"
-                     className="text-white hover:bg-white/20 rounded-full h-14 w-14"
-                     onClick={() => setCommentsOpen(true)}
-                   >
-                     <MessageCircle className="w-7 h-7" />
-                   </Button>
-                   <span className="text-white text-xs font-semibold">{commentsCount}</span>
-                 </div>
+      {/* Controls Right Side - ICONE GRANDI STILE INSTAGRAM */}
+      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col items-center gap-5 z-10">
+        {/* Like Button */}
+        <div className="flex flex-col items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white hover:bg-white/20 rounded-full h-12 w-12"
+            onClick={handleLike}
+            disabled={loading}
+          >
+            <Heart
+              className={`w-8 h-8 ${isLiked ? "fill-red-500 text-red-500" : ""}`}
+              style={{ width: '28px', height: '28px' }}
+            />
+          </Button>
+          <span className="text-white text-xs font-bold mt-0.5">{formatCount(likesCount)}</span>
+        </div>
 
-                 {/* Save Button */}
-                 <div className="flex flex-col items-center">
-                   <Button
-                     variant="ghost"
-                     size="icon"
-                     className="text-white hover:bg-white/20 rounded-full h-14 w-14"
-                     onClick={handleSaveToggle}
-                     disabled={loading}
-                   >
-                     <Bookmark
-                       className={`w-7 h-7 ${isSaved ? "fill-yellow-400 text-yellow-400" : ""}`}
-                     />
-                   </Button>
-                 </div>
-               </div>
+        {/* Comment Button */}
+        <div className="flex flex-col items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white hover:bg-white/20 rounded-full h-12 w-12"
+            onClick={() => setCommentsOpen(true)}
+          >
+            <MessageCircle style={{ width: '28px', height: '28px' }} />
+          </Button>
+          <span className="text-white text-xs font-bold mt-0.5">{formatCount(commentsCount)}</span>
+        </div>
 
-         {/* Progress Bar & Caption */}
-         <div className="absolute bottom-0 left-0 right-16 p-4 bg-gradient-to-t from-black/70 to-transparent" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1rem)' }}>
-           {/* Caption */}
-           {post.content && (
-             <p className="text-white text-sm mb-3 line-clamp-3">{post.content}</p>
-           )}
-           
-           {/* Progress */}
-           <div className="flex items-center gap-3 text-white text-xs">
-             <span>{formatTime(currentTime)}</span>
-             <div className="flex-1 bg-white/30 rounded-full h-1">
-               <div
-                 className="bg-white rounded-full h-1 transition-all duration-100"
-                 style={{ width: `${progress}%` }}
-               />
-             </div>
-             <span>{formatTime(duration)}</span>
-           </div>
-         </div>
+        {/* Share Button */}
+        <div className="flex flex-col items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white hover:bg-white/20 rounded-full h-12 w-12"
+            onClick={() => setShareOpen(true)}
+          >
+            <Send style={{ width: '26px', height: '26px' }} />
+          </Button>
+          {sharesCount > 0 && (
+            <span className="text-white text-xs font-bold mt-0.5">{formatCount(sharesCount)}</span>
+          )}
+        </div>
 
-         {/* Comments Sheet - AGGIUNGI QUESTO */}
-         <CommentsSheet
-           open={commentsOpen}
-           onOpenChange={(open) => {
-             setCommentsOpen(open);
-             if (!open) loadCommentsCount(); // Ricarica il conteggio quando si chiude
-           }}
-           postId={post.id}
-           currentUserId={currentUserId}
-         />
-       </div>
-     );
-   };
+        {/* Save Button */}
+        <div className="flex flex-col items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white hover:bg-white/20 rounded-full h-12 w-12"
+            onClick={handleSaveToggle}
+            disabled={loading}
+          >
+            <Bookmark
+              className={`${isSaved ? "fill-white text-white" : ""}`}
+              style={{ width: '28px', height: '28px' }}
+            />
+          </Button>
+        </div>
+      </div>
 
-   export default VideoViewer;
+      {/* Progress Bar & Caption */}
+      <div className="absolute bottom-0 left-0 right-16 p-4 bg-gradient-to-t from-black/80 to-transparent" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1rem)' }}>
+        {/* Views Count */}
+        <div className="flex items-center gap-1.5 mb-2">
+          <Eye className="w-4 h-4 text-white/80" />
+          <span className="text-white/80 text-sm font-medium">{formatCount(viewsCount)} {t('social.views')}</span>
+        </div>
+
+        {/* Caption */}
+        {post.content && (
+          <p className="text-white text-sm mb-3 line-clamp-2">{post.content}</p>
+        )}
+        
+        {/* Progress */}
+        <div className="flex items-center gap-3 text-white text-xs">
+          <span>{formatTime(currentTime)}</span>
+          <div className="flex-1 bg-white/30 rounded-full h-1">
+            <div
+              className="bg-white rounded-full h-1 transition-all duration-100"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <span>{formatTime(duration)}</span>
+        </div>
+      </div>
+
+      {/* Comments Sheet */}
+      <CommentsSheet
+        open={commentsOpen}
+        onOpenChange={(open) => {
+          setCommentsOpen(open);
+          if (!open) loadCommentsCount();
+        }}
+        postId={post.id}
+        currentUserId={currentUserId}
+      />
+
+      {/* Share Sheet */}
+      <SharePostSheet
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        postId={post.id}
+        currentUserId={currentUserId}
+        onShareComplete={handleShareComplete}
+      />
+    </div>
+  );
+};
+
+export default VideoViewer;
