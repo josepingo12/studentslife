@@ -66,8 +66,16 @@ const ClientOnboarding = ({
 }: ClientOnboardingProps) => {
   const [showWarning, setShowWarning] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showFinalCelebration, setShowFinalCelebration] = useState(false);
   const [spotlightRect, setSpotlightRect] = useState<{x: number, y: number, width: number, height: number, isRectangle?: boolean} | null>(null);
   const [prevCanProceed, setPrevCanProceed] = useState(canProceed);
+  
+  // Play celebration sound
+  const playCelebrationSound = () => {
+    const audio = new Audio('data:audio/wav;base64,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');
+    audio.volume = 0.5;
+    audio.play().catch(() => {});
+  };
   
   // Detect when canProceed changes from false to true (step completed!)
   useEffect(() => {
@@ -78,7 +86,7 @@ const ClientOnboarding = ({
         setShowSuccess(false);
         // Auto advance after success animation
         onNext();
-      }, 1500);
+      }, 1200);
     }
     setPrevCanProceed(canProceed);
   }, [canProceed, prevCanProceed, step?.required, onNext]);
@@ -168,7 +176,7 @@ const ClientOnboarding = ({
   }, [step.targetTab, onNavigateTab]);
 
   const triggerConfetti = () => {
-    const duration = 3000;
+    const duration = 4000;
     const animationEnd = Date.now() + duration;
     
     const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
@@ -181,39 +189,38 @@ const ClientOnboarding = ({
         return;
       }
 
-      const particleCount = 50 * (timeLeft / duration);
+      const particleCount = 60 * (timeLeft / duration);
 
-      // Confetti from the left
       confetti({
         particleCount: Math.floor(particleCount),
-        startVelocity: 30,
-        spread: 60,
+        startVelocity: 35,
+        spread: 80,
         origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-        colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'],
+        colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#fbbf24'],
       });
 
-      // Confetti from the right
       confetti({
         particleCount: Math.floor(particleCount),
-        startVelocity: 30,
-        spread: 60,
+        startVelocity: 35,
+        spread: 80,
         origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
-        colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'],
+        colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#fbbf24'],
       });
-    }, 250);
+    }, 200);
   };
 
   const handleNext = () => {
     if (isLastStep) {
+      setShowFinalCelebration(true);
       triggerConfetti();
+      playCelebrationSound();
       setTimeout(() => {
         onComplete();
-      }, 1500);
+      }, 3000);
       return;
     }
     
     if (isRequired && !canProceed) {
-      // Show warning that step is required
       setShowWarning(true);
       setTimeout(() => setShowWarning(false), 3000);
       return;
@@ -265,6 +272,51 @@ const ClientOnboarding = ({
   return (
     <AnimatePresence mode="wait">
       <>
+        {/* Final celebration overlay */}
+        <AnimatePresence>
+          {showFinalCelebration && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[250] flex flex-col items-center justify-center bg-gradient-to-br from-primary/90 via-purple-600/90 to-pink-500/90"
+            >
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 150, damping: 12 }}
+                className="text-8xl mb-6"
+              >
+                🎉
+              </motion.div>
+              <motion.h2
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-4xl font-bold text-white text-center mb-4"
+              >
+                ¡Felicidades!
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="text-xl text-white/90 text-center px-8"
+              >
+                Ya conoces todo sobre StudentsLife
+              </motion.p>
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.8, type: "spring" }}
+                className="mt-8 text-6xl"
+              >
+                🚀✨🎊
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Success overlay when step is completed */}
         <AnimatePresence>
           {showSuccess && (

@@ -189,22 +189,13 @@ export const useClientOnboarding = (userId: string | undefined) => {
     init();
   }, [userId, checkProfileCompletion, calculateSteps]);
 
-  // Refresh completion status - auto advance if required step is completed
+  // Refresh completion status
   const refreshCompletion = useCallback(async () => {
     const completion = await checkProfileCompletion();
     if (completion) {
       setProfileCompletion(completion);
-      const currentStepData = steps[currentStep];
-      
-      if (currentStepData?.checkField) {
-        const isNowComplete = completion[currentStepData.checkField as keyof ClientProfileCompletion];
-        if (isNowComplete && currentStep < steps.length - 1) {
-          // Auto advance when required step is completed
-          setCurrentStep(currentStep + 1);
-        }
-      }
     }
-  }, [checkProfileCompletion, currentStep, steps]);
+  }, [checkProfileCompletion]);
 
   // Check if current step can proceed
   const canProceed = useCallback(() => {
