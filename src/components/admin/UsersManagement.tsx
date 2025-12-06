@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Check, X, Ban, Users, Briefcase, Phone, Mail, CalendarIcon, Edit, Trash2, Search, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Check, X, Ban, Users, Briefcase, Phone, Mail, CalendarIcon, Edit, Trash2, Search, Clock, ChevronDown, ChevronUp, Tag } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,7 @@ interface Profile {
   first_name: string | null;
   last_name: string | null;
   business_name: string | null;
+  business_category: string | null;
   profile_image_url: string | null;
   account_status: string;
   contact_email: string | null;
@@ -36,6 +37,11 @@ interface Profile {
   last_access?: string | null;
 }
 
+interface Category {
+  name: string;
+  display_name: string;
+}
+
 const UsersManagement = () => {
   const [users, setUsers] = useState<Profile[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<Profile[]>([]);
@@ -44,6 +50,8 @@ const UsersManagement = () => {
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
     contact_email: "",
     phone_number: "",
@@ -54,7 +62,16 @@ const UsersManagement = () => {
 
   useEffect(() => {
     fetchUsers();
+    fetchCategories();
   }, [filter]);
+
+  const fetchCategories = async () => {
+    const { data } = await supabase
+      .from("categories")
+      .select("name, display_name")
+      .order("display_name");
+    if (data) setCategories(data);
+  };
 
   useEffect(() => {
     filterUsers();
@@ -255,6 +272,37 @@ const UsersManagement = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const updatePartnerCategory = async (userId: string, categoryName: string) => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ business_category: categoryName })
+        .eq("id", userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Éxito",
+        description: "Categoría actualizada",
+      });
+
+      setEditingCategory(null);
+      fetchUsers();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getCategoryDisplayName = (categoryName: string | null) => {
+    if (!categoryName) return "Sin categoría";
+    const cat = categories.find(c => c.name === categoryName);
+    return cat?.display_name || categoryName;
   };
 
   const getStatusBadge = (status: string) => {
@@ -495,6 +543,45 @@ const UsersManagement = () => {
                     </div>
                   </div>
                 ) : null}
+
+                {/* Category Editor for Partners */}
+                {user.user_roles?.some(r => r.role === "partner") && (
+                  <div className="flex items-center gap-2 text-xs pt-2 border-t border-border/30">
+                    <Tag className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-muted-foreground">Categoría:</span>
+                    {editingCategory === user.id ? (
+                      <Select
+                        value={user.business_category || ""}
+                        onValueChange={(value) => updatePartnerCategory(user.id, value)}
+                      >
+                        <SelectTrigger className="h-7 w-[180px] text-xs rounded-lg">
+                          <SelectValue placeholder="Seleccionar categoría" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat.name} value={cat.name}>
+                              {cat.display_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <>
+                        <Badge variant="secondary" className="text-xs">
+                          {getCategoryDisplayName(user.business_category)}
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 px-2 text-xs"
+                          onClick={(e) => { e.stopPropagation(); setEditingCategory(user.id); }}
+                        >
+                          <Edit className="w-3 h-3" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-2 pt-2">
