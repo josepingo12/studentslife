@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNotificationSound } from "@/hooks/useNotificationSound";
 import UserListItem from "@/components/chat/UserListItem";
 
 const AdminChats = () => {
@@ -15,9 +16,16 @@ const AdminChats = () => {
   const [unreadCounts, setUnreadCounts] = useState<Map<string, number>>(new Map());
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [newMessageUserId, setNewMessageUserId] = useState<string | null>(null);
+  const previousUnreadCountsRef = useRef<Map<string, number>>(new Map());
+  const { playNotificationSound } = useNotificationSound();
 
   useEffect(() => {
     loadData();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
 
     // Subscribe to new messages for realtime updates
     const messagesChannel = supabase
@@ -25,15 +33,46 @@ const AdminChats = () => {
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+        },
+        async (payload) => {
+          const newMsg = payload.new as any;
+          
+          // Only notify if message is not from current user
+          if (newMsg.sender_id !== user.id) {
+            // Find sender from conversation
+            const { data: conv } = await supabase
+              .from("conversations")
+              .select("user1_id, user2_id")
+              .eq("id", newMsg.conversation_id)
+              .maybeSingle();
+            
+            if (conv) {
+              const senderId = conv.user1_id === user.id ? conv.user2_id : conv.user1_id;
+              if (senderId) {
+                // Play sound and trigger animation
+                playNotificationSound();
+                setNewMessageUserId(senderId);
+                setTimeout(() => setNewMessageUserId(null), 2000);
+              }
+            }
+          }
+          
+          // Reload messages data
+          loadMessagesData(user.id);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
           schema: 'public',
           table: 'messages',
         },
         () => {
-          // Reload messages data when any message changes
-          if (user) {
-            loadMessagesData(user.id);
-          }
+          loadMessagesData(user.id);
         }
       )
       .subscribe();
@@ -41,7 +80,7 @@ const AdminChats = () => {
     return () => {
       supabase.removeChannel(messagesChannel);
     };
-  }, [user]);
+  }, [user, playNotificationSound]);
 
   const loadData = async () => {
     try {
@@ -206,16 +245,24 @@ const AdminChats = () => {
           </div>
         ) : (
           sortedUsers.map((userItem) => (
-            <UserListItem
+            <div
               key={userItem.id}
-              user={userItem}
-              currentUserId={user?.id || ""}
-              unreadCount={unreadCounts.get(userItem.id) || 0}
-              lastMessage={userMessages.get(userItem.id)}
-              isFavorite={false}
-              onUserClick={handleUserClick}
-              onToggleFavorite={() => {}}
-            />
+              className={`transition-all duration-300 ${
+                newMessageUserId === userItem.id 
+                  ? 'animate-pulse ring-2 ring-primary rounded-xl scale-[1.02]' 
+                  : ''
+              }`}
+            >
+              <UserListItem
+                user={userItem}
+                currentUserId={user?.id || ""}
+                unreadCount={unreadCounts.get(userItem.id) || 0}
+                lastMessage={userMessages.get(userItem.id)}
+                isFavorite={false}
+                onUserClick={handleUserClick}
+                onToggleFavorite={() => {}}
+              />
+            </div>
           ))
         )}
       </div>
