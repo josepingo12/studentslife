@@ -84,8 +84,10 @@ const SharedPostPreview = ({ postId, isOwn }: SharedPostPreviewProps) => {
       }, { onConflict: "post_id,viewer_id" });
     }
     
-    // Navigate to the video feed with this specific post
-    navigate(`/social?post=${postId}`);
+    // Navigate to the user's profile and open the video directly
+    if (post) {
+      navigate(`/profile/${post.user_id}?openPost=${postId}`);
+    }
   };
 
   const getDisplayName = () => {
