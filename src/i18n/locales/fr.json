@@ -360,7 +360,8 @@
     "shared": "Partagé !",
     "sharedSuccess": "Le reel a été envoyé avec succès",
     "sendTo": "Envoyer à",
-    "views": "vues"
+    "views": "vues",
+    "allUsers": "Utilisateurs"
   },
   "chat": {
     "chats": "Discussions",

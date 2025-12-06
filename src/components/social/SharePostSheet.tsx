@@ -30,18 +30,29 @@ const SharePostSheet = ({ open, onOpenChange, postId, currentUserId, onShareComp
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [favorites, setFavorites] = useState<User[]>([]);
-  const [recentChats, setRecentChats] = useState<User[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [searchResults, setSearchResults] = useState<User[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     if (open) {
       loadFavorites();
-      loadRecentChats();
+      loadAllUsers();
       setSelectedUsers([]);
       setSearchQuery("");
+      setSearchResults([]);
     }
   }, [open, currentUserId]);
+
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      searchUsers(searchQuery);
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery]);
 
   const loadFavorites = async () => {
     const { data } = await supabase
@@ -62,25 +73,36 @@ const SharePostSheet = ({ open, onOpenChange, postId, currentUserId, onShareComp
     }
   };
 
-  const loadRecentChats = async () => {
+  const loadAllUsers = async () => {
     const { data } = await supabase
-      .from("conversations")
-      .select(`
-        id, user1_id, user2_id,
-        user1:user1_id (id, first_name, last_name, business_name, profile_image_url),
-        user2:user2_id (id, first_name, last_name, business_name, profile_image_url)
-      `)
-      .or(`user1_id.eq.${currentUserId},user2_id.eq.${currentUserId}`)
-      .order("updated_at", { ascending: false })
+      .from("profiles")
+      .select("id, first_name, last_name, business_name, profile_image_url")
+      .neq("id", currentUserId)
+      .limit(50);
+
+    if (data) {
+      setAllUsers(data);
+    }
+  };
+
+  const searchUsers = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setSearching(true);
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, first_name, last_name, business_name, profile_image_url")
+      .neq("id", currentUserId)
+      .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,business_name.ilike.%${query}%`)
       .limit(20);
 
     if (data) {
-      const users = data.map((conv: any) => {
-        const otherUser = conv.user1_id === currentUserId ? conv.user2 : conv.user1;
-        return otherUser;
-      }).filter((u: any) => u?.id);
-      setRecentChats(users);
+      setSearchResults(data);
     }
+    setSearching(false);
   };
 
   const getDisplayName = (user: User) => {
@@ -167,13 +189,13 @@ const SharePostSheet = ({ open, onOpenChange, postId, currentUserId, onShareComp
   };
 
   const filteredFavorites = favorites.filter(user => 
-    getDisplayName(user).toLowerCase().includes(searchQuery.toLowerCase())
+    !searchQuery || getDisplayName(user).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredRecentChats = recentChats.filter(user => 
-    !favorites.some(f => f.id === user.id) &&
-    getDisplayName(user).toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Show search results when searching, otherwise show all users (excluding favorites)
+  const usersToShow = searchQuery.trim() 
+    ? searchResults.filter(user => !favorites.some(f => f.id === user.id))
+    : allUsers.filter(user => !favorites.some(f => f.id === user.id));
 
   const UserItem = ({ user }: { user: User }) => {
     const isSelected = selectedUsers.includes(user.id);
@@ -258,15 +280,21 @@ const SharePostSheet = ({ open, onOpenChange, postId, currentUserId, onShareComp
             </div>
           )}
 
-          {/* Recent Chats */}
+          {/* All Users / Search Results */}
           <div>
             <h3 className="text-sm font-semibold text-muted-foreground mb-2 px-1">
-              {t('chat.recentChats').toUpperCase()}
+              {searchQuery.trim() ? t('search.searching') : t('social.allUsers')}
             </h3>
             <div className="space-y-1">
-              {filteredRecentChats.map(user => (
-                <UserItem key={user.id} user={user} />
-              ))}
+              {searching ? (
+                <p className="text-center text-muted-foreground py-4">{t('common.loading')}</p>
+              ) : usersToShow.length > 0 ? (
+                usersToShow.map(user => (
+                  <UserItem key={user.id} user={user} />
+                ))
+              ) : searchQuery.trim() ? (
+                <p className="text-center text-muted-foreground py-4">{t('search.noUsersFound')}</p>
+              ) : null}
             </div>
           </div>
         </div>
