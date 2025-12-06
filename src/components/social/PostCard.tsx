@@ -472,67 +472,57 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
         return null;
       })()}
 
-      {/* Stats - Compact */}
-      <div className="px-3 py-2 flex items-center gap-3 text-xs">
-        <button
-          onClick={() => setLikesSheetOpen(true)}
-          className="font-medium text-gray-900 hover:text-blue-600 transition-colors"
-        >
-          {likesCount} {t('profile.likes').toLowerCase()}
-        </button>
-        {commentsCount > 0 && (
-          <span className="text-gray-500">
-            {commentsCount} {t('post.comments').toLowerCase()}
-          </span>
+      {/* Actions - Instagram style with counters */}
+      <div className="px-3 py-2 border-t border-gray-100">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleLike}
+              disabled={loading}
+              className="flex items-center gap-1.5 text-gray-700 hover:text-red-500 transition-colors"
+            >
+              <Heart
+                className={`w-6 h-6 ${isLiked ? "fill-red-500 text-red-500" : ""}`}
+              />
+              {likesCount > 0 && (
+                <span className="text-sm font-medium">{likesCount}</span>
+              )}
+            </button>
+            <button
+              onClick={() => setCommentsOpen(true)}
+              className="flex items-center gap-1.5 text-gray-700 hover:text-blue-500 transition-colors"
+            >
+              <MessageCircle className="w-6 h-6" />
+              {commentsCount > 0 && (
+                <span className="text-sm font-medium">{commentsCount}</span>
+              )}
+            </button>
+            <button
+              onClick={() => setShareSheetOpen(true)}
+              className="flex items-center gap-1.5 text-gray-700 hover:text-green-500 transition-colors"
+            >
+              <Send className="w-6 h-6" />
+              {sharesCount > 0 && (
+                <span className="text-sm font-medium">{sharesCount}</span>
+              )}
+            </button>
+          </div>
+          <button
+            onClick={handleSaveToggle}
+            disabled={loading}
+            className="text-gray-700 hover:text-yellow-500 transition-colors"
+          >
+            <Bookmark className={`w-6 h-6 ${isSaved ? "fill-yellow-500 text-yellow-500" : ""}`} />
+          </button>
+        </div>
+        {likesCount > 0 && (
+          <button
+            onClick={() => setLikesSheetOpen(true)}
+            className="mt-2 text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors"
+          >
+            {likesCount} {likesCount === 1 ? 'Me gusta' : 'Me gusta'}
+          </button>
         )}
-        {sharesCount > 0 && (
-          <span className="text-gray-500">
-            {sharesCount} {t('social.shares') || 'compartidos'}
-          </span>
-        )}
-      </div>
-
-      {/* Actions - Compact with Share button */}
-      <div className="px-2 py-2 border-t border-gray-100 flex items-center justify-around">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="gap-1.5 text-gray-600 hover:text-red-500 hover:bg-red-50 rounded-full px-3 h-8 text-xs"
-          onClick={handleLike}
-          disabled={loading}
-        >
-          <Heart
-            className={`w-4 h-4 ${isLiked ? "fill-red-500 text-red-500" : ""}`}
-          />
-          {t('post.like')}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="gap-1.5 text-gray-600 hover:text-blue-500 hover:bg-blue-50 rounded-full px-3 h-8 text-xs"
-          onClick={() => setCommentsOpen(true)}
-        >
-          <MessageCircle className="w-4 h-4" />
-          {t('post.comment')}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="gap-1.5 text-gray-600 hover:text-green-500 hover:bg-green-50 rounded-full px-3 h-8 text-xs"
-          onClick={() => setShareSheetOpen(true)}
-        >
-          <Send className="w-4 h-4" />
-          {t('social.share')}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="gap-1.5 text-gray-600 hover:text-yellow-500 hover:bg-yellow-50 rounded-full px-3 h-8 text-xs"
-          onClick={handleSaveToggle}
-          disabled={loading}
-        >
-          <Bookmark className={`w-4 h-4 ${isSaved ? "fill-yellow-500 text-yellow-500" : ""}`} />
-        </Button>
       </div>
 
       {/* Comments Sheet */}
