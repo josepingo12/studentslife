@@ -60,6 +60,22 @@ const UserProfile = () => {
     checkAuth();
   }, [userId]);
 
+  // Handle openPost query parameter to auto-open video
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const openPostId = searchParams.get('openPost');
+    
+    if (openPostId && posts.length > 0 && !loading) {
+      const postToOpen = posts.find(p => p.id === openPostId);
+      if (postToOpen) {
+        setSelectedPost(postToOpen);
+        setVideoFeedOpen(true);
+        // Clean up URL
+        window.history.replaceState({}, '', location.pathname);
+      }
+    }
+  }, [location.search, posts, loading]);
+
   useEffect(() => {
     if (currentUser && location.pathname.startsWith('/profile')) {
       loadUserContent(userId || currentUser.id);
