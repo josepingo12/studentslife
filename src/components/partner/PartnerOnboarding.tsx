@@ -31,13 +31,13 @@ interface PartnerOnboardingProps {
 }
 
 const stepIcons: Record<string, React.ReactNode> = {
-  welcome: <Sparkles className="w-12 h-12 text-primary" />,
-  "profile-photo": <Camera className="w-12 h-12 text-blue-500" />,
-  "cover-photo": <Image className="w-12 h-12 text-purple-500" />,
-  "business-data": <FileText className="w-12 h-12 text-green-500" />,
-  "gallery-photos": <Images className="w-12 h-12 text-orange-500" />,
-  "create-discount": <Tag className="w-12 h-12 text-red-500" />,
-  complete: <PartyPopper className="w-12 h-12 text-primary" />,
+  welcome: <Sparkles className="w-8 h-8 sm:w-12 sm:h-12 text-primary" />,
+  "profile-photo": <Camera className="w-8 h-8 sm:w-12 sm:h-12 text-blue-500" />,
+  "cover-photo": <Image className="w-8 h-8 sm:w-12 sm:h-12 text-purple-500" />,
+  "business-data": <FileText className="w-8 h-8 sm:w-12 sm:h-12 text-green-500" />,
+  "gallery-photos": <Images className="w-8 h-8 sm:w-12 sm:h-12 text-orange-500" />,
+  "create-discount": <Tag className="w-8 h-8 sm:w-12 sm:h-12 text-red-500" />,
+  complete: <PartyPopper className="w-8 h-8 sm:w-12 sm:h-12 text-primary" />,
 };
 
 const PartnerOnboarding = ({
@@ -152,7 +152,7 @@ const PartnerOnboarding = ({
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 150, damping: 12 }}
-              className="text-8xl mb-6"
+              className="text-5xl sm:text-8xl mb-4 sm:mb-6"
             >
               🎉
             </motion.div>
@@ -160,7 +160,7 @@ const PartnerOnboarding = ({
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-4xl font-bold text-white text-center mb-4"
+              className="text-2xl sm:text-4xl font-bold text-white text-center mb-3 sm:mb-4 px-4"
             >
               ¡Felicidades!
             </motion.h2>
@@ -168,7 +168,7 @@ const PartnerOnboarding = ({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="text-xl text-white/90 text-center px-8"
+              className="text-base sm:text-xl text-white/90 text-center px-6 sm:px-8"
             >
               Tu perfil de partner está completo
             </motion.p>
@@ -176,7 +176,7 @@ const PartnerOnboarding = ({
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.8, type: "spring" }}
-              className="mt-8 text-6xl"
+              className="mt-6 sm:mt-8 text-4xl sm:text-6xl"
             >
               🚀✨🎊
             </motion.div>
@@ -206,11 +206,11 @@ const PartnerOnboarding = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className={`fixed z-[100] mx-4 w-[calc(100%-2rem)] max-w-sm ${getPositionClasses()}`}
+            className={`fixed z-[100] mx-2 sm:mx-4 w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] max-w-sm ${getPositionClasses()}`}
           >
             {/* Progress indicator */}
             <div className="mb-2 px-1">
-              <div className="flex items-center justify-between text-xs text-white/80 mb-1">
+              <div className="flex items-center justify-between text-[10px] sm:text-xs text-white/80 mb-1">
                 <span className="bg-black/40 px-2 py-0.5 rounded-full backdrop-blur-sm">
                   Paso {currentStep + 1} de {totalSteps}
                 </span>
@@ -218,51 +218,51 @@ const PartnerOnboarding = ({
                   {Math.round(progress)}%
                 </span>
               </div>
-              <Progress value={progress} className="h-1.5 bg-white/20" />
+              <Progress value={progress} className="h-1 sm:h-1.5 bg-white/20" />
             </div>
 
             {/* Main Card */}
-            <div className="bg-background rounded-2xl p-5 shadow-2xl border border-border/50 relative overflow-hidden">
+            <div className="bg-background rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-2xl border border-border/50 relative overflow-hidden">
               {/* Decorative gradient */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/20 to-transparent rounded-bl-full pointer-events-none" />
+              <div className="absolute top-0 right-0 w-20 sm:w-32 h-20 sm:h-32 bg-gradient-to-bl from-primary/20 to-transparent rounded-bl-full pointer-events-none" />
               
               {/* Close/Skip button */}
               {!isWelcome && !isLastStep && (
                 <button
                   onClick={onSkip}
-                  className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-muted transition-colors z-10"
+                  className="absolute top-2 right-2 sm:top-3 sm:right-3 p-1 sm:p-1.5 rounded-full hover:bg-muted transition-colors z-10"
                   title="Saltar"
                 >
-                  <X className="w-4 h-4 text-muted-foreground" />
+                  <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
                 </button>
               )}
 
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-2 sm:gap-4">
                 {/* Icon */}
-                <div className="flex-shrink-0 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl p-3">
-                  {stepIcons[step.id] || <Sparkles className="w-12 h-12 text-primary" />}
+                <div className="flex-shrink-0 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg sm:rounded-xl p-2 sm:p-3">
+                  {stepIcons[step.id] || <Sparkles className="w-8 h-8 sm:w-12 sm:h-12 text-primary" />}
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-lg mb-1 pr-6">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+                  <h3 className="font-bold text-sm sm:text-lg mb-0.5 sm:mb-1 pr-5 sm:pr-6">{step.title}</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                     {step.description}
                   </p>
                 </div>
               </div>
 
               {/* Action buttons */}
-              <div className="flex gap-2 mt-4">
+              <div className="flex gap-1.5 sm:gap-2 mt-3 sm:mt-4">
                 {!isFirstStep && !isLastStep && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={onPrev}
-                    className="gap-1"
+                    className="gap-0.5 sm:gap-1 text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
                   >
-                    <ChevronLeft className="w-4 h-4" />
-                    Atrás
+                    <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <span className="hidden xs:inline">Atrás</span>
                   </Button>
                 )}
                 
@@ -273,32 +273,32 @@ const PartnerOnboarding = ({
                     variant="ghost"
                     size="sm"
                     onClick={onSkip}
-                    className="gap-1 text-muted-foreground"
+                    className="gap-0.5 sm:gap-1 text-muted-foreground text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
                   >
-                    Saltar
-                    <SkipForward className="w-4 h-4" />
+                    <span className="hidden xs:inline">Saltar</span>
+                    <SkipForward className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </Button>
                 )}
 
                 <Button
                   size="sm"
                   onClick={handleAction}
-                  className="gap-1 bg-gradient-to-r from-primary to-primary/80"
+                  className="gap-0.5 sm:gap-1 bg-gradient-to-r from-primary to-primary/80 text-xs sm:text-sm px-3 sm:px-4 h-8 sm:h-9"
                 >
                   {isLastStep ? (
                     <>
                       ¡Listo!
-                      <PartyPopper className="w-4 h-4" />
+                      <PartyPopper className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </>
                   ) : isWelcome ? (
                     <>
                       Empezar
-                      <ChevronRight className="w-4 h-4" />
+                      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </>
                   ) : (
                     <>
                       Entendido
-                      <ChevronRight className="w-4 h-4" />
+                      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </>
                   )}
                 </Button>

@@ -44,17 +44,17 @@ interface ClientOnboardingProps {
 }
 
 const stepIcons: Record<string, React.ReactNode> = {
-  welcome: <Sparkles className="w-10 h-10 text-primary" />,
-  "go-to-profile": <Navigation className="w-10 h-10 text-blue-500" />,
-  "profile-photo": <Camera className="w-10 h-10 text-blue-500" />,
-  "cover-photo": <Image className="w-10 h-10 text-purple-500" />,
-  "discover-partners": <Store className="w-10 h-10 text-green-500" />,
-  "download-discounts": <Tag className="w-10 h-10 text-red-500" />,
-  "wallet": <Wallet className="w-10 h-10 text-amber-500" />,
-  "loyalty-cards": <Gift className="w-10 h-10 text-pink-500" />,
-  "social-feed": <Share2 className="w-10 h-10 text-blue-400" />,
-  "chat": <MessageSquare className="w-10 h-10 text-indigo-500" />,
-  complete: <PartyPopper className="w-10 h-10 text-primary" />,
+  welcome: <Sparkles className="w-7 h-7 sm:w-10 sm:h-10 text-primary" />,
+  "go-to-profile": <Navigation className="w-7 h-7 sm:w-10 sm:h-10 text-blue-500" />,
+  "profile-photo": <Camera className="w-7 h-7 sm:w-10 sm:h-10 text-blue-500" />,
+  "cover-photo": <Image className="w-7 h-7 sm:w-10 sm:h-10 text-purple-500" />,
+  "discover-partners": <Store className="w-7 h-7 sm:w-10 sm:h-10 text-green-500" />,
+  "download-discounts": <Tag className="w-7 h-7 sm:w-10 sm:h-10 text-red-500" />,
+  "wallet": <Wallet className="w-7 h-7 sm:w-10 sm:h-10 text-amber-500" />,
+  "loyalty-cards": <Gift className="w-7 h-7 sm:w-10 sm:h-10 text-pink-500" />,
+  "social-feed": <Share2 className="w-7 h-7 sm:w-10 sm:h-10 text-blue-400" />,
+  "chat": <MessageSquare className="w-7 h-7 sm:w-10 sm:h-10 text-indigo-500" />,
+  complete: <PartyPopper className="w-7 h-7 sm:w-10 sm:h-10 text-primary" />,
 };
 
 const ClientOnboarding = ({
@@ -321,13 +321,13 @@ const ClientOnboarding = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[250] flex flex-col items-center justify-center bg-gradient-to-br from-primary/90 via-purple-600/90 to-pink-500/90"
+              className="fixed inset-0 z-[250] flex flex-col items-center justify-center bg-gradient-to-br from-primary/90 via-purple-600/90 to-pink-500/90 px-4"
             >
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: "spring", stiffness: 150, damping: 12 }}
-                className="text-8xl mb-6"
+                className="text-5xl sm:text-8xl mb-4 sm:mb-6"
               >
                 🎉
               </motion.div>
@@ -335,7 +335,7 @@ const ClientOnboarding = ({
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-4xl font-bold text-white text-center mb-4"
+                className="text-2xl sm:text-4xl font-bold text-white text-center mb-3 sm:mb-4"
               >
                 ¡Felicidades!
               </motion.h2>
@@ -343,7 +343,7 @@ const ClientOnboarding = ({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="text-xl text-white/90 text-center px-8"
+                className="text-base sm:text-xl text-white/90 text-center px-4 sm:px-8"
               >
                 Ya conoces todo sobre StudentsLife
               </motion.p>
@@ -351,7 +351,7 @@ const ClientOnboarding = ({
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.8, type: "spring" }}
-                className="mt-8 text-6xl"
+                className="mt-6 sm:mt-8 text-4xl sm:text-6xl"
               >
                 🚀✨🎊
               </motion.div>
@@ -480,38 +480,38 @@ const ClientOnboarding = ({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -30, scale: 0.9 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          className={`fixed z-[160] mx-4 w-[calc(100%-2rem)] max-w-sm ${!spotlightRect ? getPositionClasses() : ''}`}
+          className={`fixed z-[160] mx-2 sm:mx-4 w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] max-w-sm ${!spotlightRect ? getPositionClasses() : ''}`}
           style={getCardStyle()}
         >
           {/* Progress indicator */}
-          <div className="mb-3 px-1">
-            <div className="flex items-center justify-between text-xs text-white/90 mb-1.5">
+          <div className="mb-2 sm:mb-3 px-1">
+            <div className="flex items-center justify-between text-[10px] sm:text-xs text-white/90 mb-1 sm:mb-1.5">
               <motion.span 
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                className="bg-blue-500/80 px-3 py-1 rounded-full backdrop-blur-sm font-medium"
+                className="bg-blue-500/80 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full backdrop-blur-sm font-medium"
               >
                 Paso {currentStep + 1} de {totalSteps}
               </motion.span>
               <motion.span 
                 initial={{ x: 20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                className="bg-blue-500/80 px-3 py-1 rounded-full backdrop-blur-sm font-medium"
+                className="bg-blue-500/80 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full backdrop-blur-sm font-medium"
               >
                 {Math.round(progress)}%
               </motion.span>
             </div>
-            <Progress value={progress} className="h-2 bg-white/20" />
+            <Progress value={progress} className="h-1.5 sm:h-2 bg-white/20" />
           </div>
 
           {/* Main Card */}
           <motion.div 
-            className="bg-background rounded-3xl p-6 shadow-2xl border border-border/50 relative"
+            className="bg-background rounded-xl sm:rounded-3xl p-3 sm:p-6 shadow-2xl border border-border/50 relative"
             layoutId="onboarding-card"
           >
             {/* Animated gradient background */}
             <motion.div 
-              className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-purple-500/10 rounded-3xl"
+              className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-purple-500/10 rounded-xl sm:rounded-3xl"
               animate={{ 
                 background: [
                   "linear-gradient(135deg, rgba(59,130,246,0.1) 0%, transparent 50%, rgba(168,85,247,0.1) 100%)",
@@ -527,29 +527,29 @@ const ClientOnboarding = ({
               <motion.div 
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute top-3 right-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-3 py-1 rounded-full font-bold shadow-lg z-10 flex items-center gap-1"
+                className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] sm:text-xs px-2 sm:px-3 py-0.5 sm:py-1 rounded-full font-bold shadow-lg z-10 flex items-center gap-0.5 sm:gap-1"
               >
-                <AlertCircle className="w-3 h-3" />
+                <AlertCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                 Obligatorio
               </motion.div>
             )}
 
-            <div className="flex items-start gap-4 relative">
+            <div className="flex items-start gap-2 sm:gap-4 relative">
               {/* Icon with animation */}
               <motion.div 
-                className="flex-shrink-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl p-4"
+                className="flex-shrink-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-xl sm:rounded-2xl p-2 sm:p-4"
                 animate={{ rotate: [0, 5, -5, 0] }}
                 transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
               >
-                {stepIcons[step.id] || <Sparkles className="w-10 h-10 text-primary" />}
+                {stepIcons[step.id] || <Sparkles className="w-7 h-7 sm:w-10 sm:h-10 text-primary" />}
               </motion.div>
 
               {/* Content */}
-              <div className="flex-1 min-w-0 pr-2">
+              <div className="flex-1 min-w-0 pr-1 sm:pr-2">
                 <motion.h3 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="font-bold text-xl mb-2"
+                  className="font-bold text-sm sm:text-xl mb-1 sm:mb-2"
                 >
                   {step.title}
                 </motion.h3>
@@ -557,7 +557,7 @@ const ClientOnboarding = ({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.1 }}
-                  className="text-sm text-muted-foreground leading-relaxed"
+                  className="text-xs sm:text-sm text-muted-foreground leading-relaxed"
                 >
                   {step.description}
                 </motion.p>
@@ -571,15 +571,15 @@ const ClientOnboarding = ({
                   initial={{ opacity: 0, height: 0, y: -10 }}
                   animate={{ opacity: 1, height: "auto", y: 0 }}
                   exit={{ opacity: 0, height: 0, y: -10 }}
-                  className="mt-4 bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3"
+                  className="mt-3 sm:mt-4 bg-red-50 border border-red-200 rounded-lg sm:rounded-xl p-2 sm:p-4 flex items-center gap-2 sm:gap-3"
                 >
                   <motion.div
                     animate={{ rotate: [0, -10, 10, -10, 10, 0] }}
                     transition={{ duration: 0.5 }}
                   >
-                    <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0" />
+                    <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-500 flex-shrink-0" />
                   </motion.div>
-                  <p className="text-sm text-red-700 font-medium">
+                  <p className="text-xs sm:text-sm text-red-700 font-medium">
                     ¡Debes completar este paso para continuar!
                   </p>
                 </motion.div>
@@ -587,16 +587,16 @@ const ClientOnboarding = ({
             </AnimatePresence>
 
             {/* Action buttons */}
-            <div className="flex gap-3 mt-5 relative">
+            <div className="flex gap-2 sm:gap-3 mt-3 sm:mt-5 relative">
               {!isFirstStep && !isLastStep && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={onPrev}
-                  className="gap-1 rounded-xl"
+                  className="gap-0.5 sm:gap-1 rounded-lg sm:rounded-xl text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
                 >
-                  <ChevronLeft className="w-4 h-4" />
-                  Atrás
+                  <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span className="hidden xs:inline">Atrás</span>
                 </Button>
               )}
               
@@ -610,7 +610,7 @@ const ClientOnboarding = ({
                   size="sm"
                   onClick={handleNext}
                   disabled={isGoToProfileStep || (isRequired && !canProceed)}
-                  className={`gap-2 rounded-xl px-6 ${(isGoToProfileStep || (isRequired && !canProceed))
+                  className={`gap-1 sm:gap-2 rounded-lg sm:rounded-xl px-3 sm:px-6 text-xs sm:text-sm h-8 sm:h-9 ${(isGoToProfileStep || (isRequired && !canProceed))
                     ? "bg-gray-400 cursor-not-allowed" 
                     : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg"
                   }`}
@@ -618,20 +618,22 @@ const ClientOnboarding = ({
                   {isLastStep ? (
                     <>
                       ¡Empezar!
-                      <PartyPopper className="w-4 h-4" />
+                      <PartyPopper className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </>
                   ) : isGoToProfileStep ? (
                     <>
-                      Haz clic en tu avatar ↑
+                      <span className="hidden xs:inline">Haz clic en tu avatar</span>
+                      <span className="xs:hidden">Clic avatar</span> ↑
                     </>
                   ) : isRequired && !canProceed ? (
                     <>
-                      Sube tu foto ↑
+                      <span className="hidden xs:inline">Sube tu foto</span>
+                      <span className="xs:hidden">Subir foto</span> ↑
                     </>
                   ) : (
                     <>
                       Siguiente
-                      <ChevronRight className="w-4 h-4" />
+                      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </>
                   )}
                 </Button>
