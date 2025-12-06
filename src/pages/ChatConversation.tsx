@@ -210,9 +210,12 @@ const ChatConversation = () => {
 
     if ((!newMessage.trim() && !mediaUrl) || !user) return;
 
+    // Clear input immediately for instant feedback
+    const messageContent = newMessage.trim() || "";
+    setNewMessage("");
+
     try {
       const hasMedia = !!mediaUrl;
-      const messageContent = newMessage.trim() || (hasMedia ? "" : "");
 
       // Call moderation AI for message
       const { data: moderationData, error: moderationError } = await supabase.functions.invoke(
@@ -261,35 +264,31 @@ const ChatConversation = () => {
         });
       }
 
-      // Notify admin about new message
-      try {
-        const { data: senderProfile } = await supabase
-          .from("profiles")
-          .select("first_name, last_name, business_name")
-          .eq("id", user.id)
-          .single();
+      // Notify admin about new message (in background)
+      supabase
+        .from("profiles")
+        .select("first_name, last_name, business_name")
+        .eq("id", user.id)
+        .single()
+        .then(async ({ data: senderProfile }) => {
+          const { data: roleData } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", user.id)
+            .single();
 
-        const { data: roleData } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .single();
+          const senderName = senderProfile?.first_name || senderProfile?.business_name || "Usuario";
+          const senderType = roleData?.role === "partner" ? "Socio" : "Cliente";
+          const messagePreview = (messageContent || "Media inviato").substring(0, 100);
 
-        const senderName = senderProfile?.first_name || senderProfile?.business_name || "Usuario";
-        const senderType = roleData?.role === "partner" ? "Socio" : "Cliente";
-        const messagePreview = (newMessage.trim() || "Media inviato").substring(0, 100);
-
-        await supabase.functions.invoke("notify-admin-message", {
-          body: {
-            sender_name: senderName,
-            sender_type: senderType,
-            message_preview: messagePreview,
-          },
+          supabase.functions.invoke("notify-admin-message", {
+            body: {
+              sender_name: senderName,
+              sender_type: senderType,
+              message_preview: messagePreview,
+            },
+          }).catch(console.error);
         });
-      } catch (emailError) {
-        // Don't block message sending if email fails
-        console.error("Failed to send admin notification:", emailError);
-      }
 
       // Update conversation updated_at
       await supabase
@@ -300,8 +299,9 @@ const ChatConversation = () => {
       // Stop typing indicator
       await updateTypingStatus(false);
 
-      setNewMessage("");
     } catch (error: any) {
+      // Restore message on error
+      setNewMessage(messageContent);
       toast({
         title: "Errore",
         description: error.message,
