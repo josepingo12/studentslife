@@ -18,7 +18,30 @@ const AdminChats = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+
+    // Subscribe to new messages for realtime updates
+    const messagesChannel = supabase
+      .channel('admin-messages-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+        },
+        () => {
+          // Reload messages data when any message changes
+          if (user) {
+            loadMessagesData(user.id);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(messagesChannel);
+    };
+  }, [user]);
 
   const loadData = async () => {
     try {
