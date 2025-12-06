@@ -83,7 +83,7 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 bg-black z-50"
+      className="fixed inset-0 bg-black z-[100]"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
