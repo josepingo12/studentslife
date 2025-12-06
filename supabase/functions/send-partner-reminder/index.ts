@@ -245,8 +245,9 @@ function buildReminderEmail(partnerName: string, hasNoEvents: boolean, hasNoImag
     </head>
     <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
       <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-        <!-- Header -->
+        <!-- Header with Logo -->
         <div style="text-align: center; margin-bottom: 30px;">
+          <img src="https://fkarwrqwwnssnfioiaau.supabase.co/storage/v1/object/public/avatars/logo.png" alt="StudentsLife" style="width: 120px; height: auto; margin-bottom: 15px;" />
           <h1 style="background: linear-gradient(135deg, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 32px; margin: 0;">StudentsLife</h1>
           <p style="color: #6b7280; margin-top: 10px;">Panel de Partners</p>
         </div>
@@ -270,13 +271,6 @@ function buildReminderEmail(partnerName: string, hasNoEvents: boolean, hasNoImag
           <p style="color: #1e40af; font-size: 14px; margin: 0; font-weight: 600;">
             💡 Los partners con perfil completo reciben un 80% más de visitas de estudiantes
           </p>
-        </div>
-
-        <!-- CTA Button -->
-        <div style="text-align: center; margin-bottom: 30px;">
-          <a href="https://studentslife.es/#/partner" style="display: inline-block; background: linear-gradient(135deg, #ec4899, #8b5cf6); color: white; text-decoration: none; padding: 16px 40px; border-radius: 30px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);">
-            ¡Completar mi perfil ahora!
-          </a>
         </div>
 
         <!-- Footer -->
