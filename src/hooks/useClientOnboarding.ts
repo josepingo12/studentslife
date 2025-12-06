@@ -138,7 +138,6 @@ export const useClientOnboarding = (userId: string | undefined) => {
 
   // Build the steps list based on completion
   const calculateSteps = useCallback((completion: ClientProfileCompletion) => {
-    const isFirstTime = !localStorage.getItem(`client_onboarding_started_${userId}`);
     const wasCompleted = localStorage.getItem(`client_onboarding_completed_${userId}`);
     
     // If already completed, don't show again
@@ -146,23 +145,10 @@ export const useClientOnboarding = (userId: string | undefined) => {
       return [];
     }
     
-    // If first time, show all steps
-    if (isFirstTime) {
-      localStorage.setItem(`client_onboarding_started_${userId}`, "true");
-      return ONBOARDING_STEPS;
-    }
-
-    // If returning user, only show missing required steps
-    const missingSteps: ClientOnboardingStep[] = [];
-    
-    if (!completion.hasProfilePhoto) {
-      missingSteps.push(ONBOARDING_STEPS.find(s => s.id === "profile-photo")!);
-    }
-    if (!completion.hasCoverPhoto) {
-      missingSteps.push(ONBOARDING_STEPS.find(s => s.id === "cover-photo")!);
-    }
-
-    return missingSteps;
+    // Always show all steps for first time or returning user who hasn't completed
+    // Mark as started
+    localStorage.setItem(`client_onboarding_started_${userId}`, "true");
+    return ONBOARDING_STEPS;
   }, [userId]);
 
   // Initialize
