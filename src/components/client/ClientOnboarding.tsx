@@ -79,6 +79,8 @@ const ClientOnboarding = ({
   const [showFinalCelebration, setShowFinalCelebration] = useState(false);
   const [spotlightRect, setSpotlightRect] = useState<{x: number, y: number, width: number, height: number, isRectangle?: boolean} | null>(null);
   const [prevCanProceed, setPrevCanProceed] = useState(canProceed);
+  const [walletOpened, setWalletOpened] = useState(false);
+  const [loyaltyOpened, setLoyaltyOpened] = useState(false);
   
   // Play celebration sound
   const playCelebrationSound = () => {
@@ -185,16 +187,32 @@ const ClientOnboarding = ({
       onNavigateTab(step.targetTab);
     }
     
-    // Auto-open wallet when on wallet step
-    if (step.id === "wallet" && onOpenWallet) {
+    // Auto-open wallet when on wallet step (only once)
+    if (step.id === "wallet" && onOpenWallet && !walletOpened) {
+      setWalletOpened(true);
       setTimeout(() => onOpenWallet(), 500);
     }
     
-    // Auto-open loyalty cards when on loyalty step
-    if (step.id === "loyalty-cards" && onOpenLoyaltyCards) {
+    // Auto-open loyalty cards when on loyalty step (only once)
+    if (step.id === "loyalty-cards" && onOpenLoyaltyCards && !loyaltyOpened) {
+      setLoyaltyOpened(true);
       setTimeout(() => onOpenLoyaltyCards(), 500);
     }
-  }, [step.id, step.targetTab, onNavigateTab, onOpenWallet, onOpenLoyaltyCards]);
+  }, [step.id, step.targetTab, onNavigateTab, onOpenWallet, onOpenLoyaltyCards, walletOpened, loyaltyOpened]);
+
+  // Auto-advance when wallet is closed after being shown
+  useEffect(() => {
+    if (step.id === "wallet" && walletOpened && walletOpen === false) {
+      setTimeout(() => onNext(), 300);
+    }
+  }, [step.id, walletOpened, walletOpen, onNext]);
+
+  // Auto-advance when loyalty cards is closed after being shown
+  useEffect(() => {
+    if (step.id === "loyalty-cards" && loyaltyOpened && loyaltyCardsOpen === false) {
+      setTimeout(() => onNext(), 300);
+    }
+  }, [step.id, loyaltyOpened, loyaltyCardsOpen, onNext]);
 
   const triggerConfetti = () => {
     const duration = 4000;
