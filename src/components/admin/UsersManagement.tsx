@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Check, X, Ban, Users, Briefcase, Phone, Mail, Euro, CalendarIcon, Edit, Trash2, Search } from "lucide-react";
-import { format } from "date-fns";
-import { it } from "date-fns/locale";
+import { Check, X, Ban, Users, Briefcase, Phone, Mail, CalendarIcon, Edit, Trash2, Search, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { format, formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -34,6 +33,7 @@ interface Profile {
   last_payment_date: string | null;
   last_payment_amount: number | null;
   user_roles: { role: string }[];
+  last_access?: string | null;
 }
 
 const UsersManagement = () => {
@@ -43,6 +43,7 @@ const UsersManagement = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<string | null>(null);
+  const [expandedUser, setExpandedUser] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
     contact_email: "",
     phone_number: "",
@@ -77,32 +78,35 @@ const UsersManagement = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      // Get all profiles with new fields
       const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
-        .select(`
-          *,
-          business_phone,
-          contact_email,
-          phone_number,
-          last_payment_date,
-          last_payment_amount
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (profilesError) throw profilesError;
 
-      // Get roles for each user
       const { data: rolesData, error: rolesError } = await supabase
         .from("user_roles")
         .select("user_id, role");
 
       if (rolesError) throw rolesError;
 
-      // Merge data
+      const { data: accessData } = await supabase
+        .from("access_logs")
+        .select("user_id, accessed_at")
+        .order("accessed_at", { ascending: false });
+
+      const lastAccessMap = new Map<string, string>();
+      accessData?.forEach(log => {
+        if (!lastAccessMap.has(log.user_id)) {
+          lastAccessMap.set(log.user_id, log.accessed_at || '');
+        }
+      });
+
       const usersWithRoles = (profilesData || []).map((profile) => ({
         ...profile,
         user_roles: rolesData?.filter((r) => r.user_id === profile.id) || [],
+        last_access: lastAccessMap.get(profile.id) || null,
       }));
 
       let filtered = usersWithRoles;
@@ -120,7 +124,7 @@ const UsersManagement = () => {
       setUsers(filtered);
     } catch (error: any) {
       toast({
-        title: "Errore",
+        title: "Error",
         description: error.message,
         variant: "destructive",
       });
@@ -138,7 +142,6 @@ const UsersManagement = () => {
 
       if (error) throw error;
 
-      // If account is approved, send approval email
       if (status === "approved") {
         const user = users.find(u => u.id === userId);
         if (user && user.email) {
@@ -148,15 +151,12 @@ const UsersManagement = () => {
             .eq("user_id", userId)
             .single();
 
-          const userName = user.first_name || user.business_name || "Usuario";
-          const userType = roleData?.role || "client";
-
           try {
             await supabase.functions.invoke("send-approval-email", {
               body: {
                 user_email: user.email,
-                user_name: userName,
-                user_type: userType,
+                user_name: user.first_name || user.business_name || "Usuario",
+                user_type: roleData?.role || "client",
               },
             });
           } catch (emailError) {
@@ -166,14 +166,14 @@ const UsersManagement = () => {
       }
 
       toast({
-        title: "Successo",
-        description: `Account ${status === "approved" ? "approvato" : status === "blocked" ? "bloccato" : "rifiutato"}`,
+        title: "Éxito",
+        description: `Cuenta ${status === "approved" ? "aprobada" : status === "blocked" ? "bloqueada" : "rechazada"}`,
       });
 
       fetchUsers();
     } catch (error: any) {
       toast({
-        title: "Errore",
+        title: "Error",
         description: error.message,
         variant: "destructive",
       });
@@ -181,19 +181,17 @@ const UsersManagement = () => {
   };
 
   const deleteUser = async (userId: string) => {
-    if (!confirm("Sei sicuro di voler eliminare questo utente? Questa azione è irreversibile.")) {
+    if (!confirm("¿Estás seguro de eliminar este usuario? Esta acción es irreversible.")) {
       return;
     }
 
     try {
-      // Get the current session token
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        throw new Error("Sessione non valida");
+        throw new Error("Sesión no válida");
       }
 
-      // Call the edge function to delete the user
       const { data, error } = await supabase.functions.invoke('delete-user', {
         body: { userId },
         headers: {
@@ -205,14 +203,14 @@ const UsersManagement = () => {
       if (data?.error) throw new Error(data.error);
 
       toast({
-        title: "Successo",
-        description: "Utente eliminato con successo",
+        title: "Éxito",
+        description: "Usuario eliminado con éxito",
       });
 
       fetchUsers();
     } catch (error: any) {
       toast({
-        title: "Errore",
+        title: "Error",
         description: error.message,
         variant: "destructive",
       });
@@ -244,15 +242,15 @@ const UsersManagement = () => {
       if (error) throw error;
 
       toast({
-        title: "Successo",
-        description: "Dati utente aggiornati",
+        title: "Éxito",
+        description: "Datos actualizados",
       });
 
       setEditingUser(null);
       fetchUsers();
     } catch (error: any) {
       toast({
-        title: "Errore",
+        title: "Error",
         description: error.message,
         variant: "destructive",
       });
@@ -262,278 +260,312 @@ const UsersManagement = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
-        return <Badge className="bg-green-500">Approvato</Badge>;
+        return <Badge className="bg-green-500/20 text-green-700 text-[10px] px-1.5">Aprobado</Badge>;
       case "blocked":
-        return <Badge variant="destructive">Bloccato</Badge>;
+        return <Badge variant="destructive" className="text-[10px] px-1.5">Bloqueado</Badge>;
       case "pending":
-        return <Badge variant="secondary">In Attesa</Badge>;
+        return <Badge variant="secondary" className="text-[10px] px-1.5">Pendiente</Badge>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <Badge variant="outline" className="text-[10px] px-1.5">{status}</Badge>;
     }
   };
 
   const getUserRole = (user: Profile) => {
     const role = user.user_roles?.[0]?.role;
     return role === "partner" ? (
-      <Badge variant="outline">
-        <Briefcase className="w-3 h-3 mr-1" />
+      <Badge variant="outline" className="text-[10px] px-1.5 gap-0.5">
+        <Briefcase className="w-2.5 h-2.5" />
         Partner
       </Badge>
     ) : (
-      <Badge variant="outline">
-        <Users className="w-3 h-3 mr-1" />
+      <Badge variant="outline" className="text-[10px] px-1.5 gap-0.5">
+        <Users className="w-2.5 h-2.5" />
         Cliente
       </Badge>
     );
   };
 
   if (loading) {
-    return <div>Caricamento...</div>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-pulse text-muted-foreground">Cargando usuarios...</div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold">Gestione Utenti</h2>
-        
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <div className="relative flex-1 sm:min-w-[300px]">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Cerca per nome, email o attività..."
-              className="pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          
-          <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder="Filtra per tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tutti gli utenti</SelectItem>
-              <SelectItem value="partner">Solo Partner</SelectItem>
-              <SelectItem value="client">Solo Clienti</SelectItem>
-            </SelectContent>
-          </Select>
+    <div className="space-y-4">
+      {/* Compact Search and Filter */}
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input
+            placeholder="Buscar..."
+            className="pl-9 h-10 rounded-xl bg-muted/50"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
+        
+        <Select value={filter} onValueChange={setFilter}>
+          <SelectTrigger className="w-[120px] h-10 rounded-xl">
+            <SelectValue placeholder="Filtrar" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="partner">Partners</SelectItem>
+            <SelectItem value="client">Clientes</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      <div className="grid gap-4">
+      {/* Users Count */}
+      <p className="text-sm text-muted-foreground">
+        {filteredUsers.length} usuarios
+      </p>
+
+      {/* Compact User Cards */}
+      <div className="space-y-2">
         {filteredUsers.map((user) => (
-          <Card key={user.id}>
-            <CardHeader>
-              <div className="flex justify-between items-start gap-4">
-                <div className="flex items-start gap-3 flex-1">
-                  <Avatar className="h-12 w-12 border-2 border-primary/20">
-                    <AvatarImage src={user.profile_image_url || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                      {user.business_name?.[0] || user.first_name?.[0] || user.email[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">
-                      {user.business_name || `${user.first_name} ${user.last_name}` || user.email}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
-
-                  {/* Informazioni di contatto e pagamento */}
-                  <div className="mt-3 space-y-2">
-                    <div className="flex items-center gap-4 text-sm flex-wrap">
-                      {(user.contact_email || user.email) && (
-                        <a 
-                          href={`mailto:${user.contact_email || user.email}`}
-                          className="flex items-center gap-1 hover:text-primary transition-colors"
-                        >
-                          <Mail className="h-3 w-3" />
-                          <span className="underline">{user.contact_email || user.email}</span>
-                        </a>
-                      )}
-                      
-                      {(user.phone_number || user.business_phone) && (
-                        <div className="flex items-center gap-2">
-                          <a 
-                            href={`tel:${user.phone_number || user.business_phone}`}
-                            className="flex items-center gap-1 hover:text-primary transition-colors"
-                          >
-                            <Phone className="h-3 w-3" />
-                            <span className="underline">{user.phone_number || user.business_phone}</span>
-                          </a>
-                          <a
-                            href={`https://wa.me/+34${(user.phone_number || user.business_phone || '').replace(/[^0-9]/g, '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-green-600 hover:text-green-700 transition-colors text-xs"
-                          >
-                            WhatsApp
-                          </a>
-                        </div>
-                      )}
-                    </div>
-
-                    {user.last_payment_date && (
-                      <div className="flex items-center gap-4 text-sm">
-                        <div className="flex items-center gap-1">
-                          <CalendarIcon className="h-3 w-3" />
-                          <span>Ultimo pagamento: {format(new Date(user.last_payment_date), "dd/MM/yyyy")}</span>
-                        </div>
-                        {user.last_payment_amount && (
-                          <Badge className="bg-green-100 text-green-800">
-                            €{user.last_payment_amount.toFixed(2)}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 items-center">
+          <div 
+            key={user.id}
+            className="bg-card rounded-2xl border border-border/50 overflow-hidden"
+          >
+            {/* Main Row - Always visible */}
+            <div 
+              className="p-3 flex items-center gap-3 cursor-pointer"
+              onClick={() => setExpandedUser(expandedUser === user.id ? null : user.id)}
+            >
+              <Avatar className="h-11 w-11 border-2 border-primary/20 flex-shrink-0">
+                <AvatarImage src={user.profile_image_url || undefined} />
+                <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-semibold text-sm">
+                  {user.business_name?.[0] || user.first_name?.[0] || user.email[0].toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-semibold text-sm truncate">
+                    {user.business_name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email}
+                  </p>
                   {getUserRole(user)}
-                  {getStatusBadge(user.account_status)}
+                </div>
+                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                {/* Last Access */}
+                <div className="flex items-center gap-1 mt-1">
+                  <Clock className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-[10px] text-muted-foreground">
+                    {user.last_access 
+                      ? formatDistanceToNow(new Date(user.last_access), { addSuffix: true, locale: es })
+                      : "Sin accesos"
+                    }
+                  </span>
                 </div>
               </div>
-            </CardHeader>
 
-            <CardContent>
-              {editingUser === user.id ? (
-                <div className="space-y-4 mb-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium mb-1 block">Email Contatto</label>
-                      <Input
-                        placeholder="email@esempio.com"
-                        value={editForm.contact_email}
-                        onChange={(e) => setEditForm({...editForm, contact_email: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium mb-1 block">Telefono</label>
-                      <Input
-                        placeholder="+39 123 456 7890"
-                        value={editForm.phone_number}
-                        onChange={(e) => setEditForm({...editForm, phone_number: e.target.value})}
-                      />
-                    </div>
-                  </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {getStatusBadge(user.account_status)}
+                {expandedUser === user.id ? (
+                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                )}
+              </div>
+            </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium mb-1 block">Data Pagamento</label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !editForm.payment_date && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {editForm.payment_date ? (
-                              format(editForm.payment_date, "dd/MM/yyyy")
-                            ) : (
-                              "Seleziona data"
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={editForm.payment_date}
-                            onSelect={(date) => setEditForm({...editForm, payment_date: date})}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium mb-1 block">Importo (€)</label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={editForm.payment_amount}
-                        onChange={(e) => setEditForm({...editForm, payment_amount: e.target.value})}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={() => saveUserData(user.id)}>
-                      Salva
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => setEditingUser(null)}>
-                      Annulla
-                    </Button>
-                  </div>
-                </div>
-              ) : null}
-
-              <div className="flex gap-2 flex-wrap">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => startEditing(user)}
-                >
-                  <Edit className="w-4 h-4 mr-1" />
-                  Modifica Dati
-                </Button>
-
-                {user.account_status === "pending" && (
-                  <>
-                    <Button
-                      size="sm"
-                      onClick={() => updateAccountStatus(user.id, "approved")}
-                      className="ios-button"
+            {/* Expanded Content */}
+            {expandedUser === user.id && (
+              <div className="px-3 pb-3 pt-1 border-t border-border/50 space-y-3">
+                {/* Contact Info */}
+                <div className="flex flex-wrap gap-2 text-xs">
+                  {(user.contact_email || user.email) && (
+                    <a 
+                      href={`mailto:${user.contact_email || user.email}`}
+                      className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
                     >
-                      <Check className="w-4 h-4 mr-1" />
-                      Approva
-                    </Button>
+                      <Mail className="h-3 w-3" />
+                      <span className="truncate max-w-[150px]">{user.contact_email || user.email}</span>
+                    </a>
+                  )}
+                  
+                  {(user.phone_number || user.business_phone) && (
+                    <>
+                      <a 
+                        href={`tel:${user.phone_number || user.business_phone}`}
+                        className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                      >
+                        <Phone className="h-3 w-3" />
+                        <span>{user.phone_number || user.business_phone}</span>
+                      </a>
+                      <a
+                        href={`https://wa.me/+34${(user.phone_number || user.business_phone || '').replace(/[^0-9]/g, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+                      >
+                        WhatsApp
+                      </a>
+                    </>
+                  )}
+                </div>
+
+                {/* Payment Info */}
+                {user.last_payment_date && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <CalendarIcon className="h-3 w-3 text-muted-foreground" />
+                    <span>Último pago: {format(new Date(user.last_payment_date), "dd/MM/yyyy")}</span>
+                    {user.last_payment_amount && (
+                      <Badge className="bg-green-100 text-green-800 text-[10px]">
+                        €{user.last_payment_amount.toFixed(2)}
+                      </Badge>
+                    )}
+                  </div>
+                )}
+
+                {/* Edit Form */}
+                {editingUser === user.id ? (
+                  <div className="space-y-3 pt-2 border-t border-border/30">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-xs font-medium mb-1 block">Email</label>
+                        <Input
+                          placeholder="email@ejemplo.com"
+                          className="h-9 text-sm rounded-lg"
+                          value={editForm.contact_email}
+                          onChange={(e) => setEditForm({...editForm, contact_email: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium mb-1 block">Teléfono</label>
+                        <Input
+                          placeholder="+34 123 456 789"
+                          className="h-9 text-sm rounded-lg"
+                          value={editForm.phone_number}
+                          onChange={(e) => setEditForm({...editForm, phone_number: e.target.value})}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-xs font-medium mb-1 block">Fecha Pago</label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full h-9 justify-start text-left font-normal text-sm rounded-lg",
+                                !editForm.payment_date && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-3 w-3" />
+                              {editForm.payment_date ? format(editForm.payment_date, "dd/MM/yyyy") : "Seleccionar"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={editForm.payment_date}
+                              onSelect={(date) => setEditForm({...editForm, payment_date: date})}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium mb-1 block">Importe (€)</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          className="h-9 text-sm rounded-lg"
+                          value={editForm.payment_amount}
+                          onChange={(e) => setEditForm({...editForm, payment_amount: e.target.value})}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button size="sm" className="rounded-lg" onClick={() => saveUserData(user.id)}>
+                        Guardar
+                      </Button>
+                      <Button size="sm" variant="outline" className="rounded-lg" onClick={() => setEditingUser(null)}>
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs rounded-lg"
+                    onClick={(e) => { e.stopPropagation(); startEditing(user); }}
+                  >
+                    <Edit className="w-3 h-3 mr-1" />
+                    Editar
+                  </Button>
+
+                  {user.account_status === "pending" && (
+                    <>
+                      <Button
+                        size="sm"
+                        className="h-8 text-xs rounded-lg bg-green-600 hover:bg-green-700"
+                        onClick={(e) => { e.stopPropagation(); updateAccountStatus(user.id, "approved"); }}
+                      >
+                        <Check className="w-3 h-3 mr-1" />
+                        Aprobar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="h-8 text-xs rounded-lg"
+                        onClick={(e) => { e.stopPropagation(); updateAccountStatus(user.id, "rejected"); }}
+                      >
+                        <X className="w-3 h-3 mr-1" />
+                        Rechazar
+                      </Button>
+                    </>
+                  )}
+
+                  {user.account_status === "approved" && (
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => updateAccountStatus(user.id, "blocked")}
+                      className="h-8 text-xs rounded-lg text-orange-600 border-orange-300 hover:bg-orange-50"
+                      onClick={(e) => { e.stopPropagation(); updateAccountStatus(user.id, "blocked"); }}
                     >
-                      <X className="w-4 h-4 mr-1" />
-                      Rifiuta
+                      <Ban className="w-3 h-3 mr-1" />
+                      Bloquear
                     </Button>
-                  </>
-                )}
-                {user.account_status === "approved" && (
+                  )}
+
+                  {user.account_status === "blocked" && (
+                    <Button
+                      size="sm"
+                      className="h-8 text-xs rounded-lg bg-green-600 hover:bg-green-700"
+                      onClick={(e) => { e.stopPropagation(); updateAccountStatus(user.id, "approved"); }}
+                    >
+                      <Check className="w-3 h-3 mr-1" />
+                      Desbloquear
+                    </Button>
+                  )}
+
                   <Button
                     size="sm"
-                    variant="destructive"
-                    onClick={() => updateAccountStatus(user.id, "blocked")}
+                    variant="ghost"
+                    className="h-8 text-xs rounded-lg text-destructive hover:bg-destructive/10"
+                    onClick={(e) => { e.stopPropagation(); deleteUser(user.id); }}
                   >
-                    <Ban className="w-4 h-4 mr-1" />
-                    Blocca Account
+                    <Trash2 className="w-3 h-3 mr-1" />
+                    Eliminar
                   </Button>
-                )}
-                {user.account_status === "blocked" && (
-                  <Button
-                    size="sm"
-                    onClick={() => updateAccountStatus(user.id, "approved")}
-                    className="ios-button"
-                  >
-                    <Check className="w-4 h-4 mr-1" />
-                    Sblocca
-                  </Button>
-                )}
-                
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => deleteUser(user.id)}
-                >
-                  <Trash2 className="w-4 h-4 mr-1" />
-                  Elimina Utente
-                </Button>
+                </div>
               </div>
-            </CardContent>
-          </Card>
+            )}
+          </div>
         ))}
       </div>
     </div>
