@@ -22,16 +22,25 @@ const ONBOARDING_STEPS: ClientOnboardingStep[] = [
   {
     id: "welcome",
     title: "¡Bienvenido a StudentsLife! 🎉",
-    description: "Te guiaremos para conocer todas las funciones de la app. ¡Vamos!",
+    description: "Te guiaremos para conocer todas las funciones. ¡Vamos!",
+    targetTab: "social",
     position: "center",
   },
   {
-    id: "profile-photo",
-    title: "📷 Tu Foto de Perfil",
-    description: "Haz clic en tu avatar para subir una foto de perfil. ¡Es obligatorio para continuar!",
+    id: "go-to-profile",
+    title: "📷 Ve a Tu Perfil",
+    description: "Haz clic en tu avatar para ir a tu perfil y subir tu foto.",
     targetTab: "social",
     position: "top",
     highlightElement: "avatar",
+    arrowDirection: "up",
+  },
+  {
+    id: "profile-photo",
+    title: "📷 Sube Tu Foto de Perfil",
+    description: "Haz clic en el lápiz sobre tu avatar para subir una foto. ¡Es obligatorio!",
+    position: "top",
+    highlightElement: "profile-avatar",
     arrowDirection: "up",
     required: true,
     checkField: "hasProfilePhoto",
@@ -39,28 +48,28 @@ const ONBOARDING_STEPS: ClientOnboardingStep[] = [
   {
     id: "discover-partners",
     title: "🏪 Sección Socios",
-    description: "Aquí encontrarás todos los locales con descuentos exclusivos. ¡Explora el mapa y las categorías!",
+    description: "Aquí encontrarás todos los locales con descuentos exclusivos. ¡Explora el mapa!",
     targetTab: "partners",
     position: "center",
   },
   {
     id: "download-discounts",
     title: "🏷️ Descargar Descuentos",
-    description: "Entra en cualquier local → ve a sus eventos → descarga el QR. ¡Muéstralo en el local para tu descuento!",
+    description: "Entra en cualquier local → ve a sus eventos → descarga el QR. ¡Muéstralo para tu descuento!",
     targetTab: "partners",
     position: "center",
   },
   {
     id: "wallet",
     title: "💼 Tu Wallet",
-    description: "¡Mira! Aquí se guardan todos tus QR descargados. Acceso rápido a tus descuentos activos.",
+    description: "¡Mira! Aquí se guardan todos tus QR descargados. Acceso rápido a tus descuentos.",
     targetTab: "partners",
     position: "center",
   },
   {
     id: "loyalty-cards",
     title: "🎁 Tarjetas de Fidelidad",
-    description: "¡Mira! Cada vez que uses un QR, acumulas sellos. ¡Con 10 sellos ganas premios gratis!",
+    description: "¡Mira! Cada vez que uses un QR, acumulas sellos. ¡Con 10 sellos ganas premios!",
     targetTab: "partners",
     position: "center",
   },
@@ -93,6 +102,20 @@ export const useClientOnboarding = (userId: string | undefined) => {
   const [profileCompletion, setProfileCompletion] = useState<ClientProfileCompletion | null>(null);
   const [steps, setSteps] = useState<ClientOnboardingStep[]>([]);
 
+  // Get saved step from localStorage
+  const getSavedStep = useCallback(() => {
+    if (!userId) return 0;
+    const saved = localStorage.getItem(`client_onboarding_step_${userId}`);
+    return saved ? parseInt(saved, 10) : 0;
+  }, [userId]);
+
+  // Save current step to localStorage
+  const saveCurrentStep = useCallback((step: number) => {
+    if (userId) {
+      localStorage.setItem(`client_onboarding_step_${userId}`, step.toString());
+    }
+  }, [userId]);
+
   // Check profile completion status
   const checkProfileCompletion = useCallback(async () => {
     if (!userId) return null;
@@ -116,12 +139,10 @@ export const useClientOnboarding = (userId: string | undefined) => {
   const calculateSteps = useCallback(() => {
     const wasCompleted = localStorage.getItem(`client_onboarding_completed_${userId}`);
     
-    // If already completed, don't show again
     if (wasCompleted) {
       return [];
     }
     
-    // Always show all steps
     localStorage.setItem(`client_onboarding_started_${userId}`, "true");
     return ONBOARDING_STEPS;
   }, [userId]);
@@ -137,27 +158,47 @@ export const useClientOnboarding = (userId: string | undefined) => {
       await checkProfileCompletion();
       const stepsToShow = calculateSteps();
       setSteps(stepsToShow);
+      
+      // Restore saved step
+      const savedStep = getSavedStep();
+      if (savedStep > 0 && savedStep < stepsToShow.length) {
+        setCurrentStep(savedStep);
+      }
+      
       setIsOnboardingActive(stepsToShow.length > 0);
       setIsLoading(false);
     };
 
     init();
-  }, [userId, checkProfileCompletion, calculateSteps]);
+  }, [userId, checkProfileCompletion, calculateSteps, getSavedStep]);
 
-  // Refresh completion status
+  // Refresh completion status and auto-advance if needed
   const refreshCompletion = useCallback(async () => {
     const completion = await checkProfileCompletion();
     if (completion) {
       setProfileCompletion(completion);
+      
+      // Auto-advance if current required step is now complete
+      const currentStepData = steps[currentStep];
+      if (currentStepData?.required && currentStepData?.checkField) {
+        const isNowComplete = completion[currentStepData.checkField as keyof ClientProfileCompletion];
+        if (isNowComplete) {
+          // Auto advance to next step
+          const nextStepIndex = currentStep + 1;
+          if (nextStepIndex < steps.length) {
+            setCurrentStep(nextStepIndex);
+            saveCurrentStep(nextStepIndex);
+          }
+        }
+      }
     }
-  }, [checkProfileCompletion]);
+  }, [checkProfileCompletion, currentStep, steps, saveCurrentStep]);
 
   // Check if current step can proceed
   const canProceed = useCallback(() => {
     const currentStepData = steps[currentStep];
     if (!currentStepData) return true;
     
-    // If step is required and has a checkField, verify it's complete
     if (currentStepData.required && currentStepData.checkField && profileCompletion) {
       return profileCompletion[currentStepData.checkField as keyof ClientProfileCompletion];
     }
@@ -166,34 +207,51 @@ export const useClientOnboarding = (userId: string | undefined) => {
   }, [currentStep, steps, profileCompletion]);
 
   const nextStep = useCallback(() => {
+    if (!canProceed()) {
+      return false;
+    }
+    
     if (currentStep < steps.length - 1) {
-      setCurrentStep((prev) => prev + 1);
+      const next = currentStep + 1;
+      setCurrentStep(next);
+      saveCurrentStep(next);
       return true;
     }
     return true;
-  }, [currentStep, steps.length]);
+  }, [currentStep, steps.length, canProceed, saveCurrentStep]);
 
   const prevStep = useCallback(() => {
     if (currentStep > 0) {
-      setCurrentStep((prev) => prev - 1);
+      const prev = currentStep - 1;
+      setCurrentStep(prev);
+      saveCurrentStep(prev);
     }
-  }, [currentStep]);
+  }, [currentStep, saveCurrentStep]);
 
   const completeOnboarding = useCallback(() => {
     if (userId) {
       localStorage.setItem(`client_onboarding_completed_${userId}`, "true");
+      localStorage.removeItem(`client_onboarding_step_${userId}`);
     }
     setIsOnboardingActive(false);
   }, [userId]);
 
   const skipCurrentStep = useCallback(() => {
+    const currentStepData = steps[currentStep];
+    // Cannot skip required steps
+    if (currentStepData?.required && !canProceed()) {
+      return false;
+    }
+    
     if (currentStep < steps.length - 1) {
-      setCurrentStep((prev) => prev + 1);
+      const next = currentStep + 1;
+      setCurrentStep(next);
+      saveCurrentStep(next);
     } else {
       completeOnboarding();
     }
     return true;
-  }, [currentStep, steps, completeOnboarding]);
+  }, [currentStep, steps, completeOnboarding, canProceed, saveCurrentStep]);
 
   const getCurrentStep = (): ClientOnboardingStep | null => {
     return steps[currentStep] || null;
