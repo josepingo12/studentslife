@@ -12,9 +12,9 @@ interface LoyaltyCardsSheetProps {
   clientId: string;
 }
 
-interface StampDate {
-  date: string;
-  index: number;
+interface StampHistoryItem {
+  stamp_number: number;
+  stamped_at: string;
 }
 
 interface StampData {
@@ -33,6 +33,7 @@ interface StampData {
     reward_description: string;
     stamps_required: number;
   };
+  stampHistory?: StampHistoryItem[];
 }
 
 const LoyaltyCardsSheet = ({ open, onOpenChange, clientId }: LoyaltyCardsSheetProps) => {
@@ -61,10 +62,26 @@ const LoyaltyCardsSheet = ({ open, onOpenChange, clientId }: LoyaltyCardsSheetPr
       .eq("client_id", clientId);
 
     if (data) {
-      setStamps(data as unknown as StampData[]);
+      // Fetch stamp history for each stamp
+      const stampsWithHistory = await Promise.all(
+        data.map(async (stamp: any) => {
+          const { data: historyData } = await supabase
+            .from("stamp_history")
+            .select("stamp_number, stamped_at")
+            .eq("client_stamps_id", stamp.id)
+            .order("stamp_number", { ascending: true });
+          
+          return {
+            ...stamp,
+            stampHistory: historyData || [],
+          };
+        })
+      );
+      
+      setStamps(stampsWithHistory as unknown as StampData[]);
       
       // Check for completed cards that haven't been claimed
-      const completedUnclaimed = data.find(
+      const completedUnclaimed = stampsWithHistory.find(
         (s: any) => s.stamps_count >= (s.loyalty_card?.stamps_required || 10) && !s.reward_claimed
       );
       
@@ -221,21 +238,14 @@ const LoyaltyCardsSheet = ({ open, onOpenChange, clientId }: LoyaltyCardsSheetPr
                         {/* Stamps grid with dates */}
                         <div className="grid grid-cols-5 gap-2 mb-3">
                           {[...Array(stampsRequired)].map((_, i) => {
-                            // Calculate date for this stamp (distribute dates based on last_stamp_at and created_at)
+                            const stampNumber = i + 1;
                             const isStamped = i < stamp.stamps_count;
-                            let stampDate: string | null = null;
                             
-                            if (isStamped && stamp.last_stamp_at && stamp.created_at) {
-                              // Simple approach: show date only for filled stamps
-                              // For a more accurate approach, we'd need individual stamp dates in the DB
-                              if (i === stamp.stamps_count - 1) {
-                                // Last stamp - use last_stamp_at
-                                stampDate = stamp.last_stamp_at;
-                              } else if (i === 0) {
-                                // First stamp - use created_at
-                                stampDate = stamp.created_at;
-                              }
-                            }
+                            // Get date from stamp history
+                            const historyItem = stamp.stampHistory?.find(
+                              (h) => h.stamp_number === stampNumber
+                            );
+                            const stampDate = historyItem?.stamped_at || null;
                             
                             return (
                               <div key={i} className="flex flex-col items-center">
@@ -257,7 +267,7 @@ const LoyaltyCardsSheet = ({ open, onOpenChange, clientId }: LoyaltyCardsSheetPr
                                         month: '2-digit', 
                                         year: '2-digit' 
                                       })
-                                    : isStamped ? '—' : ''
+                                    : ''
                                   }
                                 </span>
                               </div>

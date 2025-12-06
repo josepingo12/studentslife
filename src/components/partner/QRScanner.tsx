@@ -181,6 +181,15 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
           })
           .eq("id", existingStamps.id);
 
+        // Add to stamp history
+        await supabase
+          .from("stamp_history")
+          .insert({
+            client_stamps_id: existingStamps.id,
+            stamp_number: newCount,
+            stamped_at: new Date().toISOString(),
+          });
+
         toast({
           title: (
             <div className="flex items-center gap-2">
@@ -198,7 +207,7 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         });
       } else {
         // Create new stamp record
-        await supabase
+        const { data: newStampRecord } = await supabase
           .from("client_stamps")
           .insert({
             client_id: clientId,
@@ -206,7 +215,20 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
             loyalty_card_id: loyaltyCard.id,
             stamps_count: 1,
             last_stamp_at: new Date().toISOString(),
-          });
+          })
+          .select("id")
+          .single();
+
+        // Add to stamp history
+        if (newStampRecord) {
+          await supabase
+            .from("stamp_history")
+            .insert({
+              client_stamps_id: newStampRecord.id,
+              stamp_number: 1,
+              stamped_at: new Date().toISOString(),
+            });
+        }
 
         toast({
           title: (
