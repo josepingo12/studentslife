@@ -369,7 +369,8 @@
     "shared": "¡Compartido!",
     "sharedSuccess": "El reel ha sido enviado correctamente",
     "sendTo": "Enviar a",
-    "views": "visualizaciones"
+    "views": "visualizaciones",
+    "allUsers": "Usuarios"
   },
   "chat": {
     "chats": "Chats",
