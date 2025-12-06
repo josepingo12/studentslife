@@ -685,6 +685,8 @@ const handlePartnerSearch = async (query: string) => {
           onSkip={skipCurrentStep}
           onComplete={completeOnboarding}
           onNavigateTab={(tab) => setActiveTab(tab as "social" | "partners" | "chats")}
+          onOpenWallet={() => setWalletSheetOpen(true)}
+          onOpenLoyaltyCards={() => setLoyaltyCardsSheetOpen(true)}
           canProceed={canProceed()}
         />
       )}
