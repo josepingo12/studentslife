@@ -101,14 +101,8 @@
     "noPosts": "¡No hay publicaciones aún. Sé el primero en publicar!",
     "noLikesYet": "Aún no hay me gusta"
   },
-  "chat": {
-    "chats": "Chats",
-    "newMessage": "Nuevo Mensaje",
-    "typeMessage": "Escribe un mensaje...",
-    "send": "Enviar",
-    "noMessages": "Sin mensajes aún",
-    "online": "En línea",
-    "offline": "Desconectado"
+  "chat_old": {
+    "_note": "Moved to bottom of file with additional keys"
   },
   "partner": {
     "gallery": "Galería",
@@ -203,26 +197,8 @@
     "uploadSuccess": "Subida completada",
     "uploadError": "Error al subir"
   },
-  "common": {
-    "save": "Guardar",
-    "cancel": "Cancelar",
-    "delete": "Eliminar",
-    "edit": "Editar",
-    "loading": "Cargando...",
-    "success": "Éxito",
-    "error": "Error",
-    "confirm": "Confirmar",
-    "back": "Atrás",
-    "next": "Siguiente",
-    "upload": "Subir",
-    "search": "Buscar",
-    "user": "Usuario",
-    "close": "Cerrar",
-    "view": "Ver",
-    "send": "Enviar",
-    "message": "Mensaje",
-    "code": "Código",
-    "tip": "Sugerencia"
+  "common_old": {
+    "_note": "Moved to bottom of file with additional keys"
   },
   "moderation": {
     "blockUser": "Bloquear usuario",
@@ -386,5 +362,48 @@
     "awesome": "¡Genial!",
     "stampAdded": "¡Sello añadido!",
     "stampAddedDesc": "Tienes {count}/{total} sellos"
+  },
+  "social": {
+    "share": "Compartir",
+    "sharedReel": "Reel compartido",
+    "shared": "¡Compartido!",
+    "sharedSuccess": "El reel ha sido enviado correctamente",
+    "sendTo": "Enviar a",
+    "views": "visualizaciones"
+  },
+  "chat": {
+    "chats": "Chats",
+    "newMessage": "Nuevo Mensaje",
+    "typeMessage": "Escribe un mensaje...",
+    "send": "Enviar",
+    "noMessages": "Sin mensajes aún",
+    "online": "En línea",
+    "offline": "Desconectado",
+    "searchContacts": "Buscar contactos...",
+    "favorites": "Favoritos",
+    "recentChats": "Chats recientes"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "loading": "Cargando...",
+    "success": "Éxito",
+    "error": "Error",
+    "confirm": "Confirmar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "upload": "Subir",
+    "search": "Buscar",
+    "user": "Usuario",
+    "close": "Cerrar",
+    "view": "Ver",
+    "send": "Enviar",
+    "message": "Mensaje",
+    "code": "Código",
+    "tip": "Sugerencia",
+    "person": "persona",
+    "people": "personas"
   }
 }

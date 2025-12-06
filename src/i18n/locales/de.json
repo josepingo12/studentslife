@@ -353,5 +353,48 @@
     "coordinatesHelper": "Sie können Ihre Koordinaten auf Google Maps finden: Klicken Sie mit der rechten Maustaste auf Ihren Standort und wählen Sie die Koordinaten zum Kopieren aus.",
     "invalidLatitude": "Der Breitengrad muss zwischen -90 und 90 liegen",
     "invalidLongitude": "Der Längengrad muss zwischen -180 und 180 liegen"
+  },
+  "social": {
+    "share": "Teilen",
+    "sharedReel": "Geteiltes Reel",
+    "shared": "Geteilt!",
+    "sharedSuccess": "Das Reel wurde erfolgreich gesendet",
+    "sendTo": "Senden an",
+    "views": "Aufrufe"
+  },
+  "chat": {
+    "chats": "Chats",
+    "newMessage": "Neue Nachricht",
+    "typeMessage": "Nachricht eingeben...",
+    "send": "Senden",
+    "noMessages": "Noch keine Nachrichten",
+    "online": "Online",
+    "offline": "Offline",
+    "searchContacts": "Kontakte suchen...",
+    "favorites": "Favoriten",
+    "recentChats": "Letzte Chats"
+  },
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "loading": "Wird geladen...",
+    "success": "Erfolg",
+    "error": "Fehler",
+    "confirm": "Bestätigen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "upload": "Hochladen",
+    "search": "Suchen",
+    "user": "Benutzer",
+    "close": "Schließen",
+    "view": "Ansehen",
+    "send": "Senden",
+    "message": "Nachricht",
+    "code": "Code",
+    "tip": "Tipp",
+    "person": "Person",
+    "people": "Personen"
   }
 }
