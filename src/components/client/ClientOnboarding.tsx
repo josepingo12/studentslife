@@ -173,6 +173,7 @@ const ClientOnboarding = ({
   const isFirstStep = currentStep === 0;
   const isWelcome = step.id === "welcome";
   const isRequired = step.required;
+  const isGoToProfileStep = step.id === "go-to-profile";
 
   // Navigate to the correct tab and trigger actions
   useEffect(() => {
@@ -236,10 +237,8 @@ const ClientOnboarding = ({
       return;
     }
     
-    // If on go-to-profile step, navigate to profile page
-    if (step?.id === "go-to-profile" && onNavigateToProfile) {
-      onNavigateToProfile();
-      onNext();
+    // Don't allow button click for go-to-profile step - must click the avatar
+    if (isGoToProfileStep) {
       return;
     }
     
@@ -403,6 +402,26 @@ const ClientOnboarding = ({
           )}
         </motion.div>
 
+        {/* Clickable area for go-to-profile step */}
+        {isGoToProfileStep && spotlightRect && onNavigateToProfile && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed z-[92] cursor-pointer"
+            onClick={() => {
+              onNavigateToProfile();
+              onNext();
+            }}
+            style={{
+              left: spotlightRect.x - spotlightRect.width / 2,
+              top: spotlightRect.y - spotlightRect.height / 2,
+              width: spotlightRect.width,
+              height: spotlightRect.height,
+              borderRadius: spotlightRect.isRectangle ? '0.75rem' : '50%',
+            }}
+          />
+        )}
+
         {/* Animated arrow pointing to the element */}
         {spotlightRect && step.arrowDirection && (
           <motion.div
@@ -563,18 +582,6 @@ const ClientOnboarding = ({
               
               <div className="flex-1" />
 
-              {!isLastStep && !isWelcome && !isRequired && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleSkip}
-                  className="gap-1 text-muted-foreground rounded-xl"
-                >
-                  Saltar
-                  <X className="w-4 h-4" />
-                </Button>
-              )}
-
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -582,7 +589,8 @@ const ClientOnboarding = ({
                 <Button
                   size="sm"
                   onClick={handleNext}
-                  className={`gap-2 rounded-xl px-6 ${isRequired && !canProceed 
+                  disabled={isGoToProfileStep || (isRequired && !canProceed)}
+                  className={`gap-2 rounded-xl px-6 ${(isGoToProfileStep || (isRequired && !canProceed))
                     ? "bg-gray-400 cursor-not-allowed" 
                     : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg"
                   }`}
@@ -592,9 +600,13 @@ const ClientOnboarding = ({
                       ¡Empezar!
                       <PartyPopper className="w-4 h-4" />
                     </>
+                  ) : isGoToProfileStep ? (
+                    <>
+                      Haz clic en tu avatar ↑
+                    </>
                   ) : isRequired && !canProceed ? (
                     <>
-                      Haz clic arriba ↑
+                      Sube tu foto ↑
                     </>
                   ) : (
                     <>
