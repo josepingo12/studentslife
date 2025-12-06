@@ -7,6 +7,7 @@ import { Heart, MessageCircle, QrCode } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
+import VideoThumbnail from "@/components/shared/VideoThumbnail";
 
 interface NotificationsSheetProps {
   open: boolean;
@@ -298,15 +299,12 @@ const NotificationsSheet = ({ open, onOpenChange, userId, userRole }: Notificati
                     </div>
                   )}
                   {notification.posts?.video_url && !notification.posts?.image_url && (
-                    <div
+                    <VideoThumbnail
+                      videoUrl={notification.posts.video_url}
+                      className="w-12 h-12 rounded cursor-pointer"
+                      showPlayIcon={true}
                       onClick={() => notification.post_id && handlePostClick(notification.post_id)}
-                      className="cursor-pointer"
-                    >
-                      <video
-                        src={notification.posts.video_url}
-                        className="w-12 h-12 rounded object-cover"
-                      />
-                    </div>
+                    />
                   )}
                   {notification.events?.image_url && (
                     <div className="cursor-pointer">
