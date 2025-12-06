@@ -983,6 +983,38 @@ export type Database = {
           },
         ]
       }
+      stamp_history: {
+        Row: {
+          client_stamps_id: string
+          created_at: string
+          id: string
+          stamp_number: number
+          stamped_at: string
+        }
+        Insert: {
+          client_stamps_id: string
+          created_at?: string
+          id?: string
+          stamp_number: number
+          stamped_at?: string
+        }
+        Update: {
+          client_stamps_id?: string
+          created_at?: string
+          id?: string
+          stamp_number?: number
+          stamped_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stamp_history_client_stamps_id_fkey"
+            columns: ["client_stamps_id"]
+            isOneToOne: false
+            referencedRelation: "client_stamps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stories: {
         Row: {
           auto_moderated: boolean | null
