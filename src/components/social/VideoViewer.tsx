@@ -290,23 +290,22 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
            onClick={handleVideoClick}
          />
 
-         {/* Controls Right Side - ICONE GIGANTI CENTRALI */}
-               <div className="absolute right-2 top-1/2 transform translate-y-8 flex flex-col items-center gap-8 z-10">
+         {/* Controls Right Side - ICONE CENTRALI */}
+               <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col items-center gap-6 z-10">
                  {/* Like Button */}
                  <div className="flex flex-col items-center">
                    <Button
                      variant="ghost"
                      size="icon"
-                     className="text-white hover:bg-white/20 rounded-full h-16 w-16 p-2"
+                     className="text-white hover:bg-white/20 rounded-full h-14 w-14"
                      onClick={handleLike}
                      disabled={loading}
                    >
                      <Heart
-                       className={`${isLiked ? "fill-red-500 text-red-500" : ""}`}
-                       style={{ width: '30px', height: '30px' }} // ICONE A 30PX
+                       className={`w-7 h-7 ${isLiked ? "fill-red-500 text-red-500" : ""}`}
                      />
                    </Button>
-                   <span className="text-white text-xs font-bold -mt-1">{likesCount}</span> {/* Contatore più vicino */}
+                   <span className="text-white text-xs font-semibold">{likesCount}</span>
                  </div>
 
                  {/* Comment Button */}
@@ -314,14 +313,12 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
                    <Button
                      variant="ghost"
                      size="icon"
-                     className="text-white hover:bg-white/20 rounded-full h-16 w-16 p-2"
+                     className="text-white hover:bg-white/20 rounded-full h-14 w-14"
                      onClick={() => setCommentsOpen(true)}
                    >
-                     <MessageCircle
-                       style={{ width: '30px', height: '30px' }} // ICONE A 30PX
-                     />
+                     <MessageCircle className="w-7 h-7" />
                    </Button>
-                   <span className="text-white text-xs font-bold -mt-1">{commentsCount}</span> {/* Contatore più vicino */}
+                   <span className="text-white text-xs font-semibold">{commentsCount}</span>
                  </div>
 
                  {/* Save Button */}
@@ -329,23 +326,28 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
                    <Button
                      variant="ghost"
                      size="icon"
-                     className="text-white hover:bg-white/20 rounded-full h-16 w-16 p-2"
+                     className="text-white hover:bg-white/20 rounded-full h-14 w-14"
                      onClick={handleSaveToggle}
                      disabled={loading}
                    >
                      <Bookmark
-                       className={`${isSaved ? "fill-yellow-400 text-yellow-400" : ""}`}
-                       style={{ width: '30px', height: '30px' }} // ICONE A 30PX
+                       className={`w-7 h-7 ${isSaved ? "fill-yellow-400 text-yellow-400" : ""}`}
                      />
                    </Button>
                  </div>
                </div>
 
-         {/* Progress Bar */}
-         <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/50 to-transparent">
-           <div className="flex items-center gap-3 text-white text-sm">
+         {/* Progress Bar & Caption */}
+         <div className="absolute bottom-0 left-0 right-16 p-4 bg-gradient-to-t from-black/70 to-transparent" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1rem)' }}>
+           {/* Caption */}
+           {post.content && (
+             <p className="text-white text-sm mb-3 line-clamp-3">{post.content}</p>
+           )}
+           
+           {/* Progress */}
+           <div className="flex items-center gap-3 text-white text-xs">
              <span>{formatTime(currentTime)}</span>
-             <div className="flex-1 bg-white/20 rounded-full h-1">
+             <div className="flex-1 bg-white/30 rounded-full h-1">
                <div
                  className="bg-white rounded-full h-1 transition-all duration-100"
                  style={{ width: `${progress}%` }}
@@ -353,13 +355,6 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
              </div>
              <span>{formatTime(duration)}</span>
            </div>
-
-           {/* Caption */}
-           {post.content && (
-             <div className="mt-3">
-               <p className="text-white text-sm">{post.content}</p>
-             </div>
-           )}
          </div>
 
          {/* Comments Sheet - AGGIUNGI QUESTO */}
