@@ -26,9 +26,8 @@ import WalletSheet from "@/components/client/WalletSheet";
 import LoyaltyCardsSheet from "@/components/client/LoyaltyCardsSheet";
 import { useTranslation } from "react-i18next";
 import { MapPin } from "lucide-react";
-// Rimuovi questi import se non usati per altro
-// import { PushNotifications } from '@capacitor/push-notifications';
-// import { useFCMTokenRegistration } from '@hooks/useFCMTokenRegistration';
+import { useClientOnboarding } from "@/hooks/useClientOnboarding";
+import ClientOnboarding from "@/components/client/ClientOnboarding";
 
 
 const ClientDashboard = () => {
@@ -63,8 +62,19 @@ const [partnerSearching, setPartnerSearching] = useState(false);
   // Abilita notifiche web (se non è una piattaforma nativa)
   useWebNotifications({ userId: user?.id });
 
-  // Rimuovi la chiamata a useFCMTokenRegistration
-  // useFCMTokenRegistration(user?.id, fcmToken);
+  // Client onboarding
+  const {
+    isOnboardingActive,
+    getCurrentStep,
+    getProgress,
+    totalSteps,
+    currentStep,
+    nextStep,
+    prevStep,
+    skipCurrentStep,
+    completeOnboarding,
+    refreshCompletion,
+  } = useClientOnboarding(user?.id);
 
   const markAllNotificationsAsRead = async () => {
     if (!user?.id) return;
@@ -654,6 +664,21 @@ const handlePartnerSearch = async (query: string) => {
         onOpenChange={setLoyaltyCardsSheetOpen}
         clientId={user.id}
       />
+
+      {/* Client Onboarding Tutorial */}
+      {isOnboardingActive && (
+        <ClientOnboarding
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          step={getCurrentStep()}
+          progress={getProgress()}
+          onNext={nextStep}
+          onPrev={prevStep}
+          onSkip={skipCurrentStep}
+          onComplete={completeOnboarding}
+          onNavigateTab={(tab) => setActiveTab(tab as "social" | "partners" | "chats")}
+        />
+      )}
     </div>
   );
 };
