@@ -16,6 +16,7 @@ import LikesSheet from "./LikesSheet";
 import SharePostSheet from "./SharePostSheet";
 import { useTranslation } from "react-i18next";
 import VideoFeed from "./VideoFeed";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface PostCardProps {
   post: any;
@@ -37,7 +38,8 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
   const [isSaved, setIsSaved] = useState(false);
   const [videoFeedOpen, setVideoFeedOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
-
+  const [showHeartAnimation, setShowHeartAnimation] = useState(false);
+  const lastTapRef = useRef<number>(0);
 
   // Stati per la gestione del video
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -48,6 +50,36 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
     loadSharesCount();
     checkIfSaved();
   }, [post.id]);
+
+  const handleDoubleTap = async () => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+    
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      // Double tap detected
+      setShowHeartAnimation(true);
+      setTimeout(() => setShowHeartAnimation(false), 1000);
+      
+      // Like the post if not already liked
+      if (!isLiked && !loading) {
+        try {
+          const { error } = await supabase
+            .from("likes")
+            .insert({
+              post_id: post.id,
+              user_id: currentUserId,
+            });
+
+          if (!error) {
+            onLikeToggle(post.id, true);
+          }
+        } catch (error) {
+          console.error("Error liking post:", error);
+        }
+      }
+    }
+    lastTapRef.current = now;
+  };
 
   // Logica per gestire il mute/unmute
   const handleToggleMute = () => {
@@ -314,7 +346,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
      if (post.media_type === 'video' && (post.video_url || post.image_url)) {
        const src = post.video_url || post.image_url;
        return (
-         <div className="relative cursor-pointer" onClick={() => setVideoFeedOpen(true)}>
+         <div className="relative cursor-pointer" onClick={(e) => { handleDoubleTap(); }}>
            <video
              ref={videoRef}
              src={src}
@@ -327,6 +359,26 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
            >
              Il tuo browser non supporta i video.
            </video>
+           {/* Heart Animation */}
+           <AnimatePresence>
+             {showHeartAnimation && (
+               <motion.div
+                 initial={{ scale: 0, opacity: 0 }}
+                 animate={{ scale: 1, opacity: 1 }}
+                 exit={{ scale: 0, opacity: 0 }}
+                 transition={{ duration: 0.3, ease: "easeOut" }}
+                 className="absolute inset-0 flex items-center justify-center pointer-events-none"
+               >
+                 <motion.div
+                   initial={{ scale: 1 }}
+                   animate={{ scale: [1, 1.2, 1] }}
+                   transition={{ duration: 0.5 }}
+                 >
+                   <Heart className="w-24 h-24 fill-white text-white drop-shadow-lg" />
+                 </motion.div>
+               </motion.div>
+             )}
+           </AnimatePresence>
            <div className="absolute bottom-3 right-3 flex gap-2">
              <Button
                variant="ghost"
@@ -347,14 +399,34 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
         if (post.media_type === 'image' && post.image_url) {
           return (
             <div
-              className="cursor-pointer"
-              onClick={() => setImageViewerOpen(true)}
+              className="relative cursor-pointer"
+              onClick={handleDoubleTap}
             >
               <img
                 src={post.image_url}
                 alt="Post"
                 className="w-full max-h-96 object-cover"
               />
+              {/* Heart Animation */}
+              <AnimatePresence>
+                {showHeartAnimation && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                  >
+                    <motion.div
+                      initial={{ scale: 1 }}
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <Heart className="w-24 h-24 fill-white text-white drop-shadow-lg" />
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           );
         }
@@ -362,7 +434,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
         if (post.image_url) {
           if (isVideoUrl(post.image_url)) {
             return (
-              <div className="relative">
+              <div className="relative" onClick={handleDoubleTap}>
                 <video
                   ref={videoRef}
                   src={post.image_url}
@@ -372,14 +444,33 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
                   muted={isMuted}
                   playsInline
                   preload="metadata"
-                  onClick={handleVideoClick}
                 />
+                {/* Heart Animation */}
+                <AnimatePresence>
+                  {showHeartAnimation && (
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                    >
+                      <motion.div
+                        initial={{ scale: 1 }}
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <Heart className="w-24 h-24 fill-white text-white drop-shadow-lg" />
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 <div className="absolute bottom-3 right-3 flex gap-2">
                   <Button
                     variant="ghost"
                     size="icon"
                     className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-sm rounded-full h-8 w-8"
-                    onClick={handleToggleMute}
+                    onClick={(e) => { e.stopPropagation(); handleToggleMute(); }}
                   >
                     {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                   </Button>
@@ -387,7 +478,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
                     variant="ghost"
                     size="icon"
                     className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-sm rounded-full h-8 w-8"
-                    onClick={handleToggleFullscreen}
+                    onClick={(e) => { e.stopPropagation(); handleToggleFullscreen(); }}
                   >
                     <Maximize className="w-4 h-4" />
                   </Button>
@@ -397,14 +488,34 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
           }
           return (
             <div
-              className="cursor-pointer"
-              onClick={() => setImageViewerOpen(true)}
+              className="relative cursor-pointer"
+              onClick={handleDoubleTap}
             >
               <img
                 src={post.image_url}
                 alt="Post"
                 className="w-full max-h-96 object-cover"
               />
+              {/* Heart Animation */}
+              <AnimatePresence>
+                {showHeartAnimation && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                  >
+                    <motion.div
+                      initial={{ scale: 1 }}
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <Heart className="w-24 h-24 fill-white text-white drop-shadow-lg" />
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           );
         }
