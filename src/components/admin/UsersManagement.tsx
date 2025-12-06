@@ -312,7 +312,7 @@ const UsersManagement = () => {
       case "blocked":
         return <Badge variant="destructive" className="text-[10px] px-1.5">Bloqueado</Badge>;
       case "pending":
-        return <Badge variant="secondary" className="text-[10px] px-1.5">Pendiente</Badge>;
+        return <Badge className="bg-yellow-400 text-yellow-900 font-semibold text-[10px] px-1.5 animate-pulse">Pendiente</Badge>;
       default:
         return <Badge variant="outline" className="text-[10px] px-1.5">{status}</Badge>;
     }
