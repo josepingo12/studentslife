@@ -460,12 +460,12 @@ const ClientOnboarding = ({
               transition={{ duration: 4, repeat: Infinity }}
             />
             
-            {/* Required badge */}
+            {/* Required badge - positioned better */}
             {isRequired && (
               <motion.div 
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute top-4 right-4 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-3 py-1 rounded-full font-bold shadow-lg"
+                className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-lg z-10"
               >
                 ⚠️ Obligatorio
               </motion.div>
