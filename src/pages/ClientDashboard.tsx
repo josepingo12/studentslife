@@ -689,6 +689,8 @@ const handlePartnerSearch = async (query: string) => {
           onOpenWallet={() => setWalletSheetOpen(true)}
           onOpenLoyaltyCards={() => setLoyaltyCardsSheetOpen(true)}
           canProceed={canProceed()}
+          walletOpen={walletSheetOpen}
+          loyaltyCardsOpen={loyaltyCardsSheetOpen}
         />
       )}
     </div>
