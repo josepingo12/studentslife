@@ -343,7 +343,10 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
             variant="ghost"
             size="icon"
             className="text-white hover:bg-white/20 rounded-full h-12 w-12"
-            onClick={handleLike}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleLike();
+            }}
             disabled={loading}
           >
             <Heart
@@ -360,7 +363,10 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
             variant="ghost"
             size="icon"
             className="text-white hover:bg-white/20 rounded-full h-12 w-12"
-            onClick={() => setCommentsOpen(true)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setCommentsOpen(true);
+            }}
           >
             <MessageCircle style={{ width: '28px', height: '28px' }} />
           </Button>
@@ -373,7 +379,10 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
             variant="ghost"
             size="icon"
             className="text-white hover:bg-white/20 rounded-full h-12 w-12"
-            onClick={() => setShareOpen(true)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShareOpen(true);
+            }}
           >
             <Send style={{ width: '26px', height: '26px' }} />
           </Button>
@@ -388,7 +397,10 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
             variant="ghost"
             size="icon"
             className="text-white hover:bg-white/20 rounded-full h-12 w-12"
-            onClick={handleSaveToggle}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSaveToggle();
+            }}
             disabled={loading}
           >
             <Bookmark
