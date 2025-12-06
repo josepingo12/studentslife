@@ -29,17 +29,26 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [likesCount, setLikesCount] = useState(post?.likes?.length || 0);
+  const [likesCount, setLikesCount] = useState(0);
   const [commentsCount, setCommentsCount] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
 
+  // Reset and reload counters when post changes
   useEffect(() => {
     if (open && post) {
+      // Reset states for new post
+      setLikesCount(post?.likes?.length || 0);
+      setIsLiked(post?.likes?.some((like: any) => like.user_id === currentUserId) || false);
+      setCommentsCount(0);
+      setIsSaved(false);
+      
+      // Load fresh data
       loadCommentsCount();
       checkIfSaved();
     }
-  }, [open, post]);
+  }, [open, post?.id, currentUserId]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -83,8 +92,6 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
     setIsSaved(!!data);
   };
 
-  const isLiked = post?.likes?.some((like: any) => like.user_id === currentUserId);
-
   const handleLike = async () => {
     if (!post?.id) return;
     setLoading(true);
@@ -97,6 +104,7 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
           .eq("user_id", currentUserId);
         if (error) throw error;
         setLikesCount(prev => prev - 1);
+        setIsLiked(false);
         onLikeToggle(post.id, false);
       } else {
         const { error } = await supabase
@@ -107,6 +115,7 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
           });
         if (error) throw error;
         setLikesCount(prev => prev + 1);
+        setIsLiked(true);
         onLikeToggle(post.id, true);
       }
     } catch (error: any) {
