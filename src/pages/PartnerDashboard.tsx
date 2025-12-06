@@ -14,7 +14,7 @@ import QRScanner from "@/components/partner/QRScanner";
 import PartnerStats from "@/components/partner/PartnerStats";
 import PartnerProfileEdit from "@/components/partner/PartnerProfileEdit";
 import PartnerSocialProfile from "@/components/partner/PartnerSocialProfile";
-import CreatePost from "@/components/social/CreatePost";
+
 import PostCard from "@/components/social/PostCard";
 import UploadSheet from "@/components/shared/UploadSheet";
 import NotificationBadge from "@/components/chat/NotificationBadge";
@@ -261,125 +261,125 @@ const PartnerDashboard = () => {
         />
       )}
 
-      {/* Modern iOS-style header */}
-      <header className="sticky top-0 z-10 bg-background border-b" style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))', paddingBottom: '0.75rem' }}>
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          <h1 className="text-xl font-semibold">
-            {activeTab === "social" && "Social"}
-            {activeTab === "events" && t('navigation.events')}
-            {activeTab === "gallery" && "Gallery"}
-            {activeTab === "scanner" && "Scanner"}
-            {activeTab === "stats" && t('navigation.stats')}
-            {activeTab === "profile" && t('navigation.profile')}
-          </h1>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate("/chats")}
-              className="relative p-2 hover:bg-muted rounded-full transition-colors"
-            >
-              <MessageCircle className="w-5 h-5" />
-              {totalUnread > 0 && (
-                <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
-                  {totalUnread}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setSettingsSheetOpen(true)}
-              className="p-2 hover:bg-muted rounded-full transition-colors"
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => setActiveTab("profile")}
-              className="hover:scale-105 transition-transform"
-            >
-              <Avatar className="h-9 w-9 ring-2 ring-muted">
-                <AvatarImage src={profile?.profile_image_url} />
-                <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
-                  {getDisplayName(profile)[0].toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            </button>
-          </div>
-        </div>
-        
-        {/* Search bar - only visible on social tab */}
-        {activeTab === "social" && (
-          <div className="container mx-auto px-4 mt-3 relative">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
-              <Input
-                type="text"
-                placeholder={t('search.users')}
-                value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="w-full pl-10 pr-10 rounded-full border-muted-foreground/20 bg-muted/50"
-              />
-              {searchQuery && (
+      {/* Modern iOS-style header - AZZURRO E MODERNO */}
+      <header className="sticky top-0 z-10" style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))' }}>
+        <div className="mx-4 mb-2 relative">
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl px-6 py-4 shadow-lg flex flex-col gap-3">
+            {/* Top row: Menu, Title, Chat, Avatar */}
+            <div className="flex items-center justify-between">
+              {/* Menu hamburger a sinistra */}
+              <button
+                onClick={() => setSettingsSheetOpen(true)}
+                className="flex flex-col gap-1 p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <div className="w-6 h-0.5 bg-white rounded-full"></div>
+                <div className="w-6 h-0.5 bg-white rounded-full"></div>
+                <div className="w-6 h-0.5 bg-white rounded-full"></div>
+              </button>
+
+              {/* Titolo al centro */}
+              <h1 className="text-xl font-bold text-white">
+                {activeTab === "social" && "Social"}
+                {activeTab === "events" && t('navigation.events')}
+                {activeTab === "gallery" && "Gallery"}
+                {activeTab === "scanner" && "Scanner"}
+                {activeTab === "stats" && t('navigation.stats')}
+                {activeTab === "profile" && t('navigation.profile')}
+              </h1>
+
+              {/* Right side: Chat + Avatar */}
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => handleSearch("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 z-10 hover:bg-muted rounded-full p-1 transition-colors"
+                  onClick={() => navigate("/chats")}
+                  className="relative p-2 hover:bg-white/10 rounded-full transition-colors"
                 >
-                  <X className="w-4 h-4" />
+                  <MessageCircle className="w-5 h-5 text-white" />
+                  {totalUnread > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                      {totalUnread}
+                    </span>
+                  )}
                 </button>
-              )}
+                <button
+                  onClick={() => setActiveTab("profile")}
+                  className="hover:scale-105 transition-transform"
+                >
+                  <Avatar className="h-10 w-10 ring-2 ring-white/30">
+                    <AvatarImage src={profile?.profile_image_url} />
+                    <AvatarFallback className="bg-white text-blue-500 font-semibold">
+                      {getDisplayName(profile)[0].toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </div>
             </div>
-            
-            {/* Search Results Dropdown */}
-            {searchQuery && (
-              <div className="absolute top-[calc(100%+0.5rem)] left-4 right-4 bg-card rounded-xl shadow-xl border z-50 max-h-80 overflow-y-auto">
-                {searching ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">{t('common.loading')}</p>
-                ) : searchResults.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">{t('search.noUsersFound')}</p>
-                ) : (
-                  <div className="py-2">
-                    {searchResults.map((result) => (
-                      <button
-                        key={result.id}
-                        onClick={() => {
-                          navigate(`/profile/${result.id}`);
-                          setSearchQuery("");
-                          setSearchResults([]);
-                        }}
-                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors"
-                      >
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={result.profile_image_url} />
-                          <AvatarFallback className="bg-primary text-primary-foreground">
-                            {getDisplayName(result)[0].toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="text-left flex-1">
-                          <p className="font-semibold">{getDisplayName(result)}</p>
-                          {result.first_name && result.business_name && (
-                            <p className="text-sm text-muted-foreground">{result.business_name}</p>
-                          )}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+
+            {/* Bottom row: Search bar - only on social tab */}
+            {activeTab === "social" && (
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400 z-10" />
+                <Input
+                  type="text"
+                  placeholder={t('search.users')}
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  className="w-full pl-10 pr-10 py-2.5 rounded-full border-none bg-blue-50 text-blue-800 placeholder:text-blue-400 focus-visible:ring-0 text-base font-medium transition-all duration-200"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => handleSearch("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 z-10 hover:bg-blue-100 rounded-full p-1 transition-colors"
+                  >
+                    <X className="w-4 h-4 text-blue-600" />
+                  </button>
                 )}
               </div>
             )}
           </div>
-        )}
+
+          {/* Search Results Dropdown */}
+          {searchQuery && activeTab === "social" && (
+            <div className="absolute top-[calc(100%+0.5rem)] left-0 right-0 mt-0 bg-white rounded-2xl shadow-xl border border-blue-100 z-50 max-h-80 overflow-y-auto">
+              {searching ? (
+                <p className="text-sm text-gray-500 text-center py-8">{t('common.loading')}</p>
+              ) : searchResults.length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-8">{t('search.noUsersFound')}</p>
+              ) : (
+                <div className="py-3">
+                  {searchResults.map((result) => (
+                    <button
+                      key={result.id}
+                      onClick={() => {
+                        navigate(`/profile/${result.id}`);
+                        setSearchQuery("");
+                        setSearchResults([]);
+                      }}
+                      className="w-full flex items-center gap-4 px-4 py-3 hover:bg-blue-50 transition-colors"
+                    >
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={result.profile_image_url} />
+                        <AvatarFallback className="bg-blue-500 text-white">
+                          {getDisplayName(result)[0].toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="text-left flex-1">
+                        <p className="font-semibold text-gray-900">{getDisplayName(result)}</p>
+                        {result.first_name && result.business_name && (
+                          <p className="text-sm text-gray-500">{result.business_name}</p>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </header>
 
       {/* Main Content */}
       {activeTab === "social" ? (
         <div className="flex-1 overflow-y-auto pb-24">
-
-          {/* Create Post */}
-          <div className="mx-4 mt-2">
-            <CreatePost
-              userId={user.id}
-              userProfile={profile}
-              onPostCreated={handlePostCreated}
-            />
-          </div>
-
           {/* Posts Feed */}
           <div className="mx-4 mt-4 space-y-4">
             {loadingPosts ? (
