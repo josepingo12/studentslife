@@ -476,36 +476,52 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
       <div className="px-3 py-2 border-t border-gray-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button
-              onClick={handleLike}
-              disabled={loading}
-              className="flex items-center gap-1.5 text-gray-700 hover:text-red-500 transition-colors"
-            >
-              <Heart
-                className={`w-6 h-6 ${isLiked ? "fill-red-500 text-red-500" : ""}`}
-              />
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={handleLike}
+                disabled={loading}
+                className="text-gray-700 hover:text-red-500 transition-colors"
+              >
+                <Heart
+                  className={`w-6 h-6 ${isLiked ? "fill-red-500 text-red-500" : ""}`}
+                />
+              </button>
               {likesCount > 0 && (
-                <span className="text-sm font-medium">{likesCount}</span>
+                <button 
+                  onClick={() => setLikesSheetOpen(true)}
+                  className="text-sm font-medium text-gray-700 hover:text-gray-500 transition-colors"
+                >
+                  {likesCount}
+                </button>
               )}
-            </button>
-            <button
-              onClick={() => setCommentsOpen(true)}
-              className="flex items-center gap-1.5 text-gray-700 hover:text-blue-500 transition-colors"
-            >
-              <MessageCircle className="w-6 h-6" />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setCommentsOpen(true)}
+                className="text-gray-700 hover:text-blue-500 transition-colors"
+              >
+                <MessageCircle className="w-6 h-6" />
+              </button>
               {commentsCount > 0 && (
-                <span className="text-sm font-medium">{commentsCount}</span>
+                <button 
+                  onClick={() => setCommentsOpen(true)}
+                  className="text-sm font-medium text-gray-700 hover:text-gray-500 transition-colors"
+                >
+                  {commentsCount}
+                </button>
               )}
-            </button>
-            <button
-              onClick={() => setShareSheetOpen(true)}
-              className="flex items-center gap-1.5 text-gray-700 hover:text-green-500 transition-colors"
-            >
-              <Send className="w-6 h-6" />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setShareSheetOpen(true)}
+                className="text-gray-700 hover:text-green-500 transition-colors"
+              >
+                <Send className="w-6 h-6" />
+              </button>
               {sharesCount > 0 && (
-                <span className="text-sm font-medium">{sharesCount}</span>
+                <span className="text-sm font-medium text-gray-700">{sharesCount}</span>
               )}
-            </button>
+            </div>
           </div>
           <button
             onClick={handleSaveToggle}
@@ -515,14 +531,6 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
             <Bookmark className={`w-6 h-6 ${isSaved ? "fill-yellow-500 text-yellow-500" : ""}`} />
           </button>
         </div>
-        {likesCount > 0 && (
-          <button
-            onClick={() => setLikesSheetOpen(true)}
-            className="mt-2 text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors"
-          >
-            {likesCount} {likesCount === 1 ? 'Me gusta' : 'Me gusta'}
-          </button>
-        )}
       </div>
 
       {/* Comments Sheet */}
