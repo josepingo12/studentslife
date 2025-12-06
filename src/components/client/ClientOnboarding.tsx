@@ -35,6 +35,7 @@ interface ClientOnboardingProps {
   onSkip: () => boolean | void;
   onComplete: () => void;
   onNavigateTab: (tab: string) => void;
+  onNavigateToProfile?: () => void;
   onOpenWallet?: () => void;
   onOpenLoyaltyCards?: () => void;
   canProceed: boolean;
@@ -64,6 +65,7 @@ const ClientOnboarding = ({
   onSkip,
   onComplete,
   onNavigateTab,
+  onNavigateToProfile,
   onOpenWallet,
   onOpenLoyaltyCards,
   canProceed,
@@ -231,6 +233,13 @@ const ClientOnboarding = ({
       setTimeout(() => {
         onComplete();
       }, 3000);
+      return;
+    }
+    
+    // If on go-to-profile step, navigate to profile page
+    if (step?.id === "go-to-profile" && onNavigateToProfile) {
+      onNavigateToProfile();
+      onNext();
       return;
     }
     
@@ -458,12 +467,12 @@ const ClientOnboarding = ({
 
           {/* Main Card */}
           <motion.div 
-            className="bg-background rounded-3xl p-6 shadow-2xl border border-border/50 relative overflow-hidden"
+            className="bg-background rounded-3xl p-6 shadow-2xl border border-border/50 relative"
             layoutId="onboarding-card"
           >
             {/* Animated gradient background */}
             <motion.div 
-              className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-purple-500/10"
+              className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-purple-500/10 rounded-3xl"
               animate={{ 
                 background: [
                   "linear-gradient(135deg, rgba(59,130,246,0.1) 0%, transparent 50%, rgba(168,85,247,0.1) 100%)",
@@ -474,14 +483,15 @@ const ClientOnboarding = ({
               transition={{ duration: 4, repeat: Infinity }}
             />
             
-            {/* Required badge - positioned better */}
+            {/* Required badge - inside card with proper spacing */}
             {isRequired && (
               <motion.div 
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-lg z-10"
+                className="absolute top-3 right-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-3 py-1 rounded-full font-bold shadow-lg z-10 flex items-center gap-1"
               >
-                ⚠️ Obligatorio
+                <AlertCircle className="w-3 h-3" />
+                Obligatorio
               </motion.div>
             )}
 
