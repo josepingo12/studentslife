@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Users, QrCode, Calendar, TrendingUp, BarChart3 } from "lucide-react";
+import { Users, QrCode, Calendar, TrendingUp, BarChart3, Search, ChevronRight } from "lucide-react";
 import UserDetailChart from "./UserDetailChart";
+import { useTranslation } from "react-i18next";
 
 interface UserData {
   id: string;
@@ -33,6 +32,7 @@ interface Stats {
 }
 
 const Statistics = () => {
+  const { t } = useTranslation();
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalPartners: 0,
@@ -46,8 +46,7 @@ const Statistics = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<{ id: string; name: string; role: "partner" | "client" } | null>(null);
-  const [testEmailLoading, setTestEmailLoading] = useState(false);
-  const [testEmailResult, setTestEmailResult] = useState<string>("");
+  const [activeSection, setActiveSection] = useState<"overview" | "partners" | "clients">("overview");
 
   useEffect(() => {
     fetchStatistics();
@@ -55,24 +54,20 @@ const Statistics = () => {
 
   const fetchStatistics = async () => {
     try {
-      // Total users
       const { count: totalUsers } = await supabase
         .from("profiles")
         .select("*", { count: "exact", head: true });
 
-      // Total partners
       const { count: totalPartners } = await supabase
         .from("user_roles")
         .select("*", { count: "exact", head: true })
         .eq("role", "partner");
 
-      // Total clients
       const { count: totalClients } = await supabase
         .from("user_roles")
         .select("*", { count: "exact", head: true })
         .eq("role", "client");
 
-      // QR codes stats
       const { count: totalQRCodes } = await supabase
         .from("qr_codes")
         .select("*", { count: "exact", head: true });
@@ -82,7 +77,6 @@ const Statistics = () => {
         .select("*", { count: "exact", head: true })
         .eq("is_used", true);
 
-      // Recent accesses (last 7 days)
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -91,7 +85,6 @@ const Statistics = () => {
         .select("*", { count: "exact", head: true })
         .gte("accessed_at", sevenDaysAgo.toISOString());
 
-      // Get all partners
       const { data: partnerRoles } = await supabase
         .from("user_roles")
         .select("user_id")
@@ -101,14 +94,12 @@ const Statistics = () => {
       for (const partnerRole of partnerRoles || []) {
         const partnerId = partnerRole.user_id;
         
-        // Get profile data
         const { data: profile } = await supabase
           .from("profiles")
           .select("business_name, profile_image_url")
           .eq("id", partnerId)
           .single();
         
-        // Get events for this partner
         const { data: events } = await supabase
           .from("events")
           .select("id")
@@ -116,16 +107,14 @@ const Statistics = () => {
         
         const eventIds = events?.map(e => e.id) || [];
         
-        // Get QR codes count
         const { data: qrCodes } = await supabase
           .from("qr_codes")
           .select("is_used")
-          .in("event_id", eventIds);
+          .in("event_id", eventIds.length > 0 ? eventIds : ['00000000-0000-0000-0000-000000000000']);
         
         const qr_count = qrCodes?.length || 0;
         const used_count = qrCodes?.filter(qr => qr.is_used).length || 0;
         
-        // Get last access
         const { data: lastAccess } = await supabase
           .from("access_logs")
           .select("accessed_at")
@@ -146,7 +135,6 @@ const Statistics = () => {
         });
       }
 
-      // Get all clients
       const { data: clientRoles } = await supabase
         .from("user_roles")
         .select("user_id")
@@ -156,14 +144,12 @@ const Statistics = () => {
       for (const clientRole of clientRoles || []) {
         const clientId = clientRole.user_id;
         
-        // Get profile data
         const { data: profile } = await supabase
           .from("profiles")
           .select("first_name, last_name, profile_image_url")
           .eq("id", clientId)
           .single();
         
-        // Get QR codes count
         const { data: qrCodes } = await supabase
           .from("qr_codes")
           .select("is_used")
@@ -171,7 +157,6 @@ const Statistics = () => {
         
         const qr_count = qrCodes?.length || 0;
         
-        // Get last access
         const { data: lastAccess } = await supabase
           .from("access_logs")
           .select("accessed_at")
@@ -217,236 +202,305 @@ const Statistics = () => {
   );
 
   const formatLastAccess = (date?: string) => {
-    if (!date) return "Mai";
+    if (!date) return "Sin acceso";
     const d = new Date(date);
-    return d.toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" });
-  };
-
-  const handleTestEmail = async () => {
-    setTestEmailLoading(true);
-    setTestEmailResult("");
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
     
-    try {
-      const { data, error } = await supabase.functions.invoke('test-email', {
-        body: { to_email: 'stud3nts1ife.info@gmail.com' }
-      });
-
-      if (error) {
-        setTestEmailResult(`❌ Errore: ${error.message}`);
-        console.error('Test email error:', error);
-      } else if (data?.success) {
-        setTestEmailResult(data.message || '✅ Email di test inviata con successo!');
-        console.log('Test email result:', data);
-      } else {
-        setTestEmailResult(`❌ ${data?.error || 'Errore sconosciuto'}`);
-      }
-    } catch (err: any) {
-      setTestEmailResult(`❌ Errore: ${err.message}`);
-      console.error('Test email exception:', err);
-    } finally {
-      setTestEmailLoading(false);
-    }
+    if (diffMins < 60) return `Hace ${diffMins}m`;
+    if (diffHours < 24) return `Hace ${diffHours}h`;
+    if (diffDays < 7) return `Hace ${diffDays}d`;
+    return d.toLocaleDateString("es-ES", { day: "2-digit", month: "short" });
   };
 
   if (loading) {
-    return <div>Caricamento statistiche...</div>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-pulse text-muted-foreground">Cargando estadísticas...</div>
+      </div>
+    );
   }
+
+  const qrPercentage = stats.totalQRCodes > 0 
+    ? Math.round((stats.usedQRCodes / stats.totalQRCodes) * 100) 
+    : 0;
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold">Statistiche</h2>
-        
-        <div className="flex flex-col gap-2 w-full sm:w-auto">
-          <Button 
-            onClick={handleTestEmail}
-            disabled={testEmailLoading}
-            variant="outline"
-            className="w-full sm:w-auto"
+      {/* Section Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        {[
+          { id: "overview", label: "Resumen" },
+          { id: "partners", label: "Partners" },
+          { id: "clients", label: "Clientes" },
+        ].map((section) => (
+          <button
+            key={section.id}
+            onClick={() => setActiveSection(section.id as any)}
+            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+              activeSection === section.id
+                ? "bg-primary text-primary-foreground shadow-lg"
+                : "bg-muted/50 text-muted-foreground hover:bg-muted"
+            }`}
           >
-            {testEmailLoading ? "Invio in corso..." : "🧪 Testa Email"}
-          </Button>
-          
-          {testEmailResult && (
-            <div className={`text-sm p-3 rounded-lg ${
-              testEmailResult.includes('✅') 
-                ? 'bg-green-50 text-green-800 border border-green-200' 
-                : 'bg-red-50 text-red-800 border border-red-200'
-            }`}>
-              {testEmailResult}
-            </div>
-          )}
-        </div>
+            {section.label}
+          </button>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Utenti Totali</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Partner</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalPartners}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Clienti</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalClients}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">QR Code Totali</CardTitle>
-            <QrCode className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalQRCodes}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">QR Code Usati</CardTitle>
-            <QrCode className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.usedQRCodes}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.totalQRCodes > 0
-                ? `${((stats.usedQRCodes / stats.totalQRCodes) * 100).toFixed(1)}% utilizzati`
-                : "0%"}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Accessi (7gg)</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.recentAccesses}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Tutti i Partner</CardTitle>
-            <Input
-              placeholder="Cerca partner..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="mt-2"
-            />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3 max-h-[600px] overflow-y-auto">
-              {filteredPartners.map((partner) => (
-                <div key={partner.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors">
-                  <div className="flex items-center gap-3 flex-1">
-                    <Avatar>
-                      <AvatarImage src={partner.profile_image_url} />
-                      <AvatarFallback>{partner.business_name?.substring(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="font-medium">{partner.business_name}</p>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>{partner.qr_count} QR generati</span>
-                        <span>•</span>
-                        <span>{partner.used_count} utilizzati</span>
-                        <span>•</span>
-                        <span>Ultimo: {formatLastAccess(partner.last_access)}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setSelectedUser({ 
-                      id: partner.id, 
-                      name: partner.business_name || "Partner", 
-                      role: "partner" 
-                    })}
-                  >
-                    <BarChart3 className="w-4 h-4" />
-                  </Button>
+      {/* Overview Section */}
+      {activeSection === "overview" && (
+        <div className="space-y-4">
+          {/* Stats Grid - 2x3 */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Total Users */}
+            <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-2xl p-4 border border-blue-500/20">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-blue-500" />
                 </div>
-              ))}
-              {filteredPartners.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">Nessun partner trovato</p>
-              )}
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{stats.totalUsers}</p>
+                  <p className="text-xs text-muted-foreground">Usuarios</p>
+                </div>
+              </div>
             </div>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Tutti i Clienti</CardTitle>
-            <Input
-              placeholder="Cerca clienti..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="mt-2"
-            />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3 max-h-[600px] overflow-y-auto">
-              {filteredClients.map((client) => (
-                <div key={client.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors">
-                  <div className="flex items-center gap-3 flex-1">
-                    <Avatar>
+            {/* Partners */}
+            <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-2xl p-4 border border-purple-500/20">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-purple-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{stats.totalPartners}</p>
+                  <p className="text-xs text-muted-foreground">Partners</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Clients */}
+            <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 rounded-2xl p-4 border border-green-500/20">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-green-500/20 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-green-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{stats.totalClients}</p>
+                  <p className="text-xs text-muted-foreground">Clientes</p>
+                </div>
+              </div>
+            </div>
+
+            {/* QR Codes */}
+            <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 rounded-2xl p-4 border border-orange-500/20">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
+                  <QrCode className="h-5 w-5 text-orange-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{stats.totalQRCodes}</p>
+                  <p className="text-xs text-muted-foreground">QR Codes</p>
+                </div>
+              </div>
+            </div>
+
+            {/* QR Used */}
+            <div className="bg-gradient-to-br from-pink-500/10 to-pink-600/5 rounded-2xl p-4 border border-pink-500/20">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-pink-500/20 flex items-center justify-center">
+                  <QrCode className="h-5 w-5 text-pink-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{stats.usedQRCodes}</p>
+                  <p className="text-xs text-muted-foreground">QR Usados ({qrPercentage}%)</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Accesses 7d */}
+            <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 rounded-2xl p-4 border border-cyan-500/20">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-cyan-500/20 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-cyan-500" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{stats.recentAccesses}</p>
+                  <p className="text-xs text-muted-foreground">Accesos 7d</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Lists */}
+          <div className="space-y-4">
+            {/* Top Partners */}
+            <div className="bg-muted/30 rounded-2xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-foreground">Top Partners</h3>
+                <button 
+                  onClick={() => setActiveSection("partners")}
+                  className="text-xs text-primary font-medium"
+                >
+                  Ver todos
+                </button>
+              </div>
+              <div className="space-y-2">
+                {stats.allPartners.slice(0, 3).map((partner, idx) => (
+                  <div key={partner.id} className="flex items-center gap-3 p-2 rounded-xl bg-background/50">
+                    <span className="text-sm font-bold text-muted-foreground w-5">{idx + 1}</span>
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={partner.profile_image_url} />
+                      <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                        {partner.business_name?.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{partner.business_name}</p>
+                    </div>
+                    <span className="text-xs font-semibold text-primary">{partner.qr_count} QR</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Top Clients */}
+            <div className="bg-muted/30 rounded-2xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-foreground">Top Clientes</h3>
+                <button 
+                  onClick={() => setActiveSection("clients")}
+                  className="text-xs text-primary font-medium"
+                >
+                  Ver todos
+                </button>
+              </div>
+              <div className="space-y-2">
+                {stats.allClients.slice(0, 3).map((client, idx) => (
+                  <div key={client.id} className="flex items-center gap-3 p-2 rounded-xl bg-background/50">
+                    <span className="text-sm font-bold text-muted-foreground w-5">{idx + 1}</span>
+                    <Avatar className="h-8 w-8">
                       <AvatarImage src={client.profile_image_url} />
-                      <AvatarFallback>
+                      <AvatarFallback className="text-xs bg-primary/10 text-primary">
                         {client.first_name?.charAt(0)}{client.last_name?.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1">
-                      <p className="font-medium">{client.first_name} {client.last_name}</p>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>{client.qr_count} QR generati</span>
-                        <span>•</span>
-                        <span>Ultimo: {formatLastAccess(client.last_access)}</span>
-                      </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{client.first_name} {client.last_name}</p>
                     </div>
+                    <span className="text-xs font-semibold text-primary">{client.qr_count} QR</span>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setSelectedUser({ 
-                      id: client.id, 
-                      name: `${client.first_name} ${client.last_name}`, 
-                      role: "client" 
-                    })}
-                  >
-                    <BarChart3 className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
-              {filteredClients.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">Nessun cliente trovato</p>
-              )}
+                ))}
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </div>
+      )}
+
+      {/* Partners Section */}
+      {activeSection === "partners" && (
+        <div className="space-y-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar partners..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 rounded-xl bg-muted/50 border-0"
+            />
+          </div>
+
+          {/* Partners List */}
+          <div className="space-y-2">
+            {filteredPartners.map((partner) => (
+              <button
+                key={partner.id}
+                onClick={() => setSelectedUser({ 
+                  id: partner.id, 
+                  name: partner.business_name || "Partner", 
+                  role: "partner" 
+                })}
+                className="w-full flex items-center gap-3 p-3 rounded-2xl bg-muted/30 hover:bg-muted/50 transition-colors"
+              >
+                <Avatar className="h-11 w-11 ring-2 ring-border/30">
+                  <AvatarImage src={partner.profile_image_url} />
+                  <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                    {partner.business_name?.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 text-left min-w-0">
+                  <p className="font-medium text-foreground truncate">{partner.business_name}</p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>{partner.qr_count} QR</span>
+                    <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
+                    <span>{partner.used_count} usados</span>
+                    <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
+                    <span>{formatLastAccess(partner.last_access)}</span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </button>
+            ))}
+            {filteredPartners.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-8">No se encontraron partners</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Clients Section */}
+      {activeSection === "clients" && (
+        <div className="space-y-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar clientes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 rounded-xl bg-muted/50 border-0"
+            />
+          </div>
+
+          {/* Clients List */}
+          <div className="space-y-2">
+            {filteredClients.map((client) => (
+              <button
+                key={client.id}
+                onClick={() => setSelectedUser({ 
+                  id: client.id, 
+                  name: `${client.first_name} ${client.last_name}`, 
+                  role: "client" 
+                })}
+                className="w-full flex items-center gap-3 p-3 rounded-2xl bg-muted/30 hover:bg-muted/50 transition-colors"
+              >
+                <Avatar className="h-11 w-11 ring-2 ring-border/30">
+                  <AvatarImage src={client.profile_image_url} />
+                  <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                    {client.first_name?.charAt(0)}{client.last_name?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 text-left min-w-0">
+                  <p className="font-medium text-foreground truncate">{client.first_name} {client.last_name}</p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>{client.qr_count} QR descargados</span>
+                    <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
+                    <span>{formatLastAccess(client.last_access)}</span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </button>
+            ))}
+            {filteredClients.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-8">No se encontraron clientes</p>
+            )}
+          </div>
+        </div>
+      )}
 
       {selectedUser && (
         <UserDetailChart
