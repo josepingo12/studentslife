@@ -182,11 +182,19 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
           .eq("id", existingStamps.id);
 
         toast({
-          title: t("loyaltyCard.stampAdded"),
+          title: (
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-bold">✓</span>
+              </div>
+              <span>{t("loyaltyCard.stampAdded")}</span>
+            </div>
+          ) as any,
           description: t("loyaltyCard.stampAddedDesc", { 
             count: newCount, 
             total: loyaltyCard.stamps_required 
           }),
+          className: "bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800",
         });
       } else {
         // Create new stamp record
@@ -197,14 +205,23 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
             partner_id: partnerId,
             loyalty_card_id: loyaltyCard.id,
             stamps_count: 1,
+            last_stamp_at: new Date().toISOString(),
           });
 
         toast({
-          title: t("loyaltyCard.stampAdded"),
+          title: (
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-bold">✓</span>
+              </div>
+              <span>{t("loyaltyCard.stampAdded")}</span>
+            </div>
+          ) as any,
           description: t("loyaltyCard.stampAddedDesc", { 
             count: 1, 
             total: loyaltyCard.stamps_required 
           }),
+          className: "bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800",
         });
       }
     } catch (error) {

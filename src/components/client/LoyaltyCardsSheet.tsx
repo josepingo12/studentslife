@@ -12,12 +12,19 @@ interface LoyaltyCardsSheetProps {
   clientId: string;
 }
 
+interface StampDate {
+  date: string;
+  index: number;
+}
+
 interface StampData {
   id: string;
   stamps_count: number;
   reward_claimed: boolean;
   partner_id: string;
   loyalty_card_id: string;
+  last_stamp_at: string | null;
+  created_at: string | null;
   partner_profile?: {
     business_name: string | null;
     profile_image_url: string | null;
@@ -211,22 +218,51 @@ const LoyaltyCardsSheet = ({ open, onOpenChange, clientId }: LoyaltyCardsSheetPr
                           </div>
                         </div>
 
-                        {/* Stamps grid */}
+                        {/* Stamps grid with dates */}
                         <div className="grid grid-cols-5 gap-2 mb-3">
-                          {[...Array(stampsRequired)].map((_, i) => (
-                            <div
-                              key={i}
-                              className={`aspect-square rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
-                                i < stamp.stamps_count
-                                  ? "bg-white/40 border-white scale-100"
-                                  : "bg-transparent border-white/40 scale-95"
-                              }`}
-                            >
-                              {i < stamp.stamps_count && (
-                                <span className="text-sm font-bold animate-scale-in">✓</span>
-                              )}
-                            </div>
-                          ))}
+                          {[...Array(stampsRequired)].map((_, i) => {
+                            // Calculate date for this stamp (distribute dates based on last_stamp_at and created_at)
+                            const isStamped = i < stamp.stamps_count;
+                            let stampDate: string | null = null;
+                            
+                            if (isStamped && stamp.last_stamp_at && stamp.created_at) {
+                              // Simple approach: show date only for filled stamps
+                              // For a more accurate approach, we'd need individual stamp dates in the DB
+                              if (i === stamp.stamps_count - 1) {
+                                // Last stamp - use last_stamp_at
+                                stampDate = stamp.last_stamp_at;
+                              } else if (i === 0) {
+                                // First stamp - use created_at
+                                stampDate = stamp.created_at;
+                              }
+                            }
+                            
+                            return (
+                              <div key={i} className="flex flex-col items-center">
+                                <div
+                                  className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
+                                    isStamped
+                                      ? "bg-white/40 border-white scale-100"
+                                      : "bg-transparent border-white/40 scale-95"
+                                  }`}
+                                >
+                                  {isStamped && (
+                                    <span className="text-sm font-bold animate-scale-in">✓</span>
+                                  )}
+                                </div>
+                                <span className="text-[8px] text-white/70 mt-1 text-center leading-tight h-4">
+                                  {stampDate 
+                                    ? new Date(stampDate).toLocaleDateString('es-ES', { 
+                                        day: '2-digit', 
+                                        month: '2-digit', 
+                                        year: '2-digit' 
+                                      })
+                                    : isStamped ? '—' : ''
+                                  }
+                                </span>
+                              </div>
+                            );
+                          })}
                         </div>
 
                         {/* Progress */}
