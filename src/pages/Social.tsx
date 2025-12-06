@@ -132,10 +132,18 @@ const Social = () => {
         {/* Header */}
         <div className="bg-white mx-4 mt-4 p-4 rounded-2xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            {/* Avatar a sinistra invece del tasto impostazioni */}
+            {/* Botón atrás */}
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            </button>
+
+            {/* Avatar en el centro */}
             <button
               onClick={() => setSettingsSheetOpen(true)}
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+              className="hover:opacity-80 transition-opacity"
             >
               <Avatar className="h-10 w-10">
                 <AvatarImage src={profile?.profile_image_url} />
@@ -145,9 +153,7 @@ const Social = () => {
               </Avatar>
             </button>
 
-            <h1 className="text-2xl font-bold text-blue-600">Students Life Social</h1>
-
-            <div className="w-10" />
+            <div className="w-5" />
           </div>
 
           {/* Search Bar */}
