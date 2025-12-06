@@ -46,6 +46,7 @@ const UsersManagement = () => {
   const [users, setUsers] = useState<Profile[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<Profile[]>([]);
   const [filter, setFilter] = useState<string>("all");
+  const [accessFilter, setAccessFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<string | null>(null);
@@ -75,18 +76,44 @@ const UsersManagement = () => {
 
   useEffect(() => {
     filterUsers();
-  }, [users, searchQuery]);
+  }, [users, searchQuery, accessFilter]);
 
   const filterUsers = () => {
     let filtered = users;
     
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = users.filter(user => 
+      filtered = filtered.filter(user => 
         user.email.toLowerCase().includes(query) ||
         user.business_name?.toLowerCase().includes(query) ||
         `${user.first_name} ${user.last_name}`.toLowerCase().includes(query)
       );
+    }
+
+    // Filter by last access
+    const now = new Date();
+    if (accessFilter === "today") {
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      filtered = filtered.filter(user => 
+        user.last_access && new Date(user.last_access) >= today
+      );
+    } else if (accessFilter === "week") {
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      filtered = filtered.filter(user => 
+        user.last_access && new Date(user.last_access) >= weekAgo
+      );
+    } else if (accessFilter === "month") {
+      const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      filtered = filtered.filter(user => 
+        user.last_access && new Date(user.last_access) >= monthAgo
+      );
+    } else if (accessFilter === "inactive") {
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      filtered = filtered.filter(user => 
+        !user.last_access || new Date(user.last_access) < weekAgo
+      );
+    } else if (accessFilter === "never") {
+      filtered = filtered.filter(user => !user.last_access);
     }
     
     setFilteredUsers(filtered);
@@ -356,13 +383,27 @@ const UsersManagement = () => {
         </div>
         
         <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-[120px] h-10 rounded-xl">
-            <SelectValue placeholder="Filtrar" />
+          <SelectTrigger className="w-[100px] h-10 rounded-xl">
+            <SelectValue placeholder="Tipo" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos</SelectItem>
             <SelectItem value="partner">Partners</SelectItem>
             <SelectItem value="client">Clientes</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={accessFilter} onValueChange={setAccessFilter}>
+          <SelectTrigger className="w-[110px] h-10 rounded-xl">
+            <SelectValue placeholder="Acceso" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="today">Hoy</SelectItem>
+            <SelectItem value="week">7 días</SelectItem>
+            <SelectItem value="month">30 días</SelectItem>
+            <SelectItem value="inactive">Inactivos</SelectItem>
+            <SelectItem value="never">Sin acceso</SelectItem>
           </SelectContent>
         </Select>
       </div>
