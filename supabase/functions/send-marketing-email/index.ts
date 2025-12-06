@@ -9,6 +9,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Helper function to delay between emails (to avoid rate limiting)
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -18,27 +21,22 @@ serve(async (req: Request) => {
   try {
     console.log("Starting marketing email job...");
 
+    // Check for test mode
+    let testEmail: string | null = null;
+    try {
+      const body = await req.json();
+      testEmail = body.test_email || null;
+    } catch {
+      // No body or invalid JSON, continue without test mode
+    }
+
+    if (testEmail) {
+      console.log(`TEST MODE: Sending only to ${testEmail}`);
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Get users who haven't accessed in 6+ days
-    const sixDaysAgo = new Date();
-    sixDaysAgo.setDate(sixDaysAgo.getDate() - 6);
-
-    console.log("Looking for inactive users since:", sixDaysAgo.toISOString());
-
-    // Get all users with their last access
-    const { data: profiles, error: profilesError } = await supabase
-      .from("profiles")
-      .select("id, email, first_name, business_name");
-
-    if (profilesError) {
-      console.error("Error fetching profiles:", profilesError);
-      throw profilesError;
-    }
-
-    console.log(`Found ${profiles?.length || 0} total profiles`);
 
     // Get active events with partner info
     const { data: events, error: eventsError } = await supabase
@@ -75,6 +73,79 @@ serve(async (req: Request) => {
 
     const partnerMap = new Map(partners?.map(p => [p.id, p]) || []);
 
+    // Build event cards HTML
+    const eventCardsHtml = events.map(event => {
+      const partner = partnerMap.get(event.partner_id);
+      const imageUrl = event.image_url || partner?.profile_image_url || '';
+      const discountBadge = event.discount_percentage && event.discount_percentage > 0
+        ? `<span style="background: linear-gradient(135deg, #ec4899, #8b5cf6); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">${event.discount_percentage}% OFF</span>`
+        : '';
+
+      return `
+        <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-bottom: 20px;">
+          ${imageUrl ? `<img src="${imageUrl}" alt="${event.title}" style="width: 100%; height: 180px; object-fit: cover;" />` : ''}
+          <div style="padding: 20px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+              ${partner?.profile_image_url ? `<img src="${partner.profile_image_url}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />` : ''}
+              <span style="font-weight: 600; color: #374151;">${partner?.business_name || 'Partner'}</span>
+              ${discountBadge}
+            </div>
+            <h3 style="margin: 0 0 10px 0; color: #111827; font-size: 18px;">${event.title}</h3>
+            <p style="margin: 0; color: #6b7280; font-size: 14px; line-height: 1.5;">${event.description || ''}</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // If test mode, only send to test email
+    if (testEmail) {
+      try {
+        const { error: emailError } = await resend.emails.send({
+          from: "StudentsLife <noreply@studentslife.es>",
+          to: [testEmail],
+          subject: "🎉 ¡Te echamos de menos! Mira las nuevas ofertas",
+          html: buildEmailHtml("Usuario Test", eventCardsHtml),
+        });
+
+        if (emailError) {
+          console.error(`Error sending test email:`, emailError);
+          return new Response(
+            JSON.stringify({ success: false, error: emailError }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        console.log(`Test email sent to ${testEmail}`);
+        return new Response(
+          JSON.stringify({ success: true, message: `Test email sent to ${testEmail}` }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      } catch (e: any) {
+        console.error(`Exception sending test email:`, e);
+        return new Response(
+          JSON.stringify({ success: false, error: e.message }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    // Production mode: Get inactive users
+    const sixDaysAgo = new Date();
+    sixDaysAgo.setDate(sixDaysAgo.getDate() - 6);
+
+    console.log("Looking for inactive users since:", sixDaysAgo.toISOString());
+
+    const { data: profiles, error: profilesError } = await supabase
+      .from("profiles")
+      .select("id, email, first_name, business_name");
+
+    if (profilesError) {
+      console.error("Error fetching profiles:", profilesError);
+      throw profilesError;
+    }
+
+    console.log(`Found ${profiles?.length || 0} total profiles`);
+
     // Find inactive users
     const inactiveUsers: any[] = [];
     
@@ -105,31 +176,7 @@ serve(async (req: Request) => {
       );
     }
 
-    // Build event cards HTML
-    const eventCardsHtml = events.map(event => {
-      const partner = partnerMap.get(event.partner_id);
-      const imageUrl = event.image_url || partner?.profile_image_url || '';
-      const discountBadge = event.discount_percentage && event.discount_percentage > 0
-        ? `<span style="background: linear-gradient(135deg, #ec4899, #8b5cf6); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">${event.discount_percentage}% OFF</span>`
-        : '';
-
-      return `
-        <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-bottom: 20px;">
-          ${imageUrl ? `<img src="${imageUrl}" alt="${event.title}" style="width: 100%; height: 180px; object-fit: cover;" />` : ''}
-          <div style="padding: 20px;">
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-              ${partner?.profile_image_url ? `<img src="${partner.profile_image_url}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />` : ''}
-              <span style="font-weight: 600; color: #374151;">${partner?.business_name || 'Partner'}</span>
-              ${discountBadge}
-            </div>
-            <h3 style="margin: 0 0 10px 0; color: #111827; font-size: 18px;">${event.title}</h3>
-            <p style="margin: 0; color: #6b7280; font-size: 14px; line-height: 1.5;">${event.description || ''}</p>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    // Send emails to inactive users
+    // Send emails to inactive users with rate limiting (1 per second)
     let sentCount = 0;
     let errorCount = 0;
 
@@ -141,52 +188,7 @@ serve(async (req: Request) => {
           from: "StudentsLife <noreply@studentslife.es>",
           to: [user.email],
           subject: "🎉 ¡Te echamos de menos! Mira las nuevas ofertas",
-          html: `
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            </head>
-            <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
-              <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-                <!-- Header -->
-                <div style="text-align: center; margin-bottom: 30px;">
-                  <h1 style="background: linear-gradient(135deg, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 32px; margin: 0;">StudentsLife</h1>
-                  <p style="color: #6b7280; margin-top: 10px;">Tu app de descuentos universitarios</p>
-                </div>
-
-                <!-- Main Content -->
-                <div style="background: linear-gradient(135deg, #fdf2f8, #faf5ff); border-radius: 24px; padding: 30px; margin-bottom: 30px;">
-                  <h2 style="color: #111827; margin: 0 0 15px 0; font-size: 24px;">¡Hola ${userName}! 👋</h2>
-                  <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0;">
-                    Hace tiempo que no te vemos por aquí. ¡Tenemos nuevas ofertas increíbles esperándote! 
-                    Mira lo que nuestros socios tienen preparado para ti:
-                  </p>
-                </div>
-
-                <!-- Events -->
-                <div style="margin-bottom: 30px;">
-                  <h3 style="color: #111827; font-size: 20px; margin-bottom: 20px;">🔥 Ofertas destacadas</h3>
-                  ${eventCardsHtml}
-                </div>
-
-                <!-- CTA Button -->
-                <div style="text-align: center; margin-bottom: 30px;">
-                  <a href="https://studentslife.es" style="display: inline-block; background: linear-gradient(135deg, #ec4899, #8b5cf6); color: white; text-decoration: none; padding: 16px 40px; border-radius: 30px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);">
-                    ¡Ver todas las ofertas!
-                  </a>
-                </div>
-
-                <!-- Footer -->
-                <div style="text-align: center; color: #9ca3af; font-size: 12px;">
-                  <p>Recibiste este email porque tienes una cuenta en StudentsLife.</p>
-                  <p>© 2024 StudentsLife. Todos los derechos reservados.</p>
-                </div>
-              </div>
-            </body>
-            </html>
-          `,
+          html: buildEmailHtml(userName, eventCardsHtml),
         });
 
         if (emailError) {
@@ -200,6 +202,9 @@ serve(async (req: Request) => {
         console.error(`Exception sending to ${user.email}:`, e);
         errorCount++;
       }
+
+      // Wait 600ms between emails to respect rate limit (max 2/sec)
+      await delay(600);
     }
 
     console.log(`Marketing emails completed: ${sentCount} sent, ${errorCount} errors`);
@@ -222,3 +227,52 @@ serve(async (req: Request) => {
     );
   }
 });
+
+function buildEmailHtml(userName: string, eventCardsHtml: string): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="background: linear-gradient(135deg, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 32px; margin: 0;">StudentsLife</h1>
+          <p style="color: #6b7280; margin-top: 10px;">Tu app de descuentos universitarios</p>
+        </div>
+
+        <!-- Main Content -->
+        <div style="background: linear-gradient(135deg, #fdf2f8, #faf5ff); border-radius: 24px; padding: 30px; margin-bottom: 30px;">
+          <h2 style="color: #111827; margin: 0 0 15px 0; font-size: 24px;">¡Hola ${userName}! 👋</h2>
+          <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0;">
+            Hace tiempo que no te vemos por aquí. ¡Tenemos nuevas ofertas increíbles esperándote! 
+            Mira lo que nuestros socios tienen preparado para ti:
+          </p>
+        </div>
+
+        <!-- Events -->
+        <div style="margin-bottom: 30px;">
+          <h3 style="color: #111827; font-size: 20px; margin-bottom: 20px;">🔥 Ofertas destacadas</h3>
+          ${eventCardsHtml}
+        </div>
+
+        <!-- CTA Button -->
+        <div style="text-align: center; margin-bottom: 30px;">
+          <a href="https://studentslife.es" style="display: inline-block; background: linear-gradient(135deg, #ec4899, #8b5cf6); color: white; text-decoration: none; padding: 16px 40px; border-radius: 30px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);">
+            ¡Ver todas las ofertas!
+          </a>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; color: #9ca3af; font-size: 12px;">
+          <p>Recibiste este email porque tienes una cuenta en StudentsLife.</p>
+          <p>© 2024 StudentsLife. Todos los derechos reservados.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
