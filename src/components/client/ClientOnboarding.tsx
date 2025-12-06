@@ -35,6 +35,8 @@ interface ClientOnboardingProps {
   onSkip: () => boolean | void;
   onComplete: () => void;
   onNavigateTab: (tab: string) => void;
+  onOpenWallet?: () => void;
+  onOpenLoyaltyCards?: () => void;
   canProceed: boolean;
 }
 
@@ -62,6 +64,8 @@ const ClientOnboarding = ({
   onSkip,
   onComplete,
   onNavigateTab,
+  onOpenWallet,
+  onOpenLoyaltyCards,
   canProceed,
 }: ClientOnboardingProps) => {
   const [showWarning, setShowWarning] = useState(false);
@@ -168,12 +172,22 @@ const ClientOnboarding = ({
   const isWelcome = step.id === "welcome";
   const isRequired = step.required;
 
-  // Navigate to the correct tab
+  // Navigate to the correct tab and trigger actions
   useEffect(() => {
     if (step.targetTab) {
       onNavigateTab(step.targetTab);
     }
-  }, [step.targetTab, onNavigateTab]);
+    
+    // Auto-open wallet when on wallet step
+    if (step.id === "wallet" && onOpenWallet) {
+      setTimeout(() => onOpenWallet(), 500);
+    }
+    
+    // Auto-open loyalty cards when on loyalty step
+    if (step.id === "loyalty-cards" && onOpenLoyaltyCards) {
+      setTimeout(() => onOpenLoyaltyCards(), 500);
+    }
+  }, [step.id, step.targetTab, onNavigateTab, onOpenWallet, onOpenLoyaltyCards]);
 
   const triggerConfetti = () => {
     const duration = 4000;
