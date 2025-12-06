@@ -62,14 +62,14 @@ const ONBOARDING_STEPS: ClientOnboardingStep[] = [
   {
     id: "wallet",
     title: "💼 Tu Wallet",
-    description: "¡Mira! Aquí se guardan todos tus QR descargados. Acceso rápido a tus descuentos.",
+    description: "¡Mira! Aquí se guardan todos tus QR descargados. Cierra con la X para continuar.",
     targetTab: "partners",
     position: "center",
   },
   {
     id: "loyalty-cards",
     title: "🎁 Tarjetas de Fidelidad",
-    description: "¡Mira! Cada vez que uses un QR, acumulas sellos. ¡Con 10 sellos ganas premios!",
+    description: "¡Cada vez que uses un QR, acumulas sellos! Cierra con la X para continuar.",
     targetTab: "partners",
     position: "center",
   },
