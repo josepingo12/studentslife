@@ -57,38 +57,41 @@ const AdminChats = () => {
       .select("*")
       .or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
 
-    if (!convData) return;
+    if (!convData || convData.length === 0) return;
 
     const messagesMap = new Map();
     const unreadMap = new Map();
 
-    for (const conv of convData) {
+    // Use Promise.all for parallel fetching
+    await Promise.all(convData.map(async (conv) => {
       const otherUserId = conv.user1_id === userId ? conv.user2_id : conv.user1_id;
-      if (!otherUserId) continue;
+      if (!otherUserId) return;
 
-      const { data: lastMsg } = await supabase
-        .from("messages")
-        .select("*")
-        .eq("conversation_id", conv.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      // Fetch last message and unread count in parallel
+      const [lastMsgResult, unreadResult] = await Promise.all([
+        supabase
+          .from("messages")
+          .select("*")
+          .eq("conversation_id", conv.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from("messages")
+          .select("*", { count: "exact", head: true })
+          .eq("conversation_id", conv.id)
+          .eq("is_read", false)
+          .neq("sender_id", userId)
+      ]);
 
-      if (lastMsg) {
-        messagesMap.set(otherUserId, lastMsg);
+      if (lastMsgResult.data) {
+        messagesMap.set(otherUserId, lastMsgResult.data);
       }
 
-      const { count } = await supabase
-        .from("messages")
-        .select("*", { count: "exact", head: true })
-        .eq("conversation_id", conv.id)
-        .eq("is_read", false)
-        .neq("sender_id", userId);
-
-      if (count && count > 0) {
-        unreadMap.set(otherUserId, count);
+      if (unreadResult.count && unreadResult.count > 0) {
+        unreadMap.set(otherUserId, unreadResult.count);
       }
-    }
+    }));
 
     setUserMessages(messagesMap);
     setUnreadCounts(unreadMap);
