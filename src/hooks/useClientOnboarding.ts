@@ -27,12 +27,14 @@ const ONBOARDING_STEPS: ClientOnboardingStep[] = [
   },
   {
     id: "profile-photo",
-    title: "📷 Tu Perfil",
-    description: "Desde tu avatar puedes personalizar tu foto de perfil y portada. ¡Dale tu toque personal!",
+    title: "📷 Tu Foto de Perfil",
+    description: "Haz clic en tu avatar para subir una foto de perfil. ¡Es obligatorio para continuar!",
     targetTab: "social",
     position: "top",
     highlightElement: "avatar",
     arrowDirection: "up",
+    required: true,
+    checkField: "hasProfilePhoto",
   },
   {
     id: "discover-partners",
@@ -150,10 +152,18 @@ export const useClientOnboarding = (userId: string | undefined) => {
     }
   }, [checkProfileCompletion]);
 
-  // All steps are now demonstrative, always can proceed
+  // Check if current step can proceed
   const canProceed = useCallback(() => {
+    const currentStepData = steps[currentStep];
+    if (!currentStepData) return true;
+    
+    // If step is required and has a checkField, verify it's complete
+    if (currentStepData.required && currentStepData.checkField && profileCompletion) {
+      return profileCompletion[currentStepData.checkField as keyof ClientProfileCompletion];
+    }
+    
     return true;
-  }, []);
+  }, [currentStep, steps, profileCompletion]);
 
   const nextStep = useCallback(() => {
     if (currentStep < steps.length - 1) {
