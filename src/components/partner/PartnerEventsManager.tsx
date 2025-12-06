@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Calendar, Percent, Plus, Trash2, BarChart } from "lucide-react";
+import { Calendar, Percent, Plus, Trash2, BarChart, Pencil } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageUpload from "@/components/shared/ImageUpload";
 import { Switch } from "@/components/ui/switch";
@@ -16,22 +16,36 @@ interface PartnerEventsManagerProps {
   partnerId: string;
 }
 
+interface EventFormData {
+  title: string;
+  description: string;
+  discount_percentage: number;
+  start_date: string;
+  end_date: string;
+  image_url: string;
+  link_url: string;
+  qr_enabled: boolean;
+}
+
+const initialFormData: EventFormData = {
+  title: "",
+  description: "",
+  discount_percentage: 10,
+  start_date: "",
+  end_date: "",
+  image_url: "",
+  link_url: "",
+  qr_enabled: true,
+};
+
 const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    discount_percentage: 10,
-    start_date: "",
-    end_date: "",
-    image_url: "",
-    link_url: "",
-    qr_enabled: true,
-  });
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
+  const [formData, setFormData] = useState<EventFormData>(initialFormData);
 
   useEffect(() => {
     fetchEvents();
@@ -51,39 +65,75 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
     setLoading(false);
   };
 
+  const handleOpenCreate = () => {
+    setEditingEventId(null);
+    setFormData(initialFormData);
+    setShowDialog(true);
+  };
+
+  const handleOpenEdit = (event: any) => {
+    setEditingEventId(event.id);
+    setFormData({
+      title: event.title || "",
+      description: event.description || "",
+      discount_percentage: event.discount_percentage || 10,
+      start_date: event.start_date ? event.start_date.split("T")[0] : "",
+      end_date: event.end_date ? event.end_date.split("T")[0] : "",
+      image_url: event.image_url || "",
+      link_url: event.link_url || "",
+      qr_enabled: event.qr_enabled ?? true,
+    });
+    setShowDialog(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const { error } = await supabase.from("events").insert({
-      partner_id: partnerId,
-      ...formData,
-    });
+    if (editingEventId) {
+      // Update existing event
+      const { error } = await supabase
+        .from("events")
+        .update(formData)
+        .eq("id", editingEventId);
 
-    if (error) {
+      if (error) {
+        toast({
+          title: t("eventManager.error"),
+          description: t("eventManager.cannotUpdate"),
+          variant: "destructive",
+        });
+        return;
+      }
+
       toast({
-        title: t("eventManager.error"),
-        description: t("eventManager.cannotCreate"),
-        variant: "destructive",
+        title: t("eventManager.eventUpdated"),
+        description: t("eventManager.eventUpdatedDesc"),
       });
-      return;
+    } else {
+      // Create new event
+      const { error } = await supabase.from("events").insert({
+        partner_id: partnerId,
+        ...formData,
+      });
+
+      if (error) {
+        toast({
+          title: t("eventManager.error"),
+          description: t("eventManager.cannotCreate"),
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: t("eventManager.eventCreated"),
+        description: t("eventManager.eventVisible"),
+      });
     }
 
-    toast({
-      title: t("eventManager.eventCreated"),
-      description: t("eventManager.eventVisible"),
-    });
-
     setShowDialog(false);
-    setFormData({
-      title: "",
-      description: "",
-      discount_percentage: 10,
-      start_date: "",
-      end_date: "",
-      image_url: "",
-      link_url: "",
-      qr_enabled: true,
-    });
+    setEditingEventId(null);
+    setFormData(initialFormData);
     fetchEvents();
   };
 
@@ -104,6 +154,14 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
     });
 
     fetchEvents();
+  };
+
+  const handleCloseDialog = (open: boolean) => {
+    if (!open) {
+      setEditingEventId(null);
+      setFormData(initialFormData);
+    }
+    setShowDialog(open);
   };
 
   return (
@@ -140,14 +198,24 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
                       <p className="text-sm text-muted-foreground mb-2">{event.description}</p>
                     )}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(event.id)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleOpenEdit(event)}
+                      className="text-primary hover:text-primary"
+                    >
+                      <Pencil className="w-5 h-5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(event.id)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-4 text-sm mb-3">
@@ -206,17 +274,19 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
         </div>
       )}
 
-      {/* Create Event Button at bottom */}
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+      {/* Create/Edit Event Dialog */}
+      <Dialog open={showDialog} onOpenChange={handleCloseDialog}>
         <DialogTrigger asChild>
-          <Button className="w-full ios-button h-12">
+          <Button className="w-full ios-button h-12" onClick={handleOpenCreate}>
             <Plus className="w-5 h-5 mr-2" />
             {t("eventManager.createNewEvent")}
           </Button>
         </DialogTrigger>
         <DialogContent className="ios-card max-w-md h-[90vh] overflow-y-auto sm:max-h-[90vh] sm:h-auto flex flex-col">
           <DialogHeader className="flex-shrink-0">
-            <DialogTitle>{t("eventManager.newEvent")}</DialogTitle>
+            <DialogTitle>
+              {editingEventId ? t("eventManager.editEvent") : t("eventManager.newEvent")}
+            </DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4 pb-4 overflow-y-auto flex-1">
@@ -248,7 +318,14 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
                 showPreview
               />
               {formData.image_url && (
-                <p className="text-xs text-muted-foreground">{t("eventManager.imageUploaded")}</p>
+                <div className="mt-2">
+                  <img 
+                    src={formData.image_url} 
+                    alt="Preview" 
+                    className="w-full h-32 object-cover rounded-lg"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">{t("eventManager.imageUploaded")}</p>
+                </div>
               )}
             </div>
 
@@ -315,7 +392,7 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
             </div>
 
             <Button type="submit" className="w-full ios-button">
-              {t("eventManager.createEvent")}
+              {editingEventId ? t("eventManager.saveChanges") : t("eventManager.createEvent")}
             </Button>
           </form>
         </DialogContent>
