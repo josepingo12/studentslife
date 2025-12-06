@@ -39,6 +39,8 @@ interface ClientOnboardingProps {
   onOpenWallet?: () => void;
   onOpenLoyaltyCards?: () => void;
   canProceed: boolean;
+  walletOpen?: boolean;
+  loyaltyCardsOpen?: boolean;
 }
 
 const stepIcons: Record<string, React.ReactNode> = {
@@ -69,6 +71,8 @@ const ClientOnboarding = ({
   onOpenWallet,
   onOpenLoyaltyCards,
   canProceed,
+  walletOpen,
+  loyaltyCardsOpen,
 }: ClientOnboardingProps) => {
   const [showWarning, setShowWarning] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -191,6 +195,21 @@ const ClientOnboarding = ({
       setTimeout(() => onOpenLoyaltyCards(), 500);
     }
   }, [step.id, step.targetTab, onNavigateTab, onOpenWallet, onOpenLoyaltyCards]);
+
+  // Auto-advance when wallet/loyalty sheets are closed
+  useEffect(() => {
+    if (step.id === "wallet" && walletOpen === false) {
+      // Wallet was closed, advance to next step
+      setTimeout(() => onNext(), 300);
+    }
+  }, [step.id, walletOpen, onNext]);
+
+  useEffect(() => {
+    if (step.id === "loyalty-cards" && loyaltyCardsOpen === false) {
+      // Loyalty cards was closed, advance to next step
+      setTimeout(() => onNext(), 300);
+    }
+  }, [step.id, loyaltyCardsOpen, onNext]);
 
   const triggerConfetti = () => {
     const duration = 4000;
