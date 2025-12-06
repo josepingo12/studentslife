@@ -44,17 +44,17 @@ interface ClientOnboardingProps {
 }
 
 const stepIcons: Record<string, React.ReactNode> = {
-  welcome: <Sparkles className="w-7 h-7 sm:w-10 sm:h-10 text-primary" />,
-  "go-to-profile": <Navigation className="w-7 h-7 sm:w-10 sm:h-10 text-blue-500" />,
-  "profile-photo": <Camera className="w-7 h-7 sm:w-10 sm:h-10 text-blue-500" />,
-  "cover-photo": <Image className="w-7 h-7 sm:w-10 sm:h-10 text-purple-500" />,
-  "discover-partners": <Store className="w-7 h-7 sm:w-10 sm:h-10 text-green-500" />,
-  "download-discounts": <Tag className="w-7 h-7 sm:w-10 sm:h-10 text-red-500" />,
-  "wallet": <Wallet className="w-7 h-7 sm:w-10 sm:h-10 text-amber-500" />,
-  "loyalty-cards": <Gift className="w-7 h-7 sm:w-10 sm:h-10 text-pink-500" />,
-  "social-feed": <Share2 className="w-7 h-7 sm:w-10 sm:h-10 text-blue-400" />,
-  "chat": <MessageSquare className="w-7 h-7 sm:w-10 sm:h-10 text-indigo-500" />,
-  complete: <PartyPopper className="w-7 h-7 sm:w-10 sm:h-10 text-primary" />,
+  welcome: <Sparkles className="w-5 h-5 xs:w-6 xs:h-6 sm:w-8 sm:h-8 text-primary" />,
+  "go-to-profile": <Navigation className="w-5 h-5 xs:w-6 xs:h-6 sm:w-8 sm:h-8 text-blue-500" />,
+  "profile-photo": <Camera className="w-5 h-5 xs:w-6 xs:h-6 sm:w-8 sm:h-8 text-blue-500" />,
+  "cover-photo": <Image className="w-5 h-5 xs:w-6 xs:h-6 sm:w-8 sm:h-8 text-purple-500" />,
+  "discover-partners": <Store className="w-5 h-5 xs:w-6 xs:h-6 sm:w-8 sm:h-8 text-green-500" />,
+  "download-discounts": <Tag className="w-5 h-5 xs:w-6 xs:h-6 sm:w-8 sm:h-8 text-red-500" />,
+  "wallet": <Wallet className="w-5 h-5 xs:w-6 xs:h-6 sm:w-8 sm:h-8 text-amber-500" />,
+  "loyalty-cards": <Gift className="w-5 h-5 xs:w-6 xs:h-6 sm:w-8 sm:h-8 text-pink-500" />,
+  "social-feed": <Share2 className="w-5 h-5 xs:w-6 xs:h-6 sm:w-8 sm:h-8 text-blue-400" />,
+  "chat": <MessageSquare className="w-5 h-5 xs:w-6 xs:h-6 sm:w-8 sm:h-8 text-indigo-500" />,
+  complete: <PartyPopper className="w-5 h-5 xs:w-6 xs:h-6 sm:w-8 sm:h-8 text-primary" />,
 };
 
 const ClientOnboarding = ({
@@ -92,11 +92,9 @@ const ClientOnboarding = ({
   // Detect when canProceed changes from false to true (step completed!)
   useEffect(() => {
     if (canProceed && !prevCanProceed && step?.required) {
-      // Show success animation
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
-        // Auto advance after success animation
         onNext();
       }, 1200);
     }
@@ -141,7 +139,6 @@ const ClientOnboarding = ({
 
     if (element) {
       const rect = element.getBoundingClientRect();
-      // For cover-photo, use rectangle shape; for others use circle (square)
       const isRectangle = step.highlightElement === "cover-photo";
       setSpotlightRect({
         x: rect.left + rect.width / 2,
@@ -155,7 +152,6 @@ const ClientOnboarding = ({
     }
   }, [step?.highlightElement]);
 
-  // Update position on mount and window resize
   useEffect(() => {
     updateSpotlightPosition();
     
@@ -163,7 +159,6 @@ const ClientOnboarding = ({
     window.addEventListener('resize', handleResize);
     window.addEventListener('scroll', handleResize);
     
-    // Update frequently for dynamic content
     const interval = setInterval(updateSpotlightPosition, 300);
     
     return () => {
@@ -177,7 +172,6 @@ const ClientOnboarding = ({
 
   const isLastStep = step.id === "complete";
   const isFirstStep = currentStep === 0;
-  const isWelcome = step.id === "welcome";
   const isRequired = step.required;
   const isGoToProfileStep = step.id === "go-to-profile";
 
@@ -188,21 +182,18 @@ const ClientOnboarding = ({
     }
   }, [step.id, step.targetTab, onNavigateTab]);
 
-  // Auto-advance when wallet is closed after being opened
   useEffect(() => {
     if (step.id === "wallet" && walletOpened && walletOpen === false) {
       setTimeout(() => onNext(), 300);
     }
   }, [step.id, walletOpened, walletOpen, onNext]);
 
-  // Auto-advance when loyalty cards is closed after being opened
   useEffect(() => {
     if (step.id === "loyalty-cards" && loyaltyOpened && loyaltyCardsOpen === false) {
       setTimeout(() => onNext(), 300);
     }
   }, [step.id, loyaltyOpened, loyaltyCardsOpen, onNext]);
 
-  // Track when wallet/loyalty are opened by user click
   useEffect(() => {
     if (step.id === "wallet" && walletOpen === true) {
       setWalletOpened(true);
@@ -257,7 +248,6 @@ const ClientOnboarding = ({
       return;
     }
     
-    // Don't allow button click for go-to-profile step - must click the avatar
     if (isGoToProfileStep) {
       return;
     }
@@ -278,26 +268,6 @@ const ClientOnboarding = ({
       return;
     }
     onSkip();
-  };
-
-  const getPositionClasses = () => {
-    // If we have a spotlight, position relative to it
-    if (spotlightRect) {
-      // Position below the spotlight for top elements
-      if (spotlightRect.y < window.innerHeight / 2) {
-        return "top-auto";
-      }
-      return "bottom-28";
-    }
-    
-    switch (step.position) {
-      case "top":
-        return "top-20";
-      case "bottom":
-        return "bottom-28";
-      default:
-        return "top-1/2 -translate-y-1/2";
-    }
   };
 
   return (
@@ -388,10 +358,8 @@ const ClientOnboarding = ({
             paddingTop: 'env(safe-area-inset-top)',
           }}
         >
-          {/* Dark background */}
           <div className="absolute inset-0 bg-black/70" />
           
-          {/* Spotlight cutout for highlighted element - using actual element position */}
           {spotlightRect && (
             <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
@@ -462,53 +430,61 @@ const ClientOnboarding = ({
           </motion.div>
         )}
 
-        {/* Floating tooltip card */}
+        {/* Floating tooltip card - fully responsive for ALL mobile devices */}
         <motion.div
           key={step.id}
-          initial={{ opacity: 0, y: 30, scale: 0.9 }}
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -30, scale: 0.9 }}
+          exit={{ opacity: 0, y: -20, scale: 0.95 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          className={`fixed z-[160] left-3 right-3 sm:left-auto sm:right-auto sm:mx-4 sm:w-[calc(100%-2rem)] max-w-sm ${!spotlightRect ? getPositionClasses() : ''}`}
-          style={spotlightRect ? {
-            top: spotlightRect.y < window.innerHeight / 2 
-              ? `${Math.min(spotlightRect.y + spotlightRect.height / 2 + 60, window.innerHeight - 280)}px`
-              : 'auto',
-            bottom: spotlightRect.y >= window.innerHeight / 2 ? '100px' : 'auto',
-            left: '12px',
-            right: '12px',
-            transform: 'none',
-          } : {}}
+          className="fixed z-[160]"
+          style={{
+            left: '8px',
+            right: '8px',
+            maxWidth: '400px',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            top: spotlightRect 
+              ? spotlightRect.y < window.innerHeight / 2 
+                ? `${Math.min(spotlightRect.y + spotlightRect.height / 2 + 40, window.innerHeight - 220)}px`
+                : 'auto'
+              : step.position === 'top' ? '70px' : step.position === 'center' ? '50%' : 'auto',
+            bottom: spotlightRect 
+              ? spotlightRect.y >= window.innerHeight / 2 ? '80px' : 'auto'
+              : step.position === 'bottom' ? '80px' : 'auto',
+            transform: step.position === 'center' && !spotlightRect ? 'translateY(-50%)' : 'none',
+            paddingBottom: 'env(safe-area-inset-bottom)',
+          }}
         >
           {/* Progress indicator */}
-          <div className="mb-2 sm:mb-3 px-1">
-            <div className="flex items-center justify-between text-[10px] sm:text-xs text-white/90 mb-1 sm:mb-1.5">
+          <div className="mb-1.5 px-0.5">
+            <div className="flex items-center justify-between text-[9px] text-white/90 mb-1">
               <motion.span 
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                className="bg-blue-500/80 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full backdrop-blur-sm font-medium"
+                className="bg-blue-500/80 px-2 py-0.5 rounded-full backdrop-blur-sm font-medium"
               >
-                Paso {currentStep + 1} de {totalSteps}
+                {currentStep + 1}/{totalSteps}
               </motion.span>
               <motion.span 
                 initial={{ x: 20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                className="bg-blue-500/80 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full backdrop-blur-sm font-medium"
+                className="bg-blue-500/80 px-2 py-0.5 rounded-full backdrop-blur-sm font-medium"
               >
                 {Math.round(progress)}%
               </motion.span>
             </div>
-            <Progress value={progress} className="h-1.5 sm:h-2 bg-white/20" />
+            <Progress value={progress} className="h-1 bg-white/20" />
           </div>
 
           {/* Main Card */}
           <motion.div 
-            className="bg-background rounded-xl sm:rounded-3xl p-3 sm:p-6 shadow-2xl border border-border/50 relative"
+            className="bg-background rounded-xl p-2.5 shadow-2xl border border-border/50 relative overflow-hidden"
             layoutId="onboarding-card"
           >
             {/* Animated gradient background */}
             <motion.div 
-              className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-purple-500/10 rounded-xl sm:rounded-3xl"
+              className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-purple-500/10 rounded-xl"
               animate={{ 
                 background: [
                   "linear-gradient(135deg, rgba(59,130,246,0.1) 0%, transparent 50%, rgba(168,85,247,0.1) 100%)",
@@ -519,34 +495,34 @@ const ClientOnboarding = ({
               transition={{ duration: 4, repeat: Infinity }}
             />
             
-            {/* Required badge - inside card with proper spacing */}
+            {/* Required badge */}
             {isRequired && (
               <motion.div 
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] sm:text-xs px-2 sm:px-3 py-0.5 sm:py-1 rounded-full font-bold shadow-lg z-10 flex items-center gap-0.5 sm:gap-1"
+                className="absolute top-1.5 right-1.5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold shadow-lg z-10 flex items-center gap-0.5"
               >
-                <AlertCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                Obligatorio
+                <AlertCircle className="w-2 h-2" />
+                Req.
               </motion.div>
             )}
 
-            <div className="flex items-start gap-2 sm:gap-4 relative">
+            <div className="flex items-start gap-2 relative">
               {/* Icon with animation */}
               <motion.div 
-                className="flex-shrink-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-xl sm:rounded-2xl p-2 sm:p-4"
+                className="flex-shrink-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg p-1.5"
                 animate={{ rotate: [0, 5, -5, 0] }}
                 transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
               >
-                {stepIcons[step.id] || <Sparkles className="w-7 h-7 sm:w-10 sm:h-10 text-primary" />}
+                {stepIcons[step.id] || <Sparkles className="w-5 h-5 text-primary" />}
               </motion.div>
 
               {/* Content */}
-              <div className="flex-1 min-w-0 pr-1 sm:pr-2">
+              <div className="flex-1 min-w-0 pr-5">
                 <motion.h3 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="font-bold text-sm sm:text-xl mb-1 sm:mb-2"
+                  className="font-bold text-xs mb-0.5 leading-tight"
                 >
                   {step.title}
                 </motion.h3>
@@ -554,7 +530,7 @@ const ClientOnboarding = ({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.1 }}
-                  className="text-xs sm:text-sm text-muted-foreground leading-relaxed"
+                  className="text-[10px] text-muted-foreground leading-snug line-clamp-2"
                 >
                   {step.description}
                 </motion.p>
@@ -568,46 +544,45 @@ const ClientOnboarding = ({
                   initial={{ opacity: 0, height: 0, y: -10 }}
                   animate={{ opacity: 1, height: "auto", y: 0 }}
                   exit={{ opacity: 0, height: 0, y: -10 }}
-                  className="mt-3 sm:mt-4 bg-red-50 border border-red-200 rounded-lg sm:rounded-xl p-2 sm:p-4 flex items-center gap-2 sm:gap-3"
+                  className="mt-2 bg-red-50 border border-red-200 rounded-lg p-1.5 flex items-center gap-1.5"
                 >
                   <motion.div
                     animate={{ rotate: [0, -10, 10, -10, 10, 0] }}
                     transition={{ duration: 0.5 }}
                   >
-                    <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-500 flex-shrink-0" />
+                    <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
                   </motion.div>
-                  <p className="text-xs sm:text-sm text-red-700 font-medium">
-                    ¡Debes completar este paso para continuar!
+                  <p className="text-[10px] text-red-700 font-medium">
+                    ¡Completa este paso!
                   </p>
                 </motion.div>
               )}
             </AnimatePresence>
 
             {/* Action buttons */}
-            <div className="flex gap-2 sm:gap-3 mt-3 sm:mt-5 relative">
+            <div className="flex gap-1.5 mt-2 relative">
               {!isFirstStep && !isLastStep && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={onPrev}
-                  className="gap-0.5 sm:gap-1 rounded-lg sm:rounded-xl text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
+                  className="gap-0.5 rounded-lg text-[10px] px-1.5 h-7"
                 >
-                  <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  <span className="hidden xs:inline">Atrás</span>
+                  <ChevronLeft className="w-3 h-3" />
                 </Button>
               )}
               
               <div className="flex-1" />
 
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
                 <Button
                   size="sm"
                   onClick={handleNext}
                   disabled={isGoToProfileStep || (isRequired && !canProceed)}
-                  className={`gap-1 sm:gap-2 rounded-lg sm:rounded-xl px-3 sm:px-6 text-xs sm:text-sm h-8 sm:h-9 ${(isGoToProfileStep || (isRequired && !canProceed))
+                  className={`gap-0.5 rounded-lg px-2 text-[10px] h-7 ${(isGoToProfileStep || (isRequired && !canProceed))
                     ? "bg-gray-400 cursor-not-allowed" 
                     : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg"
                   }`}
@@ -615,22 +590,16 @@ const ClientOnboarding = ({
                   {isLastStep ? (
                     <>
                       ¡Empezar!
-                      <PartyPopper className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <PartyPopper className="w-3 h-3" />
                     </>
                   ) : isGoToProfileStep ? (
-                    <>
-                      <span className="hidden xs:inline">Haz clic en tu avatar</span>
-                      <span className="xs:hidden">Clic avatar</span> ↑
-                    </>
+                    <>Clic avatar ↑</>
                   ) : isRequired && !canProceed ? (
-                    <>
-                      <span className="hidden xs:inline">Sube tu foto</span>
-                      <span className="xs:hidden">Subir foto</span> ↑
-                    </>
+                    <>Subir foto ↑</>
                   ) : (
                     <>
                       Siguiente
-                      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <ChevronRight className="w-3 h-3" />
                     </>
                   )}
                 </Button>
