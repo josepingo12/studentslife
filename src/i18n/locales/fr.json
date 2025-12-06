@@ -405,5 +405,15 @@
     "you": "Toi",
     "person": "personne",
     "people": "personnes"
+  },
+  "wallet": {
+    "title": "Mon Portefeuille",
+    "empty": "Aucun code QR dans le portefeuille",
+    "emptyHint": "Téléchargez un code QR d'un événement pour le voir ici",
+    "validUntil": "Valable jusqu'au",
+    "deleteTitle": "Supprimer QR",
+    "deleteDescription": "Êtes-vous sûr de vouloir supprimer ce code QR de votre portefeuille?",
+    "deleteSuccess": "Code QR supprimé avec succès",
+    "deleteError": "Erreur lors de la suppression du code QR"
   }
 }

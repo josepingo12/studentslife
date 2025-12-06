@@ -405,5 +405,15 @@
     "you": "Du",
     "person": "Person",
     "people": "Personen"
+  },
+  "wallet": {
+    "title": "Mein Wallet",
+    "empty": "Keine QR-Codes im Wallet",
+    "emptyHint": "Laden Sie einen QR-Code von einem Event herunter, um ihn hier zu sehen",
+    "validUntil": "Gültig bis",
+    "deleteTitle": "QR löschen",
+    "deleteDescription": "Sind Sie sicher, dass Sie diesen QR-Code aus Ihrem Wallet löschen möchten?",
+    "deleteSuccess": "QR-Code erfolgreich gelöscht",
+    "deleteError": "Fehler beim Löschen des QR-Codes"
   }
 }
