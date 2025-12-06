@@ -31,13 +31,13 @@ interface PartnerOnboardingProps {
 }
 
 const stepIcons: Record<string, React.ReactNode> = {
-  welcome: <Sparkles className="w-8 h-8 sm:w-12 sm:h-12 text-primary" />,
-  "profile-photo": <Camera className="w-8 h-8 sm:w-12 sm:h-12 text-blue-500" />,
-  "cover-photo": <Image className="w-8 h-8 sm:w-12 sm:h-12 text-purple-500" />,
-  "business-data": <FileText className="w-8 h-8 sm:w-12 sm:h-12 text-green-500" />,
-  "gallery-photos": <Images className="w-8 h-8 sm:w-12 sm:h-12 text-orange-500" />,
-  "create-discount": <Tag className="w-8 h-8 sm:w-12 sm:h-12 text-red-500" />,
-  complete: <PartyPopper className="w-8 h-8 sm:w-12 sm:h-12 text-primary" />,
+  welcome: <Sparkles className="w-5 h-5 text-primary" />,
+  "profile-photo": <Camera className="w-5 h-5 text-blue-500" />,
+  "cover-photo": <Image className="w-5 h-5 text-purple-500" />,
+  "business-data": <FileText className="w-5 h-5 text-green-500" />,
+  "gallery-photos": <Images className="w-5 h-5 text-orange-500" />,
+  "create-discount": <Tag className="w-5 h-5 text-red-500" />,
+  complete: <PartyPopper className="w-5 h-5 text-primary" />,
 };
 
 const PartnerOnboarding = ({
@@ -54,7 +54,6 @@ const PartnerOnboarding = ({
   const [isVisible, setIsVisible] = useState(true);
   const [showFinalCelebration, setShowFinalCelebration] = useState(false);
   
-  // Play celebration sound
   const playCelebrationSound = () => {
     const audio = new Audio('data:audio/wav;base64,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');
     audio.volume = 0.5;
@@ -101,7 +100,6 @@ const PartnerOnboarding = ({
   const isFirstStep = currentStep === 0;
   const isWelcome = step.id === "welcome";
 
-  // Navigate to the correct tab
   useEffect(() => {
     if (step.targetTab) {
       onNavigateTab(step.targetTab);
@@ -110,7 +108,6 @@ const PartnerOnboarding = ({
 
   const handleAction = () => {
     if (isLastStep) {
-      // Trigger celebration animation
       setShowFinalCelebration(true);
       triggerConfetti();
       playCelebrationSound();
@@ -120,20 +117,7 @@ const PartnerOnboarding = ({
     } else if (isWelcome) {
       onNext();
     } else {
-      // For action steps, user needs to interact with the app
-      // Just minimize the tooltip
       setIsVisible(false);
-    }
-  };
-
-  const getPositionClasses = () => {
-    switch (step.position) {
-      case "top":
-        return "top-20 left-1/2 -translate-x-1/2";
-      case "bottom":
-        return "bottom-24 left-1/2 -translate-x-1/2";
-      default:
-        return "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2";
     }
   };
 
@@ -146,7 +130,7 @@ const PartnerOnboarding = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[250] flex flex-col items-center justify-center bg-gradient-to-br from-primary/90 via-purple-600/90 to-pink-500/90"
+            className="fixed inset-0 z-[250] flex flex-col items-center justify-center bg-gradient-to-br from-primary/90 via-purple-600/90 to-pink-500/90 px-4"
           >
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
@@ -160,7 +144,7 @@ const PartnerOnboarding = ({
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-2xl sm:text-4xl font-bold text-white text-center mb-3 sm:mb-4 px-4"
+              className="text-2xl sm:text-4xl font-bold text-white text-center mb-3 sm:mb-4"
             >
               ¡Felicidades!
             </motion.h2>
@@ -186,83 +170,91 @@ const PartnerOnboarding = ({
 
       {isVisible && !showFinalCelebration && (
         <>
-          {/* Semi-transparent backdrop - allows clicks through for non-center positions */}
+          {/* Semi-transparent backdrop */}
           {step.position === "center" && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm"
-              style={{ 
-                paddingTop: 'env(safe-area-inset-top)',
-              }}
+              style={{ paddingTop: 'env(safe-area-inset-top)' }}
             />
           )}
 
-          {/* Floating tooltip card */}
+          {/* Floating tooltip card - fully responsive */}
           <motion.div
             key={step.id}
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className={`fixed z-[100] mx-2 sm:mx-4 w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] max-w-sm ${getPositionClasses()}`}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className="fixed z-[100]"
+            style={{
+              left: '8px',
+              right: '8px',
+              maxWidth: '400px',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              top: step.position === 'top' ? '70px' : step.position === 'center' ? '50%' : 'auto',
+              bottom: step.position === 'bottom' ? '80px' : 'auto',
+              transform: step.position === 'center' ? 'translateY(-50%)' : 'none',
+              paddingBottom: 'env(safe-area-inset-bottom)',
+            }}
           >
             {/* Progress indicator */}
-            <div className="mb-2 px-1">
-              <div className="flex items-center justify-between text-[10px] sm:text-xs text-white/80 mb-1">
-                <span className="bg-black/40 px-2 py-0.5 rounded-full backdrop-blur-sm">
-                  Paso {currentStep + 1} de {totalSteps}
+            <div className="mb-1.5 px-0.5">
+              <div className="flex items-center justify-between text-[9px] text-white/90 mb-1">
+                <span className="bg-black/50 px-2 py-0.5 rounded-full backdrop-blur-sm font-medium">
+                  {currentStep + 1}/{totalSteps}
                 </span>
-                <span className="bg-black/40 px-2 py-0.5 rounded-full backdrop-blur-sm">
+                <span className="bg-black/50 px-2 py-0.5 rounded-full backdrop-blur-sm font-medium">
                   {Math.round(progress)}%
                 </span>
               </div>
-              <Progress value={progress} className="h-1 sm:h-1.5 bg-white/20" />
+              <Progress value={progress} className="h-1 bg-white/20" />
             </div>
 
             {/* Main Card */}
-            <div className="bg-background rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-2xl border border-border/50 relative overflow-hidden">
+            <div className="bg-background rounded-xl p-2.5 shadow-2xl border border-border/50 relative overflow-hidden">
               {/* Decorative gradient */}
-              <div className="absolute top-0 right-0 w-20 sm:w-32 h-20 sm:h-32 bg-gradient-to-bl from-primary/20 to-transparent rounded-bl-full pointer-events-none" />
+              <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-primary/20 to-transparent rounded-bl-full pointer-events-none" />
               
               {/* Close/Skip button */}
               {!isWelcome && !isLastStep && (
                 <button
                   onClick={onSkip}
-                  className="absolute top-2 right-2 sm:top-3 sm:right-3 p-1 sm:p-1.5 rounded-full hover:bg-muted transition-colors z-10"
+                  className="absolute top-1.5 right-1.5 p-1 rounded-full hover:bg-muted transition-colors z-10"
                   title="Saltar"
                 >
-                  <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
+                  <X className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
               )}
 
-              <div className="flex items-start gap-2 sm:gap-4">
+              <div className="flex items-start gap-2">
                 {/* Icon */}
-                <div className="flex-shrink-0 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg sm:rounded-xl p-2 sm:p-3">
-                  {stepIcons[step.id] || <Sparkles className="w-8 h-8 sm:w-12 sm:h-12 text-primary" />}
+                <div className="flex-shrink-0 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg p-1.5">
+                  {stepIcons[step.id] || <Sparkles className="w-5 h-5 text-primary" />}
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-sm sm:text-lg mb-0.5 sm:mb-1 pr-5 sm:pr-6">{step.title}</h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                <div className="flex-1 min-w-0 pr-5">
+                  <h3 className="font-bold text-xs mb-0.5 leading-tight">{step.title}</h3>
+                  <p className="text-[10px] text-muted-foreground leading-snug line-clamp-2">
                     {step.description}
                   </p>
                 </div>
               </div>
 
               {/* Action buttons */}
-              <div className="flex gap-1.5 sm:gap-2 mt-3 sm:mt-4">
+              <div className="flex gap-1.5 mt-2">
                 {!isFirstStep && !isLastStep && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={onPrev}
-                    className="gap-0.5 sm:gap-1 text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
+                    className="gap-0.5 text-[10px] px-1.5 h-7"
                   >
-                    <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    <span className="hidden xs:inline">Atrás</span>
+                    <ChevronLeft className="w-3 h-3" />
                   </Button>
                 )}
                 
@@ -273,32 +265,31 @@ const PartnerOnboarding = ({
                     variant="ghost"
                     size="sm"
                     onClick={onSkip}
-                    className="gap-0.5 sm:gap-1 text-muted-foreground text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
+                    className="gap-0.5 text-muted-foreground text-[10px] px-1.5 h-7"
                   >
-                    <span className="hidden xs:inline">Saltar</span>
-                    <SkipForward className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <SkipForward className="w-3 h-3" />
                   </Button>
                 )}
 
                 <Button
                   size="sm"
                   onClick={handleAction}
-                  className="gap-0.5 sm:gap-1 bg-gradient-to-r from-primary to-primary/80 text-xs sm:text-sm px-3 sm:px-4 h-8 sm:h-9"
+                  className="gap-0.5 bg-gradient-to-r from-primary to-primary/80 text-[10px] px-2 h-7"
                 >
                   {isLastStep ? (
                     <>
                       ¡Listo!
-                      <PartyPopper className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <PartyPopper className="w-3 h-3" />
                     </>
                   ) : isWelcome ? (
                     <>
                       Empezar
-                      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <ChevronRight className="w-3 h-3" />
                     </>
                   ) : (
                     <>
-                      Entendido
-                      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      OK
+                      <ChevronRight className="w-3 h-3" />
                     </>
                   )}
                 </Button>
@@ -307,14 +298,12 @@ const PartnerOnboarding = ({
 
             {/* Arrow pointer for non-center positions */}
             {step.position === "top" && (
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-background border-r border-b border-border/50 rotate-45" />
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-background border-r border-b border-border/50 rotate-45" />
             )}
             {step.position === "bottom" && (
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-background border-l border-t border-border/50 rotate-45" />
+              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-background border-l border-t border-border/50 rotate-45" />
             )}
           </motion.div>
-
-          {/* Minimized indicator when hidden */}
         </>
       )}
 
@@ -325,9 +314,9 @@ const PartnerOnboarding = ({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
           onClick={() => setIsVisible(true)}
-          className="fixed bottom-28 right-4 z-[100] bg-primary text-primary-foreground rounded-full p-3 shadow-lg hover:scale-105 transition-transform"
+          className="fixed bottom-24 right-3 z-[100] bg-primary text-primary-foreground rounded-full p-2.5 shadow-lg hover:scale-105 transition-transform"
         >
-          <Sparkles className="w-6 h-6" />
+          <Sparkles className="w-5 h-5" />
         </motion.button>
       )}
     </AnimatePresence>
