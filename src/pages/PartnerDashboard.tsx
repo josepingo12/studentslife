@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useWebNotifications } from "@/hooks/useWebNotifications";
@@ -23,6 +23,8 @@ import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import SettingsSheet from "@/components/partner/SettingsSheet";
 import NotificationsSheet from "@/components/social/NotificationsSheet";
 import { MapPin } from "lucide-react";
+import { usePartnerOnboarding } from "@/hooks/usePartnerOnboarding";
+import PartnerOnboarding from "@/components/partner/PartnerOnboarding";
 
 const PartnerDashboard = () => {
   const navigate = useNavigate();
@@ -44,7 +46,30 @@ const PartnerDashboard = () => {
   const unreadNotifications = useUnreadNotifications(user?.id);
   const [userRole, setUserRole] = useState<string>();
 
+  // Onboarding
+  const {
+    currentStep,
+    totalSteps,
+    isOnboardingActive,
+    isLoading: isOnboardingLoading,
+    getCurrentStep,
+    getProgress,
+    nextStep,
+    prevStep,
+    completeOnboarding,
+  } = usePartnerOnboarding(user?.id);
+
   useWebNotifications({ userId: user?.id });
+
+  // Handle tab navigation from onboarding
+  const handleOnboardingNavigate = useCallback((tab: string) => {
+    if (tab === "profile") {
+      setActiveTab("profile");
+      setProfileView("business");
+    } else {
+      setActiveTab(tab as any);
+    }
+  }, []);
 
   useEffect(() => {
     checkAuth();
@@ -213,6 +238,20 @@ const PartnerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* Partner Onboarding Tutorial */}
+      {isOnboardingActive && !isOnboardingLoading && (
+        <PartnerOnboarding
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          step={getCurrentStep()}
+          progress={getProgress()}
+          onNext={nextStep}
+          onPrev={prevStep}
+          onComplete={completeOnboarding}
+          onNavigateTab={handleOnboardingNavigate}
+        />
+      )}
+
       {/* Modern iOS-style header */}
       <header className="sticky top-0 z-10 bg-background border-b" style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))', paddingBottom: '0.75rem' }}>
         <div className="container mx-auto px-4 flex justify-between items-center">
@@ -360,7 +399,7 @@ const PartnerDashboard = () => {
           <PartnerEventsManager partnerId={user.id} />
         </div>
       ) : activeTab === "gallery" ? (
-        <div className="px-4 mt-4">
+        <div className="px-4 mt-4" id="gallery-section">
           <PartnerGalleryManager partnerId={user.id} />
         </div>
       ) : activeTab === "scanner" ? (
@@ -368,7 +407,7 @@ const PartnerDashboard = () => {
           <QRScanner partnerId={user.id} />
         </div>
       ) : activeTab === "stats" ? (
-        <div className="px-4 mt-4">
+        <div className="px-4 mt-4" id="stats-section">
           <PartnerStats partnerId={user.id} />
         </div>
       ) : (
@@ -382,7 +421,7 @@ const PartnerDashboard = () => {
               onSwitchToBusiness={() => setProfileView("business")}
             />
           ) : (
-            <div className="px-4">
+            <div className="px-4" id="business-profile-section">
               {/* Switch Back Button */}
               <div className="mb-4 flex justify-center">
                 <Button
