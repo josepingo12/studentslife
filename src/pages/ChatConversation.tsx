@@ -264,31 +264,7 @@ const ChatConversation = () => {
         });
       }
 
-      // Notify admin about new message (in background)
-      supabase
-        .from("profiles")
-        .select("first_name, last_name, business_name")
-        .eq("id", user.id)
-        .single()
-        .then(async ({ data: senderProfile }) => {
-          const { data: roleData } = await supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", user.id)
-            .single();
-
-          const senderName = senderProfile?.first_name || senderProfile?.business_name || "Usuario";
-          const senderType = roleData?.role === "partner" ? "Socio" : "Cliente";
-          const messagePreview = (messageContent || "Media inviato").substring(0, 100);
-
-          supabase.functions.invoke("notify-admin-message", {
-            body: {
-              sender_name: senderName,
-              sender_type: senderType,
-              message_preview: messagePreview,
-            },
-          }).catch(console.error);
-        });
+      // Email notification removed - using in-app notifications only
 
       // Update conversation updated_at
       await supabase
