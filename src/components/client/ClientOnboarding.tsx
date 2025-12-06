@@ -23,6 +23,7 @@ import {
   Navigation
 } from "lucide-react";
 import { ClientOnboardingStep } from "@/hooks/useClientOnboarding";
+import confetti from "canvas-confetti";
 
 interface ClientOnboardingProps {
   currentStep: number;
@@ -166,9 +167,48 @@ const ClientOnboarding = ({
     }
   }, [step.targetTab, onNavigateTab]);
 
+  const triggerConfetti = () => {
+    const duration = 3000;
+    const animationEnd = Date.now() + duration;
+    
+    const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+    const interval = setInterval(() => {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        return;
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+
+      // Confetti from the left
+      confetti({
+        particleCount: Math.floor(particleCount),
+        startVelocity: 30,
+        spread: 60,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+        colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'],
+      });
+
+      // Confetti from the right
+      confetti({
+        particleCount: Math.floor(particleCount),
+        startVelocity: 30,
+        spread: 60,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+        colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'],
+      });
+    }, 250);
+  };
+
   const handleNext = () => {
     if (isLastStep) {
-      onComplete();
+      triggerConfetti();
+      setTimeout(() => {
+        onComplete();
+      }, 1500);
       return;
     }
     
