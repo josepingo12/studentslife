@@ -51,34 +51,60 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
     checkIfSaved();
   }, [post.id]);
 
-  const handleDoubleTap = async () => {
+  const singleTapTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleTap = (isVideo: boolean = false) => {
     const now = Date.now();
     const DOUBLE_TAP_DELAY = 300;
     
     if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
-      // Double tap detected
+      // Double tap detected - cancel single tap action and trigger like
+      if (singleTapTimerRef.current) {
+        clearTimeout(singleTapTimerRef.current);
+        singleTapTimerRef.current = null;
+      }
+      
       setShowHeartAnimation(true);
       setTimeout(() => setShowHeartAnimation(false), 1000);
       
       // Like the post if not already liked
       if (!isLiked && !loading) {
-        try {
-          const { error } = await supabase
-            .from("likes")
-            .insert({
-              post_id: post.id,
-              user_id: currentUserId,
-            });
+        (async () => {
+          try {
+            const { error } = await supabase
+              .from("likes")
+              .insert({
+                post_id: post.id,
+                user_id: currentUserId,
+              });
 
-          if (!error) {
-            onLikeToggle(post.id, true);
+            if (!error) {
+              onLikeToggle(post.id, true);
+            }
+          } catch (error) {
+            console.error("Error liking post:", error);
           }
-        } catch (error) {
-          console.error("Error liking post:", error);
-        }
+        })();
+      }
+      lastTapRef.current = 0; // Reset to prevent triple-tap issues
+    } else {
+      // Single tap - wait to see if it's a double tap
+      lastTapRef.current = now;
+      
+      if (isVideo) {
+        singleTapTimerRef.current = setTimeout(() => {
+          // Single tap confirmed - open video feed
+          setVideoFeedOpen(true);
+          singleTapTimerRef.current = null;
+        }, DOUBLE_TAP_DELAY);
+      } else {
+        // For images, single tap opens image viewer
+        singleTapTimerRef.current = setTimeout(() => {
+          setImageViewerOpen(true);
+          singleTapTimerRef.current = null;
+        }, DOUBLE_TAP_DELAY);
       }
     }
-    lastTapRef.current = now;
   };
 
   // Logica per gestire il mute/unmute
@@ -346,7 +372,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
      if (post.media_type === 'video' && (post.video_url || post.image_url)) {
        const src = post.video_url || post.image_url;
        return (
-         <div className="relative cursor-pointer" onClick={(e) => { handleDoubleTap(); }}>
+         <div className="relative cursor-pointer" onClick={() => handleTap(true)}>
            <video
              ref={videoRef}
              src={src}
@@ -381,7 +407,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
           return (
             <div
               className="relative cursor-pointer"
-              onClick={handleDoubleTap}
+              onClick={() => handleTap(false)}
             >
               <img
                 src={post.image_url}
@@ -396,7 +422,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
         if (post.image_url) {
           if (isVideoUrl(post.image_url)) {
             return (
-              <div className="relative" onClick={handleDoubleTap}>
+              <div className="relative cursor-pointer" onClick={() => handleTap(true)}>
                 <video
                   ref={videoRef}
                   src={post.image_url}
@@ -432,7 +458,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
           return (
             <div
               className="relative cursor-pointer"
-              onClick={handleDoubleTap}
+              onClick={() => handleTap(false)}
             >
               <img
                 src={post.image_url}
