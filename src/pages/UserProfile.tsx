@@ -220,7 +220,11 @@ const UserProfile = () => {
       if (updateError) throw updateError;
 
       setCoverImage(publicUrl);
+      setProfile((prev: any) => ({ ...prev, cover_image_url: publicUrl }));
       toast({ title: "Copertina aggiornata" });
+      
+      // Trigger onboarding refresh after upload
+      setTimeout(() => refreshCompletion(), 500);
     } catch (error: any) {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
     }
@@ -251,8 +255,11 @@ const UserProfile = () => {
 
       if (updateError) throw updateError;
 
-      setProfile({ ...profile, profile_image_url: publicUrl });
+      setProfile((prev: any) => ({ ...prev, profile_image_url: publicUrl }));
       toast({ title: "Immagine profilo aggiornata" });
+      
+      // Trigger onboarding refresh after upload
+      setTimeout(() => refreshCompletion(), 500);
     } catch (error: any) {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
     }

@@ -18,7 +18,9 @@ import {
   Share2,
   ArrowUp,
   ArrowDown,
-  AlertCircle
+  AlertCircle,
+  CheckCircle2,
+  Navigation
 } from "lucide-react";
 import { ClientOnboardingStep } from "@/hooks/useClientOnboarding";
 
@@ -37,6 +39,7 @@ interface ClientOnboardingProps {
 
 const stepIcons: Record<string, React.ReactNode> = {
   welcome: <Sparkles className="w-10 h-10 text-primary" />,
+  "go-to-profile": <Navigation className="w-10 h-10 text-blue-500" />,
   "profile-photo": <Camera className="w-10 h-10 text-blue-500" />,
   "cover-photo": <Image className="w-10 h-10 text-purple-500" />,
   "discover-partners": <Store className="w-10 h-10 text-green-500" />,
@@ -61,8 +64,24 @@ const ClientOnboarding = ({
   canProceed,
 }: ClientOnboardingProps) => {
   const [showWarning, setShowWarning] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [spotlightRect, setSpotlightRect] = useState<{x: number, y: number, width: number, height: number, isRectangle?: boolean} | null>(null);
+  const [prevCanProceed, setPrevCanProceed] = useState(canProceed);
   
+  // Detect when canProceed changes from false to true (step completed!)
+  useEffect(() => {
+    if (canProceed && !prevCanProceed && step?.required) {
+      // Show success animation
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        // Auto advance after success animation
+        onNext();
+      }, 1500);
+    }
+    setPrevCanProceed(canProceed);
+  }, [canProceed, prevCanProceed, step?.required, onNext]);
+
   // Find and track the actual element position
   const updateSpotlightPosition = useCallback(() => {
     if (!step?.highlightElement) {
@@ -106,8 +125,8 @@ const ClientOnboarding = ({
       setSpotlightRect({
         x: rect.left + rect.width / 2,
         y: rect.top + rect.height / 2,
-        width: isRectangle ? rect.width + 12 : Math.max(rect.width, rect.height) + 20,
-        height: isRectangle ? rect.height + 12 : Math.max(rect.width, rect.height) + 20,
+        width: isRectangle ? rect.width + 12 : Math.max(rect.width, rect.height) + 24,
+        height: isRectangle ? rect.height + 12 : Math.max(rect.width, rect.height) + 24,
         isRectangle,
       });
     } else {
@@ -123,8 +142,8 @@ const ClientOnboarding = ({
     window.addEventListener('resize', handleResize);
     window.addEventListener('scroll', handleResize);
     
-    // Update periodically for dynamic content
-    const interval = setInterval(updateSpotlightPosition, 500);
+    // Update frequently for dynamic content
+    const interval = setInterval(updateSpotlightPosition, 300);
     
     return () => {
       window.removeEventListener('resize', handleResize);
@@ -195,7 +214,7 @@ const ClientOnboarding = ({
   const getCardStyle = () => {
     if (spotlightRect && spotlightRect.y < window.innerHeight / 2) {
       return {
-        top: `${spotlightRect.y + spotlightRect.height / 2 + 60}px`,
+        top: `${spotlightRect.y + spotlightRect.height / 2 + 70}px`,
         left: '50%',
         transform: 'translateX(-50%)',
       };
@@ -206,6 +225,36 @@ const ClientOnboarding = ({
   return (
     <AnimatePresence mode="wait">
       <>
+        {/* Success overlay when step is completed */}
+        <AnimatePresence>
+          {showSuccess && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60"
+            >
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                exit={{ scale: 0, rotate: 180 }}
+                transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                className="bg-green-500 rounded-full p-8 shadow-2xl"
+              >
+                <CheckCircle2 className="w-20 h-20 text-white" />
+              </motion.div>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="absolute mt-40 text-white text-2xl font-bold"
+              >
+                ¡Perfecto! ✨
+              </motion.p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Dark overlay with spotlight cutout */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -222,10 +271,10 @@ const ClientOnboarding = ({
           {/* Spotlight cutout for highlighted element - using actual element position */}
           {spotlightRect && (
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
+              initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.3, type: "spring" }}
-              className={spotlightRect.isRectangle ? "absolute rounded-lg" : "absolute rounded-full"}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className={spotlightRect.isRectangle ? "absolute rounded-xl" : "absolute rounded-full"}
               style={{
                 left: spotlightRect.x - spotlightRect.width / 2,
                 top: spotlightRect.y - spotlightRect.height / 2,
@@ -233,7 +282,7 @@ const ClientOnboarding = ({
                 height: spotlightRect.height,
                 boxShadow: "0 0 0 9999px rgba(0,0,0,0.7)",
                 border: "3px solid #3b82f6",
-                animation: "pulse-ring 2s ease-in-out infinite",
+                animation: "spotlight-pulse 2s ease-in-out infinite",
               }}
             />
           )}
@@ -242,78 +291,121 @@ const ClientOnboarding = ({
         {/* Animated arrow pointing to the element */}
         {spotlightRect && step.arrowDirection && (
           <motion.div
-            initial={{ opacity: 0, y: step.arrowDirection === "up" ? 10 : -10 }}
+            initial={{ opacity: 0, scale: 0 }}
             animate={{ 
               opacity: 1, 
-              y: [0, step.arrowDirection === "up" ? -8 : 8, 0],
+              scale: 1,
+              y: [0, step.arrowDirection === "up" ? -12 : 12, 0],
             }}
             transition={{ 
-              delay: 0.5,
-              y: { repeat: Infinity, duration: 1 }
+              delay: 0.3,
+              y: { repeat: Infinity, duration: 0.8, ease: "easeInOut" }
             }}
-            className="fixed z-[95] text-blue-400"
+            className="fixed z-[95]"
             style={{
-              left: spotlightRect.x - 16,
+              left: spotlightRect.x - 20,
               top: step.arrowDirection === "up" 
-                ? spotlightRect.y + spotlightRect.height / 2 + 8
-                : spotlightRect.y - spotlightRect.height / 2 - 40,
+                ? spotlightRect.y + spotlightRect.height / 2 + 12
+                : spotlightRect.y - spotlightRect.height / 2 - 52,
             }}
           >
-            {step.arrowDirection === "up" ? (
-              <ArrowUp className="w-8 h-8 drop-shadow-lg" />
-            ) : (
-              <ArrowDown className="w-8 h-8 drop-shadow-lg" />
-            )}
+            <div className="bg-blue-500 rounded-full p-2 shadow-lg">
+              {step.arrowDirection === "up" ? (
+                <ArrowUp className="w-6 h-6 text-white" />
+              ) : (
+                <ArrowDown className="w-6 h-6 text-white" />
+              )}
+            </div>
           </motion.div>
         )}
 
         {/* Floating tooltip card */}
         <motion.div
           key={step.id}
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          initial={{ opacity: 0, y: 30, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -20, scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          exit={{ opacity: 0, y: -30, scale: 0.9 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
           className={`fixed z-[100] mx-4 w-[calc(100%-2rem)] max-w-sm ${!spotlightRect ? getPositionClasses() : ''}`}
           style={getCardStyle()}
         >
           {/* Progress indicator */}
-          <div className="mb-2 px-1">
-            <div className="flex items-center justify-between text-xs text-white/80 mb-1">
-              <span className="bg-black/40 px-2 py-0.5 rounded-full backdrop-blur-sm">
+          <div className="mb-3 px-1">
+            <div className="flex items-center justify-between text-xs text-white/90 mb-1.5">
+              <motion.span 
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                className="bg-blue-500/80 px-3 py-1 rounded-full backdrop-blur-sm font-medium"
+              >
                 Paso {currentStep + 1} de {totalSteps}
-              </span>
-              <span className="bg-black/40 px-2 py-0.5 rounded-full backdrop-blur-sm">
+              </motion.span>
+              <motion.span 
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                className="bg-blue-500/80 px-3 py-1 rounded-full backdrop-blur-sm font-medium"
+              >
                 {Math.round(progress)}%
-              </span>
+              </motion.span>
             </div>
-            <Progress value={progress} className="h-1.5 bg-white/20" />
+            <Progress value={progress} className="h-2 bg-white/20" />
           </div>
 
           {/* Main Card */}
-          <div className="bg-background rounded-2xl p-5 shadow-2xl border border-border/50 relative overflow-hidden">
-            {/* Decorative gradient */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/20 to-transparent rounded-bl-full pointer-events-none" />
+          <motion.div 
+            className="bg-background rounded-3xl p-6 shadow-2xl border border-border/50 relative overflow-hidden"
+            layoutId="onboarding-card"
+          >
+            {/* Animated gradient background */}
+            <motion.div 
+              className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-purple-500/10"
+              animate={{ 
+                background: [
+                  "linear-gradient(135deg, rgba(59,130,246,0.1) 0%, transparent 50%, rgba(168,85,247,0.1) 100%)",
+                  "linear-gradient(135deg, rgba(168,85,247,0.1) 0%, transparent 50%, rgba(59,130,246,0.1) 100%)",
+                  "linear-gradient(135deg, rgba(59,130,246,0.1) 0%, transparent 50%, rgba(168,85,247,0.1) 100%)",
+                ]
+              }}
+              transition={{ duration: 4, repeat: Infinity }}
+            />
             
             {/* Required badge */}
             {isRequired && (
-              <div className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
-                Obligatorio
-              </div>
+              <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute top-4 right-4 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-3 py-1 rounded-full font-bold shadow-lg"
+              >
+                ⚠️ Obligatorio
+              </motion.div>
             )}
 
-            <div className="flex items-start gap-4">
-              {/* Icon */}
-              <div className="flex-shrink-0 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl p-3">
+            <div className="flex items-start gap-4 relative">
+              {/* Icon with animation */}
+              <motion.div 
+                className="flex-shrink-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl p-4"
+                animate={{ rotate: [0, 5, -5, 0] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+              >
                 {stepIcons[step.id] || <Sparkles className="w-10 h-10 text-primary" />}
-              </div>
+              </motion.div>
 
               {/* Content */}
-              <div className="flex-1 min-w-0 pr-4">
-                <h3 className="font-bold text-lg mb-1">{step.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+              <div className="flex-1 min-w-0 pr-2">
+                <motion.h3 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="font-bold text-xl mb-2"
+                >
+                  {step.title}
+                </motion.h3>
+                <motion.p 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-sm text-muted-foreground leading-relaxed"
+                >
                   {step.description}
-                </p>
+                </motion.p>
               </div>
             </div>
 
@@ -321,13 +413,18 @@ const ClientOnboarding = ({
             <AnimatePresence>
               {showWarning && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mt-3 bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2"
+                  initial={{ opacity: 0, height: 0, y: -10 }}
+                  animate={{ opacity: 1, height: "auto", y: 0 }}
+                  exit={{ opacity: 0, height: 0, y: -10 }}
+                  className="mt-4 bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3"
                 >
-                  <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                  <p className="text-sm text-red-700">
+                  <motion.div
+                    animate={{ rotate: [0, -10, 10, -10, 10, 0] }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0" />
+                  </motion.div>
+                  <p className="text-sm text-red-700 font-medium">
                     ¡Debes completar este paso para continuar!
                   </p>
                 </motion.div>
@@ -335,13 +432,13 @@ const ClientOnboarding = ({
             </AnimatePresence>
 
             {/* Action buttons */}
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-3 mt-5 relative">
               {!isFirstStep && !isLastStep && (
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={onPrev}
-                  className="gap-1"
+                  className="gap-1 rounded-xl"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   Atrás
@@ -355,49 +452,56 @@ const ClientOnboarding = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleSkip}
-                  className="gap-1 text-muted-foreground"
+                  className="gap-1 text-muted-foreground rounded-xl"
                 >
                   Saltar
                   <X className="w-4 h-4" />
                 </Button>
               )}
 
-              <Button
-                size="sm"
-                onClick={handleNext}
-                className={`gap-1 ${isRequired && !canProceed 
-                  ? "bg-gray-400 cursor-not-allowed" 
-                  : "bg-gradient-to-r from-primary to-primary/80"
-                }`}
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                {isLastStep ? (
-                  <>
-                    ¡Empezar!
-                    <PartyPopper className="w-4 h-4" />
-                  </>
-                ) : isRequired && !canProceed ? (
-                  <>
-                    Haz clic arriba ↑
-                  </>
-                ) : (
-                  <>
-                    Siguiente
-                    <ChevronRight className="w-4 h-4" />
-                  </>
-                )}
-              </Button>
+                <Button
+                  size="sm"
+                  onClick={handleNext}
+                  className={`gap-2 rounded-xl px-6 ${isRequired && !canProceed 
+                    ? "bg-gray-400 cursor-not-allowed" 
+                    : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg"
+                  }`}
+                >
+                  {isLastStep ? (
+                    <>
+                      ¡Empezar!
+                      <PartyPopper className="w-4 h-4" />
+                    </>
+                  ) : isRequired && !canProceed ? (
+                    <>
+                      Haz clic arriba ↑
+                    </>
+                  ) : (
+                    <>
+                      Siguiente
+                      <ChevronRight className="w-4 h-4" />
+                    </>
+                  )}
+                </Button>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         </motion.div>
 
-        {/* CSS for pulse animation */}
+        {/* CSS for animations */}
         <style>{`
-          @keyframes pulse-ring {
+          @keyframes spotlight-pulse {
             0%, 100% {
-              box-shadow: 0 0 0 9999px rgba(0,0,0,0.7), 0 0 0 0 rgba(59, 130, 246, 0.7);
+              box-shadow: 0 0 0 9999px rgba(0,0,0,0.7), 0 0 0 0 rgba(59, 130, 246, 0.6);
+              transform: scale(1);
             }
             50% {
-              box-shadow: 0 0 0 9999px rgba(0,0,0,0.7), 0 0 0 12px rgba(59, 130, 246, 0);
+              box-shadow: 0 0 0 9999px rgba(0,0,0,0.7), 0 0 20px 8px rgba(59, 130, 246, 0.3);
+              transform: scale(1.02);
             }
           }
         `}</style>
