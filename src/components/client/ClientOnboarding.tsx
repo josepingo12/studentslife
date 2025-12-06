@@ -61,7 +61,7 @@ const ClientOnboarding = ({
   canProceed,
 }: ClientOnboardingProps) => {
   const [showWarning, setShowWarning] = useState(false);
-  const [spotlightRect, setSpotlightRect] = useState<{x: number, y: number, width: number, height: number} | null>(null);
+  const [spotlightRect, setSpotlightRect] = useState<{x: number, y: number, width: number, height: number, isRectangle?: boolean} | null>(null);
   
   // Find and track the actual element position
   const updateSpotlightPosition = useCallback(() => {
@@ -74,26 +74,13 @@ const ClientOnboarding = ({
     
     switch (step.highlightElement) {
       case "avatar":
-        // Find the avatar button in the header (the one that navigates to profile)
         element = document.querySelector('[data-onboarding="avatar"]') as HTMLElement;
-        if (!element) {
-          // Fallback: find avatar in the blue header
-          element = document.querySelector('.bg-blue-500 button:last-child .h-10.w-10')?.parentElement as HTMLElement;
-        }
         break;
       case "profile-avatar":
-        // Avatar on profile page - the edit button
         element = document.querySelector('[data-onboarding="profile-avatar"]') as HTMLElement;
-        if (!element) {
-          element = document.querySelector('.h-24.w-24')?.parentElement as HTMLElement;
-        }
         break;
       case "cover-photo":
-        // Cover photo on profile page
         element = document.querySelector('[data-onboarding="cover-photo"]') as HTMLElement;
-        if (!element) {
-          element = document.querySelector('.h-32.bg-gradient-to-r, .h-32[style*="background-image"]') as HTMLElement;
-        }
         break;
       case "wallet":
         element = document.querySelector('[data-onboarding="wallet"]') as HTMLElement;
@@ -114,11 +101,14 @@ const ClientOnboarding = ({
 
     if (element) {
       const rect = element.getBoundingClientRect();
+      // For cover-photo, use rectangle shape; for others use circle (square)
+      const isRectangle = step.highlightElement === "cover-photo";
       setSpotlightRect({
         x: rect.left + rect.width / 2,
         y: rect.top + rect.height / 2,
-        width: Math.max(rect.width, rect.height) + 20,
-        height: Math.max(rect.width, rect.height) + 20,
+        width: isRectangle ? rect.width + 12 : Math.max(rect.width, rect.height) + 20,
+        height: isRectangle ? rect.height + 12 : Math.max(rect.width, rect.height) + 20,
+        isRectangle,
       });
     } else {
       setSpotlightRect(null);
@@ -235,7 +225,7 @@ const ClientOnboarding = ({
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.3, type: "spring" }}
-              className="absolute rounded-full"
+              className={spotlightRect.isRectangle ? "absolute rounded-lg" : "absolute rounded-full"}
               style={{
                 left: spotlightRect.x - spotlightRect.width / 2,
                 top: spotlightRect.y - spotlightRect.height / 2,
