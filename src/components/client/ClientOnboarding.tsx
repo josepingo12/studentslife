@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -61,7 +61,88 @@ const ClientOnboarding = ({
   canProceed,
 }: ClientOnboardingProps) => {
   const [showWarning, setShowWarning] = useState(false);
+  const [spotlightRect, setSpotlightRect] = useState<{x: number, y: number, width: number, height: number} | null>(null);
   
+  // Find and track the actual element position
+  const updateSpotlightPosition = useCallback(() => {
+    if (!step?.highlightElement) {
+      setSpotlightRect(null);
+      return;
+    }
+
+    let element: HTMLElement | null = null;
+    
+    switch (step.highlightElement) {
+      case "avatar":
+        // Find the avatar button in the header (the one that navigates to profile)
+        element = document.querySelector('[data-onboarding="avatar"]') as HTMLElement;
+        if (!element) {
+          // Fallback: find avatar in the blue header
+          element = document.querySelector('.bg-blue-500 button:last-child .h-10.w-10')?.parentElement as HTMLElement;
+        }
+        break;
+      case "profile-avatar":
+        // Avatar on profile page - the edit button
+        element = document.querySelector('[data-onboarding="profile-avatar"]') as HTMLElement;
+        if (!element) {
+          element = document.querySelector('.h-24.w-24')?.parentElement as HTMLElement;
+        }
+        break;
+      case "cover-photo":
+        // Cover photo on profile page
+        element = document.querySelector('[data-onboarding="cover-photo"]') as HTMLElement;
+        if (!element) {
+          element = document.querySelector('.h-32.bg-gradient-to-r, .h-32[style*="background-image"]') as HTMLElement;
+        }
+        break;
+      case "wallet":
+        element = document.querySelector('[data-onboarding="wallet"]') as HTMLElement;
+        break;
+      case "loyalty-cards":
+        element = document.querySelector('[data-onboarding="loyalty-cards"]') as HTMLElement;
+        break;
+      case "upload-button":
+        element = document.querySelector('[data-onboarding="upload-button"]') as HTMLElement;
+        break;
+      case "partners-tab":
+        element = document.querySelector('[data-onboarding="partners-tab"]') as HTMLElement;
+        break;
+      case "chat-tab":
+        element = document.querySelector('[data-onboarding="chat-tab"]') as HTMLElement;
+        break;
+    }
+
+    if (element) {
+      const rect = element.getBoundingClientRect();
+      setSpotlightRect({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+        width: Math.max(rect.width, rect.height) + 20,
+        height: Math.max(rect.width, rect.height) + 20,
+      });
+    } else {
+      setSpotlightRect(null);
+    }
+  }, [step?.highlightElement]);
+
+  // Update position on mount and window resize
+  useEffect(() => {
+    updateSpotlightPosition();
+    
+    const handleResize = () => updateSpotlightPosition();
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('scroll', handleResize);
+    
+    // Update periodically for dynamic content
+    const interval = setInterval(updateSpotlightPosition, 500);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleResize);
+      clearInterval(interval);
+    };
+  }, [updateSpotlightPosition, step?.id]);
+
   if (!step) return null;
 
   const isLastStep = step.id === "complete";
@@ -102,10 +183,15 @@ const ClientOnboarding = ({
   };
 
   const getPositionClasses = () => {
-    // For required steps with highlight, position near top but below the header
-    if (step.highlightElement === "avatar") {
-      return "top-32 left-1/2 -translate-x-1/2";
+    // If we have a spotlight, position relative to it
+    if (spotlightRect) {
+      // Position below the spotlight for top elements
+      if (spotlightRect.y < window.innerHeight / 2) {
+        return "top-auto";
+      }
+      return "bottom-32";
     }
+    
     switch (step.position) {
       case "top":
         return "top-20 left-1/2 -translate-x-1/2";
@@ -116,27 +202,16 @@ const ClientOnboarding = ({
     }
   };
 
-  // Get spotlight position based on highlight element
-  const getSpotlightPosition = () => {
-    switch (step.highlightElement) {
-      case "avatar":
-        return { top: "1rem", right: "1.5rem", size: "3.5rem" };
-      case "wallet":
-        return { top: "4.5rem", right: "1.5rem", size: "3rem" };
-      case "loyalty-cards":
-        return { top: "4.5rem", right: "5rem", size: "3rem" };
-      case "upload-button":
-        return { bottom: "5rem", left: "50%", transform: "translateX(-50%)", size: "4.5rem" };
-      case "partners-tab":
-        return { bottom: "1.5rem", left: "30%", size: "3rem" };
-      case "chat-tab":
-        return { bottom: "1.5rem", right: "1rem", size: "3rem" };
-      default:
-        return null;
+  const getCardStyle = () => {
+    if (spotlightRect && spotlightRect.y < window.innerHeight / 2) {
+      return {
+        top: `${spotlightRect.y + spotlightRect.height / 2 + 60}px`,
+        left: '50%',
+        transform: 'translateX(-50%)',
+      };
     }
+    return {};
   };
-
-  const spotlightPos = getSpotlightPosition();
 
   return (
     <AnimatePresence mode="wait">
@@ -154,21 +229,18 @@ const ClientOnboarding = ({
           {/* Dark background */}
           <div className="absolute inset-0 bg-black/70" />
           
-          {/* Spotlight cutout for highlighted element */}
-          {spotlightPos && (
+          {/* Spotlight cutout for highlighted element - using actual element position */}
+          {spotlightRect && (
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.3, type: "spring" }}
               className="absolute rounded-full"
               style={{
-                top: spotlightPos.top,
-                right: spotlightPos.right,
-                bottom: spotlightPos.bottom,
-                left: spotlightPos.left,
-                transform: spotlightPos.transform,
-                width: spotlightPos.size,
-                height: spotlightPos.size,
+                left: spotlightRect.x - spotlightRect.width / 2,
+                top: spotlightRect.y - spotlightRect.height / 2,
+                width: spotlightRect.width,
+                height: spotlightRect.height,
                 boxShadow: "0 0 0 9999px rgba(0,0,0,0.7)",
                 border: "3px solid #3b82f6",
                 animation: "pulse-ring 2s ease-in-out infinite",
@@ -178,7 +250,7 @@ const ClientOnboarding = ({
         </motion.div>
 
         {/* Animated arrow pointing to the element */}
-        {spotlightPos && step.arrowDirection && (
+        {spotlightRect && step.arrowDirection && (
           <motion.div
             initial={{ opacity: 0, y: step.arrowDirection === "up" ? 10 : -10 }}
             animate={{ 
@@ -191,15 +263,10 @@ const ClientOnboarding = ({
             }}
             className="fixed z-[95] text-blue-400"
             style={{
+              left: spotlightRect.x - 16,
               top: step.arrowDirection === "up" 
-                ? `calc(${spotlightPos.top} + ${spotlightPos.size} + 0.5rem)` 
-                : undefined,
-              bottom: step.arrowDirection === "down" 
-                ? `calc(${spotlightPos.bottom} + ${spotlightPos.size} + 0.5rem)` 
-                : undefined,
-              right: spotlightPos.right,
-              left: spotlightPos.left,
-              transform: spotlightPos.transform,
+                ? spotlightRect.y + spotlightRect.height / 2 + 8
+                : spotlightRect.y - spotlightRect.height / 2 - 40,
             }}
           >
             {step.arrowDirection === "up" ? (
@@ -217,7 +284,8 @@ const ClientOnboarding = ({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -20, scale: 0.95 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className={`fixed z-[100] mx-4 w-[calc(100%-2rem)] max-w-sm ${getPositionClasses()}`}
+          className={`fixed z-[100] mx-4 w-[calc(100%-2rem)] max-w-sm ${!spotlightRect ? getPositionClasses() : ''}`}
+          style={getCardStyle()}
         >
           {/* Progress indicator */}
           <div className="mb-2 px-1">

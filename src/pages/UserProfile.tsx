@@ -3,7 +3,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Grid, Bookmark, Camera, Pencil, Users, Home, UserCircle, Plus, Edit2, Settings, Award, Play, Heart } from "lucide-react"; // Added Heart icon
+import { MessageCircle, Grid, Bookmark, Camera, Pencil, Users, Home, UserCircle, Plus, Edit2, Settings, Award, Play, Heart } from "lucide-react";
 import { useBadges } from "@/hooks/useBadges";
 import { BadgeAnimation } from "@/components/gamification/BadgeAnimation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,10 +15,11 @@ import SettingsSheet from "@/components/partner/SettingsSheet";
 import { useTranslation } from "react-i18next";
 import LikesSheet from "@/components/social/LikesSheet";
 import UserVideoFeed from "@/components/social/UserVideoFeed";
-import NotificationBadge from "@/components/chat/NotificationBadge"; // Added NotificationBadge
-import { useUnreadMessages } from "@/hooks/useUnreadMessages"; // Added useUnreadMessages
-import { useUnreadNotifications } from "@/hooks/useUnreadNotifications"; // Added useUnreadNotifications
-
+import NotificationBadge from "@/components/chat/NotificationBadge";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
+import { useClientOnboarding } from "@/hooks/useClientOnboarding";
+import ClientOnboarding from "@/components/client/ClientOnboarding";
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -55,6 +56,29 @@ const UserProfile = () => {
     userId || currentUser?.id,
     userRole
   );
+
+  // Client onboarding for own profile
+  const isOwnProfileForOnboarding = !userId || userId === currentUser?.id;
+  const {
+    isOnboardingActive,
+    getCurrentStep,
+    getProgress,
+    totalSteps,
+    currentStep,
+    nextStep,
+    prevStep,
+    skipCurrentStep,
+    completeOnboarding,
+    refreshCompletion,
+    canProceed,
+  } = useClientOnboarding(isOwnProfileForOnboarding && userRole === "client" ? currentUser?.id : undefined);
+
+  // Refresh completion when profile photos change
+  useEffect(() => {
+    if (isOwnProfileForOnboarding && profile) {
+      refreshCompletion();
+    }
+  }, [profile?.profile_image_url, profile?.cover_image_url, isOwnProfileForOnboarding, refreshCompletion]);
 
   useEffect(() => {
     checkAuth();
@@ -411,6 +435,7 @@ const UserProfile = () => {
             backgroundPosition: 'center'
           } : {}}
           onClick={() => isOwnProfile && coverInputRef.current?.click()}
+          data-onboarding="cover-photo"
         >
           {isOwnProfile && (
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -429,7 +454,7 @@ const UserProfile = () => {
 
         {/* Avatar and Info */}
         <div className="px-4 -mt-12 text-center">
-          <div className="relative inline-block mb-3">
+          <div className="relative inline-block mb-3" data-onboarding="profile-avatar">
             <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
               <AvatarImage src={profile?.profile_image_url} />
               <AvatarFallback className="bg-blue-500 text-white text-2xl">
@@ -864,6 +889,25 @@ const UserProfile = () => {
 
       {/* Badge Animation */}
       <BadgeAnimation badge={newBadge} onClose={() => setNewBadge(null)} />
+
+      {/* Client Onboarding Tutorial - Only for own profile */}
+      {isOwnProfileForOnboarding && userRole === "client" && isOnboardingActive && (
+        <ClientOnboarding
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          step={getCurrentStep()}
+          progress={getProgress()}
+          onNext={nextStep}
+          onPrev={prevStep}
+          onSkip={skipCurrentStep}
+          onComplete={completeOnboarding}
+          onNavigateTab={(tab) => {
+            // Navigate back to dashboard with specified tab
+            navigate(`/client-dashboard?tab=${tab}`);
+          }}
+          canProceed={canProceed()}
+        />
+      )}
     </div>
   );
 };
