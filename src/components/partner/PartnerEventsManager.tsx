@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import ImageUpload from "@/components/shared/ImageUpload";
 import { Switch } from "@/components/ui/switch";
 import { useTranslation } from "react-i18next";
+import LoyaltyCardConfig from "./LoyaltyCardConfig";
 
 interface PartnerEventsManagerProps {
   partnerId: string;
@@ -107,6 +108,105 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
 
   return (
     <div className="space-y-4">
+      {/* Loyalty Card Config at top right */}
+      <LoyaltyCardConfig partnerId={partnerId} />
+
+      {/* Events List */}
+      {loading ? (
+        <div className="space-y-4">
+          {[1, 2].map((i) => (
+            <div key={i} className="ios-card p-4 animate-pulse">
+              <div className="h-6 bg-muted rounded w-3/4 mb-2" />
+              <div className="h-4 bg-muted rounded w-full" />
+            </div>
+          ))}
+        </div>
+      ) : events.length === 0 ? (
+        <div className="ios-card p-8 text-center">
+          <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground">{t("eventManager.noEventsYet")}</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {events.map((event) => {
+            const qrCount = event.qr_codes?.[0]?.count || 0;
+            
+            return (
+              <div key={event.id} className="ios-card p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg mb-1">{event.title}</h3>
+                    {event.description && (
+                      <p className="text-sm text-muted-foreground mb-2">{event.description}</p>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDelete(event.id)}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                <div className="flex items-center gap-4 text-sm mb-3">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Calendar className="w-4 h-4" />
+                    <span>
+                      {new Date(event.start_date).toLocaleDateString("es-ES")} -{" "}
+                      {new Date(event.end_date).toLocaleDateString("es-ES")}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-primary font-bold">
+                    <Percent className="w-4 h-4" />
+                    <span>{event.discount_percentage}%</span>
+                  </div>
+                </div>
+
+                <div className="ios-card p-3 mb-3 flex items-center justify-between">
+                  <span className="font-semibold text-sm">{t("eventManager.qrCodeEnabled")}</span>
+                  <Switch
+                    checked={event.qr_enabled}
+                    onCheckedChange={async (checked) => {
+                      const { error } = await supabase
+                        .from("events")
+                        .update({ qr_enabled: checked })
+                        .eq("id", event.id);
+
+                      if (error) {
+                        toast({
+                          title: t("eventManager.error"),
+                          description: t("eventManager.cannotUpdate"),
+                          variant: "destructive",
+                        });
+                      } else {
+                        toast({
+                          title: checked ? t("eventManager.qrEnabled") : t("eventManager.qrDisabled"),
+                        });
+                        fetchEvents();
+                      }
+                    }}
+                  />
+                </div>
+
+                {event.qr_enabled && (
+                  <div className="ios-card bg-primary/10 p-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <BarChart className="w-5 h-5 text-primary" />
+                      <span className="font-semibold">{t("eventManager.qrDownloaded")}</span>
+                    </div>
+                    <span className="text-2xl font-bold text-primary">{qrCount}</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Create Event Button at bottom */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogTrigger asChild>
           <Button className="w-full ios-button h-12">
@@ -220,100 +320,6 @@ const PartnerEventsManager = ({ partnerId }: PartnerEventsManagerProps) => {
           </form>
         </DialogContent>
       </Dialog>
-
-      {loading ? (
-        <div className="space-y-4">
-          {[1, 2].map((i) => (
-            <div key={i} className="ios-card p-4 animate-pulse">
-              <div className="h-6 bg-muted rounded w-3/4 mb-2" />
-              <div className="h-4 bg-muted rounded w-full" />
-            </div>
-          ))}
-        </div>
-      ) : events.length === 0 ? (
-        <div className="ios-card p-8 text-center">
-          <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-          <p className="text-muted-foreground">{t("eventManager.noEventsYet")}</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {events.map((event) => {
-            const qrCount = event.qr_codes?.[0]?.count || 0;
-            
-            return (
-              <div key={event.id} className="ios-card p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg mb-1">{event.title}</h3>
-                    {event.description && (
-                      <p className="text-sm text-muted-foreground mb-2">{event.description}</p>
-                    )}
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(event.id)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </Button>
-                </div>
-
-                <div className="flex items-center gap-4 text-sm mb-3">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="w-4 h-4" />
-                    <span>
-                      {new Date(event.start_date).toLocaleDateString("it-IT")} -{" "}
-                      {new Date(event.end_date).toLocaleDateString("it-IT")}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-primary font-bold">
-                    <Percent className="w-4 h-4" />
-                    <span>{event.discount_percentage}%</span>
-                  </div>
-                </div>
-
-                <div className="ios-card p-3 mb-3 flex items-center justify-between">
-                  <span className="font-semibold text-sm">{t("eventManager.qrCodeEnabled")}</span>
-                  <Switch
-                    checked={event.qr_enabled}
-                    onCheckedChange={async (checked) => {
-                      const { error } = await supabase
-                        .from("events")
-                        .update({ qr_enabled: checked })
-                        .eq("id", event.id);
-
-                      if (error) {
-                        toast({
-                          title: t("eventManager.error"),
-                          description: t("eventManager.cannotUpdate"),
-                          variant: "destructive",
-                        });
-                      } else {
-                        toast({
-                          title: checked ? t("eventManager.qrEnabled") : t("eventManager.qrDisabled"),
-                        });
-                        fetchEvents();
-                      }
-                    }}
-                  />
-                </div>
-
-                {event.qr_enabled && (
-                  <div className="ios-card bg-primary/10 p-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <BarChart className="w-5 h-5 text-primary" />
-                      <span className="font-semibold">{t("eventManager.qrDownloaded")}</span>
-                    </div>
-                    <span className="text-2xl font-bold text-primary">{qrCount}</span>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 };

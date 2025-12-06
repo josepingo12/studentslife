@@ -144,7 +144,73 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
    } catch (error) {
      console.error("💥 DEBUG: startCamera error:", error);
    }
- };
+  };
+
+  // Function to add loyalty stamp when QR is scanned
+  const addLoyaltyStamp = async (clientId: string) => {
+    try {
+      // Check if partner has an active loyalty card
+      const { data: loyaltyCard } = await supabase
+        .from("loyalty_cards")
+        .select("id, stamps_required")
+        .eq("partner_id", partnerId)
+        .eq("is_active", true)
+        .single();
+
+      if (!loyaltyCard) return; // No active loyalty card
+
+      // Check if client already has stamps with this partner
+      const { data: existingStamps } = await supabase
+        .from("client_stamps")
+        .select("*")
+        .eq("client_id", clientId)
+        .eq("partner_id", partnerId)
+        .single();
+
+      if (existingStamps) {
+        // Update existing stamps
+        const newCount = existingStamps.stamps_count + 1;
+        const isComplete = newCount >= loyaltyCard.stamps_required;
+        
+        await supabase
+          .from("client_stamps")
+          .update({
+            stamps_count: newCount,
+            last_stamp_at: new Date().toISOString(),
+            reward_claimed: isComplete ? false : existingStamps.reward_claimed,
+          })
+          .eq("id", existingStamps.id);
+
+        toast({
+          title: t("loyaltyCard.stampAdded"),
+          description: t("loyaltyCard.stampAddedDesc", { 
+            count: newCount, 
+            total: loyaltyCard.stamps_required 
+          }),
+        });
+      } else {
+        // Create new stamp record
+        await supabase
+          .from("client_stamps")
+          .insert({
+            client_id: clientId,
+            partner_id: partnerId,
+            loyalty_card_id: loyaltyCard.id,
+            stamps_count: 1,
+          });
+
+        toast({
+          title: t("loyaltyCard.stampAdded"),
+          description: t("loyaltyCard.stampAddedDesc", { 
+            count: 1, 
+            total: loyaltyCard.stamps_required 
+          }),
+        });
+      }
+    } catch (error) {
+      console.error("Error adding loyalty stamp:", error);
+    }
+  };
 
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,6 +279,9 @@ const QRScanner = ({ partnerId }: QRScannerProps) => {
         setResult({ valid: false, message: t("qrScanner.validationError") });
         return;
       }
+
+      // Add loyalty stamp if partner has active loyalty card
+      await addLoyaltyStamp(qrData.client_id);
 
       setResult({
         valid: true,
