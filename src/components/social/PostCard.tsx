@@ -16,7 +16,7 @@ import LikesSheet from "./LikesSheet";
 import SharePostSheet from "./SharePostSheet";
 import { useTranslation } from "react-i18next";
 import VideoFeed from "./VideoFeed";
-import { motion, AnimatePresence } from "framer-motion";
+import HeartAnimation from "./HeartAnimation";
 
 interface PostCardProps {
   post: any;
@@ -359,26 +359,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
            >
              Il tuo browser non supporta i video.
            </video>
-           {/* Heart Animation */}
-           <AnimatePresence>
-             {showHeartAnimation && (
-               <motion.div
-                 initial={{ scale: 0, opacity: 0 }}
-                 animate={{ scale: 1, opacity: 1 }}
-                 exit={{ scale: 0, opacity: 0 }}
-                 transition={{ duration: 0.3, ease: "easeOut" }}
-                 className="absolute inset-0 flex items-center justify-center pointer-events-none"
-               >
-                 <motion.div
-                   initial={{ scale: 1 }}
-                   animate={{ scale: [1, 1.2, 1] }}
-                   transition={{ duration: 0.5 }}
-                 >
-                   <Heart className="w-24 h-24 fill-white text-white drop-shadow-lg" />
-                 </motion.div>
-               </motion.div>
-             )}
-           </AnimatePresence>
+           <HeartAnimation show={showHeartAnimation} />
            <div className="absolute bottom-3 right-3 flex gap-2">
              <Button
                variant="ghost"
@@ -407,26 +388,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
                 alt="Post"
                 className="w-full max-h-96 object-cover"
               />
-              {/* Heart Animation */}
-              <AnimatePresence>
-                {showHeartAnimation && (
-                  <motion.div
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                  >
-                    <motion.div
-                      initial={{ scale: 1 }}
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <Heart className="w-24 h-24 fill-white text-white drop-shadow-lg" />
-                    </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <HeartAnimation show={showHeartAnimation} />
             </div>
           );
         }
@@ -445,26 +407,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
                   playsInline
                   preload="metadata"
                 />
-                {/* Heart Animation */}
-                <AnimatePresence>
-                  {showHeartAnimation && (
-                    <motion.div
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                      className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                    >
-                      <motion.div
-                        initial={{ scale: 1 }}
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <Heart className="w-24 h-24 fill-white text-white drop-shadow-lg" />
-                      </motion.div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <HeartAnimation show={showHeartAnimation} />
                 <div className="absolute bottom-3 right-3 flex gap-2">
                   <Button
                     variant="ghost"
@@ -496,26 +439,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
                 alt="Post"
                 className="w-full max-h-96 object-cover"
               />
-              {/* Heart Animation */}
-              <AnimatePresence>
-                {showHeartAnimation && (
-                  <motion.div
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                  >
-                    <motion.div
-                      initial={{ scale: 1 }}
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <Heart className="w-24 h-24 fill-white text-white drop-shadow-lg" />
-                    </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <HeartAnimation show={showHeartAnimation} />
             </div>
           );
         }
