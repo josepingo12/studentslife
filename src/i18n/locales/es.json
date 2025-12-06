@@ -365,6 +365,7 @@
   },
   "social": {
     "share": "Compartir",
+    "shares": "compartidos",
     "sharedReel": "Reel compartido",
     "shared": "¡Compartido!",
     "sharedSuccess": "El reel ha sido enviado correctamente",

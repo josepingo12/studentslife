@@ -366,9 +366,9 @@ const PartnerDashboard = () => {
 
       {/* Main Content */}
       {activeTab === "social" ? (
-        <div className="flex-1 overflow-y-auto pb-24">
+        <div className="flex-1 overflow-y-auto pb-24 max-w-[470px] mx-auto w-full">
           {/* Posts Feed */}
-          <div className="mx-4 mt-4 space-y-4">
+          <div className="mx-4 mt-4 space-y-3">
             {loadingPosts ? (
               <div className="text-center py-8">
                 <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />

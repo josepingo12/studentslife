@@ -162,6 +162,13 @@ const SharePostSheet = ({ open, onOpenChange, postId, currentUserId, onShareComp
           status: 'approved'
         });
 
+        // Record the share in post_shares table
+        await supabase.from("post_shares").insert({
+          post_id: postId,
+          shared_by: currentUserId,
+          shared_to: userId
+        });
+
         // Update conversation timestamp
         await supabase
           .from("conversations")

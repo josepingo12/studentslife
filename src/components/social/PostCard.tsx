@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from "react"; // Importa useRef
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client"; // Percorso corretto
+import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Bookmark, Trash2, VolumeX, Volume2, Maximize, MoreVertical } from "lucide-react";
+import { Heart, MessageCircle, Bookmark, Trash2, VolumeX, Volume2, Maximize, MoreVertical, Send } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import ReportContentDialog from "@/components/moderation/ReportContentDialog";
@@ -13,6 +13,7 @@ import { it, enUS, es, fr, de } from "date-fns/locale";
 import CommentsSheet from "./CommentsSheet";
 import ImageViewer from "./ImageViewer";
 import LikesSheet from "./LikesSheet";
+import SharePostSheet from "./SharePostSheet";
 import { useTranslation } from "react-i18next";
 import VideoFeed from "./VideoFeed";
 
@@ -32,8 +33,10 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [likesSheetOpen, setLikesSheetOpen] = useState(false);
   const [commentsCount, setCommentsCount] = useState(0);
+  const [sharesCount, setSharesCount] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
   const [videoFeedOpen, setVideoFeedOpen] = useState(false);
+  const [shareSheetOpen, setShareSheetOpen] = useState(false);
 
 
   // Stati per la gestione del video
@@ -42,6 +45,7 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
 
   useEffect(() => {
     loadCommentsCount();
+    loadSharesCount();
     checkIfSaved();
   }, [post.id]);
 
@@ -97,6 +101,20 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
       .eq("post_id", post.id);
 
     setCommentsCount(count || 0);
+  };
+
+  const loadSharesCount = async () => {
+    const { count } = await supabase
+      .from("post_shares")
+      .select("*", { count: "exact", head: true })
+      .eq("post_id", post.id);
+
+    setSharesCount(count || 0);
+  };
+
+  const handleShareComplete = async () => {
+    // Reload shares count after sharing
+    loadSharesCount();
   };
 
   const isLiked = post.likes?.some((like: any) => like.user_id === currentUserId);
@@ -221,21 +239,21 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-4">
-      {/* Header */}
-      <div className="p-4 flex items-center justify-between">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-3 max-w-[470px] mx-auto">
+      {/* Header - More compact */}
+      <div className="p-3 flex items-center justify-between">
         <button
           onClick={() => navigate(`/profile/${post.user_id}`)}
-          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
-          <Avatar className="h-10 w-10">
+          <Avatar className="h-9 w-9">
             <AvatarImage src={post.public_profiles?.profile_image_url} />
-            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm">
               {displayName[0]}
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-semibold text-gray-900">{displayName}</p>
+            <p className="font-semibold text-gray-900 text-sm">{displayName}</p>
             <p className="text-xs text-gray-500">
               {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: getDateLocale() })}
             </p>
@@ -282,10 +300,10 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
         )}
       </div>
 
-      {/* Content */}
+      {/* Content - More compact */}
       {post.content && (
-        <div className="px-4 pb-3">
-          <p className="whitespace-pre-wrap text-gray-800">{post.content}</p>
+        <div className="px-3 pb-2">
+          <p className="whitespace-pre-wrap text-gray-800 text-sm">{post.content}</p>
         </div>
       )}
 
@@ -393,53 +411,66 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
         return null;
       })()}
 
-      {/* Stats */}
-      <div className="px-4 py-3 flex items-center gap-4">
+      {/* Stats - Compact */}
+      <div className="px-3 py-2 flex items-center gap-3 text-xs">
         <button
           onClick={() => setLikesSheetOpen(true)}
-          className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
+          className="font-medium text-gray-900 hover:text-blue-600 transition-colors"
         >
           {likesCount} {t('profile.likes').toLowerCase()}
         </button>
         {commentsCount > 0 && (
-          <p className="text-sm text-gray-500">
+          <span className="text-gray-500">
             {commentsCount} {t('post.comments').toLowerCase()}
-          </p>
+          </span>
+        )}
+        {sharesCount > 0 && (
+          <span className="text-gray-500">
+            {sharesCount} {t('social.shares') || 'compartidos'}
+          </span>
         )}
       </div>
 
-      {/* Actions */}
-      <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-around">
+      {/* Actions - Compact with Share button */}
+      <div className="px-2 py-2 border-t border-gray-100 flex items-center justify-around">
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2 text-gray-600 hover:text-red-500 hover:bg-red-50 rounded-full px-4"
+          className="gap-1.5 text-gray-600 hover:text-red-500 hover:bg-red-50 rounded-full px-3 h-8 text-xs"
           onClick={handleLike}
           disabled={loading}
         >
           <Heart
-            className={`w-5 h-5 ${isLiked ? "fill-red-500 text-red-500" : ""}`}
+            className={`w-4 h-4 ${isLiked ? "fill-red-500 text-red-500" : ""}`}
           />
           {t('post.like')}
         </Button>
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2 text-gray-600 hover:text-blue-500 hover:bg-blue-50 rounded-full px-4"
+          className="gap-1.5 text-gray-600 hover:text-blue-500 hover:bg-blue-50 rounded-full px-3 h-8 text-xs"
           onClick={() => setCommentsOpen(true)}
         >
-          <MessageCircle className="w-5 h-5" />
+          <MessageCircle className="w-4 h-4" />
           {t('post.comment')}
         </Button>
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2 text-gray-600 hover:text-yellow-500 hover:bg-yellow-50 rounded-full px-4"
+          className="gap-1.5 text-gray-600 hover:text-green-500 hover:bg-green-50 rounded-full px-3 h-8 text-xs"
+          onClick={() => setShareSheetOpen(true)}
+        >
+          <Send className="w-4 h-4" />
+          {t('social.share')}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-1.5 text-gray-600 hover:text-yellow-500 hover:bg-yellow-50 rounded-full px-3 h-8 text-xs"
           onClick={handleSaveToggle}
           disabled={loading}
         >
-          <Bookmark className={`w-5 h-5 {isSaved ? "fill-yellow-500 text-yellow-500" : ""}`} />
-          {t('common.save')}
+          <Bookmark className={`w-4 h-4 ${isSaved ? "fill-yellow-500 text-yellow-500" : ""}`} />
         </Button>
       </div>
 
@@ -478,8 +509,17 @@ const PostCard = ({ post, currentUserId, onDelete, onLikeToggle }: PostCardProps
                currentUserId={currentUserId}
                onLikeToggle={onLikeToggle}
              />
+
+             {/* Share Sheet */}
+             <SharePostSheet
+               open={shareSheetOpen}
+               onOpenChange={setShareSheetOpen}
+               postId={post.id}
+               currentUserId={currentUserId}
+               onShareComplete={handleShareComplete}
+             />
           </div>
         );
       };
 
-      export default PostCard;
+export default PostCard;
