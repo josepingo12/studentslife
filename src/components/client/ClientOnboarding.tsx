@@ -287,28 +287,17 @@ const ClientOnboarding = ({
       if (spotlightRect.y < window.innerHeight / 2) {
         return "top-auto";
       }
-      return "bottom-32";
+      return "bottom-28";
     }
     
     switch (step.position) {
       case "top":
-        return "top-20 left-1/2 -translate-x-1/2";
+        return "top-20";
       case "bottom":
-        return "bottom-28 left-1/2 -translate-x-1/2";
+        return "bottom-28";
       default:
-        return "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2";
+        return "top-1/2 -translate-y-1/2";
     }
-  };
-
-  const getCardStyle = () => {
-    if (spotlightRect && spotlightRect.y < window.innerHeight / 2) {
-      return {
-        top: `${spotlightRect.y + spotlightRect.height / 2 + 70}px`,
-        left: '50%',
-        transform: 'translateX(-50%)',
-      };
-    }
-    return {};
   };
 
   return (
@@ -480,8 +469,16 @@ const ClientOnboarding = ({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -30, scale: 0.9 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          className={`fixed z-[160] mx-2 sm:mx-4 w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] max-w-sm ${!spotlightRect ? getPositionClasses() : ''}`}
-          style={getCardStyle()}
+          className={`fixed z-[160] left-3 right-3 sm:left-auto sm:right-auto sm:mx-4 sm:w-[calc(100%-2rem)] max-w-sm ${!spotlightRect ? getPositionClasses() : ''}`}
+          style={spotlightRect ? {
+            top: spotlightRect.y < window.innerHeight / 2 
+              ? `${Math.min(spotlightRect.y + spotlightRect.height / 2 + 60, window.innerHeight - 280)}px`
+              : 'auto',
+            bottom: spotlightRect.y >= window.innerHeight / 2 ? '100px' : 'auto',
+            left: '12px',
+            right: '12px',
+            transform: 'none',
+          } : {}}
         >
           {/* Progress indicator */}
           <div className="mb-2 sm:mb-3 px-1">
