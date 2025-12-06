@@ -181,38 +181,36 @@ const ClientOnboarding = ({
   const isRequired = step.required;
   const isGoToProfileStep = step.id === "go-to-profile";
 
-  // Navigate to the correct tab and trigger actions
+  // Navigate to the correct tab
   useEffect(() => {
     if (step.targetTab) {
       onNavigateTab(step.targetTab);
     }
-    
-    // Auto-open wallet when on wallet step (only once)
-    if (step.id === "wallet" && onOpenWallet && !walletOpened) {
-      setWalletOpened(true);
-      setTimeout(() => onOpenWallet(), 500);
-    }
-    
-    // Auto-open loyalty cards when on loyalty step (only once)
-    if (step.id === "loyalty-cards" && onOpenLoyaltyCards && !loyaltyOpened) {
-      setLoyaltyOpened(true);
-      setTimeout(() => onOpenLoyaltyCards(), 500);
-    }
-  }, [step.id, step.targetTab, onNavigateTab, onOpenWallet, onOpenLoyaltyCards, walletOpened, loyaltyOpened]);
+  }, [step.id, step.targetTab, onNavigateTab]);
 
-  // Auto-advance when wallet is closed after being shown
+  // Auto-advance when wallet is closed after being opened
   useEffect(() => {
     if (step.id === "wallet" && walletOpened && walletOpen === false) {
       setTimeout(() => onNext(), 300);
     }
   }, [step.id, walletOpened, walletOpen, onNext]);
 
-  // Auto-advance when loyalty cards is closed after being shown
+  // Auto-advance when loyalty cards is closed after being opened
   useEffect(() => {
     if (step.id === "loyalty-cards" && loyaltyOpened && loyaltyCardsOpen === false) {
       setTimeout(() => onNext(), 300);
     }
   }, [step.id, loyaltyOpened, loyaltyCardsOpen, onNext]);
+
+  // Track when wallet/loyalty are opened by user click
+  useEffect(() => {
+    if (step.id === "wallet" && walletOpen === true) {
+      setWalletOpened(true);
+    }
+    if (step.id === "loyalty-cards" && loyaltyCardsOpen === true) {
+      setLoyaltyOpened(true);
+    }
+  }, [step.id, walletOpen, loyaltyCardsOpen]);
 
   const triggerConfetti = () => {
     const duration = 4000;
