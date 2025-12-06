@@ -405,5 +405,15 @@
     "you": "Tu",
     "person": "persona",
     "people": "persone"
+  },
+  "wallet": {
+    "title": "Il Mio Wallet",
+    "empty": "Nessun codice QR nel wallet",
+    "emptyHint": "Scarica un codice QR da un evento per vederlo qui",
+    "validUntil": "Valido fino al",
+    "deleteTitle": "Elimina QR",
+    "deleteDescription": "Sei sicuro di voler eliminare questo codice QR dal tuo wallet?",
+    "deleteSuccess": "Codice QR eliminato con successo",
+    "deleteError": "Errore nell'eliminazione del codice QR"
   }
 }
