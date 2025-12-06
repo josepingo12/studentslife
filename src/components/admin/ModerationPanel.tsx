@@ -212,7 +212,11 @@ const ModerationPanel = () => {
       // Check if it's an auto-moderated flag
       if (flagId.startsWith("auto-")) {
         // Handle auto-moderated content approval/rejection
-        const [, contentType, contentId] = flagId.split("-");
+        // Parse the flag ID correctly - format is "auto-{type}-{uuid}"
+        // Need to handle UUID with dashes correctly
+        const prefix = flagId.substring(0, flagId.indexOf("-", 5)); // "auto-post", "auto-comment", etc.
+        const contentType = prefix.replace("auto-", ""); // "post", "comment", etc.
+        const contentId = flagId.substring(prefix.length + 1); // The full UUID after "auto-{type}-"
         
         if (status === "resolved") {
           // Approve the content
