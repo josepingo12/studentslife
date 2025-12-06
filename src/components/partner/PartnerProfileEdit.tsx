@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import PartnerGalleryManager from "@/components/partner/PartnerGalleryManager";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
+import { MapPin, Loader2, CheckCircle2 } from "lucide-react";
+
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN;
 
 interface PartnerProfileEditProps {
   profile: any;
@@ -20,6 +23,8 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const [geocoding, setGeocoding] = useState(false);
+  const [geocodeSuccess, setGeocodeSuccess] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     business_name: profile.business_name || "",
@@ -48,6 +53,53 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
       setCategories(data);
     }
   };
+
+  // Geocode address automatically
+  const geocodeAddress = useCallback(async (address: string, city: string) => {
+    if (!address || !city || !MAPBOX_TOKEN) return;
+    
+    const fullAddress = `${address}, ${city}, España`;
+    setGeocoding(true);
+    setGeocodeSuccess(false);
+    
+    try {
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(fullAddress)}.json?access_token=${MAPBOX_TOKEN}&limit=1&country=ES`
+      );
+      
+      const data = await response.json();
+      
+      if (data.features && data.features.length > 0) {
+        const [lng, lat] = data.features[0].center;
+        setFormData(prev => ({
+          ...prev,
+          latitude: lat.toFixed(6),
+          longitude: lng.toFixed(6)
+        }));
+        setGeocodeSuccess(true);
+        
+        toast({
+          title: "📍 Coordenadas generadas",
+          description: "Las coordenadas se han obtenido automáticamente de la dirección.",
+        });
+      }
+    } catch (error) {
+      console.error("Error geocoding:", error);
+    } finally {
+      setGeocoding(false);
+    }
+  }, [toast]);
+
+  // Debounced geocoding when address or city changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (formData.business_address && formData.business_city) {
+        geocodeAddress(formData.business_address, formData.business_city);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [formData.business_address, formData.business_city, geocodeAddress]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,11 +185,23 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
 
         <div className="space-y-2">
           <Label>{t("profileEdit.address")}</Label>
-          <Input
-            className="ios-input"
-            value={formData.business_address}
-            onChange={(e) => setFormData({ ...formData, business_address: e.target.value })}
-          />
+          <div className="relative">
+            <Input
+              className="ios-input pr-10"
+              value={formData.business_address}
+              onChange={(e) => setFormData({ ...formData, business_address: e.target.value })}
+              placeholder="Calle Gran Vía, 1"
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {geocoding ? (
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              ) : geocodeSuccess ? (
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+              ) : (
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -146,16 +210,31 @@ const PartnerProfileEdit = ({ profile, onUpdate }: PartnerProfileEditProps) => {
             className="ios-input"
             value={formData.business_city}
             onChange={(e) => setFormData({ ...formData, business_city: e.target.value })}
+            placeholder="Valladolid"
           />
+          {geocoding && (
+            <p className="text-xs text-primary flex items-center gap-1">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              Generando coordenadas automáticamente...
+            </p>
+          )}
         </div>
 
         {/* Coordinates Section */}
         <div className="space-y-4 pt-4 border-t border-border/50">
-          <div>
-            <h3 className="font-semibold text-lg mb-1">{t("profileEdit.coordinates")}</h3>
-            <p className="text-sm text-muted-foreground">
-              {t("profileEdit.coordinatesDescription")}
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-lg mb-1">{t("profileEdit.coordinates")}</h3>
+              <p className="text-sm text-muted-foreground">
+                Se generan automáticamente desde la dirección
+              </p>
+            </div>
+            {geocodeSuccess && (
+              <div className="flex items-center gap-1 text-green-500 text-sm">
+                <CheckCircle2 className="h-4 w-4" />
+                Auto-generadas
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
