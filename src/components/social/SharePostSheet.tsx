@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -35,6 +35,8 @@ const SharePostSheet = ({ open, onOpenChange, postId, currentUserId, onShareComp
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
   const [searching, setSearching] = useState(false);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -43,6 +45,7 @@ const SharePostSheet = ({ open, onOpenChange, postId, currentUserId, onShareComp
       setSelectedUsers([]);
       setSearchQuery("");
       setSearchResults([]);
+      setKeyboardOpen(false);
     }
   }, [open, currentUserId]);
 
@@ -53,6 +56,23 @@ const SharePostSheet = ({ open, onOpenChange, postId, currentUserId, onShareComp
       setSearchResults([]);
     }
   }, [searchQuery]);
+
+  // Detect keyboard open/close via visual viewport
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.visualViewport) {
+        const viewportHeight = window.visualViewport.height;
+        const windowHeight = window.innerHeight;
+        // If viewport is significantly smaller, keyboard is likely open
+        setKeyboardOpen(windowHeight - viewportHeight > 150);
+      }
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize);
+      return () => window.visualViewport?.removeEventListener('resize', handleResize);
+    }
+  }, []);
 
   const loadFavorites = async () => {
     const { data } = await supabase
@@ -229,14 +249,21 @@ const SharePostSheet = ({ open, onOpenChange, postId, currentUserId, onShareComp
     );
   };
 
+  // Calculate dynamic height based on keyboard state
+  const sheetHeight = keyboardOpen ? '50vh' : '85vh';
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl">
+      <SheetContent 
+        side="bottom" 
+        className="rounded-t-3xl transition-all duration-200"
+        style={{ height: sheetHeight }}
+      >
         <SheetHeader className="pb-4">
           <SheetTitle className="text-center">{t('social.share')}</SheetTitle>
         </SheetHeader>
 
-        {/* Search */}
+        {/* Search - not auto-focused */}
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <Input
@@ -244,13 +271,19 @@ const SharePostSheet = ({ open, onOpenChange, postId, currentUserId, onShareComp
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 rounded-xl bg-muted/50 border-0"
+            autoFocus={false}
+            autoComplete="off"
           />
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto max-h-[calc(85vh-200px)]">
+        <div 
+          ref={contentRef}
+          className="flex-1 overflow-y-auto"
+          style={{ maxHeight: keyboardOpen ? 'calc(50vh - 180px)' : 'calc(85vh - 200px)' }}
+        >
           {/* Favorites */}
-          {filteredFavorites.length > 0 && (
+          {filteredFavorites.length > 0 && !keyboardOpen && (
             <div className="mb-6">
               <h3 className="text-sm font-semibold text-muted-foreground mb-2 px-1">
                 {t('chat.favorites').toUpperCase()}
@@ -307,7 +340,10 @@ const SharePostSheet = ({ open, onOpenChange, postId, currentUserId, onShareComp
 
         {/* Send Button */}
         {selectedUsers.length > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1rem)' }}>
+          <div 
+            className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t" 
+            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1rem)' }}
+          >
             <Button 
               className="w-full rounded-xl h-12 gap-2"
               onClick={handleSend}
