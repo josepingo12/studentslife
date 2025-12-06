@@ -370,7 +370,8 @@
     "sharedSuccess": "El reel ha sido enviado correctamente",
     "sendTo": "Enviar a",
     "views": "visualizaciones",
-    "allUsers": "Usuarios"
+    "allUsers": "Usuarios",
+    "postNotFound": "Publicación no disponible"
   },
   "chat": {
     "chats": "Chats",
