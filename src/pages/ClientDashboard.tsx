@@ -305,6 +305,7 @@ const handlePartnerSearch = async (query: string) => {
                 <button
                   onClick={() => navigate("/profile")}
                   className="hover:scale-105 transition-transform"
+                  data-onboarding="avatar"
                 >
                   <Avatar className="h-10 w-10 ring-2 ring-white/30">
                     <AvatarImage src={profile?.profile_image_url} />
@@ -419,6 +420,7 @@ const handlePartnerSearch = async (query: string) => {
             <button
               onClick={() => setLoyaltyCardsSheetOpen(true)}
               className="flex flex-col items-center gap-1 text-white hover:scale-105 transition-all"
+              data-onboarding="loyalty-cards"
             >
               <CreditCard className="w-5 h-6" />
               <span className="text-xs font-semibold">Tarjetas</span>
@@ -426,6 +428,7 @@ const handlePartnerSearch = async (query: string) => {
             <button
               onClick={() => setWalletSheetOpen(true)}
               className="flex flex-col items-center gap-1 text-white hover:scale-105 transition-all"
+              data-onboarding="wallet"
             >
               <Wallet className="w-5 h-6" />
               <span className="text-xs font-semibold">Wallet</span>
@@ -573,6 +576,7 @@ const handlePartnerSearch = async (query: string) => {
                 ? "bg-blue-100 text-blue-600"
                 : "text-gray-500 hover:bg-blue-50"
             }`}
+            data-onboarding="social-tab"
           >
             <Users className="w-6 h-6" />
             <span className="text-xs font-medium">{t('navigation.social')}</span>
@@ -585,6 +589,7 @@ const handlePartnerSearch = async (query: string) => {
                 ? "bg-blue-100 text-blue-600"
                 : "text-gray-500 hover:bg-blue-50"
             }`}
+            data-onboarding="partners-tab"
           >
             <Home className="w-6 h-6" />
             <span className="text-xs font-medium">{t('navigation.partners')}</span>
@@ -594,6 +599,7 @@ const handlePartnerSearch = async (query: string) => {
           <button
             onClick={() => setUploadSheetOpen(true)}
             className="relative -mt-6 h-16 w-16 rounded-full bg-blue-500 text-white shadow-lg flex items-center justify-center hover:bg-blue-600 hover:scale-105 transition-all"
+            data-onboarding="upload-button"
           >
             <Plus className="w-8 h-8" />
           </button>
@@ -616,6 +622,7 @@ const handlePartnerSearch = async (query: string) => {
                 ? "bg-blue-100 text-blue-600"
                 : "text-gray-500 hover:bg-blue-50"
             }`}
+            data-onboarding="chat-tab"
           >
             <div className="relative">
               <MessageCircle className="w-6 h-6" />
