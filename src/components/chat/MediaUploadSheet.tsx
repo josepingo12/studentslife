@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { ImageIcon, Video, File, Camera, Mic } from "lucide-react";
 import { Camera as CapacitorCamera } from '@capacitor/camera';
@@ -100,11 +100,11 @@ const MediaUploadSheet = ({
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-3xl">
-        <SheetHeader>
-          <SheetTitle>{t('chatMedia.attachContent')}</SheetTitle>
-        </SheetHeader>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="px-4 pb-6">
+        <DrawerHeader>
+          <DrawerTitle>{t('chatMedia.attachContent')}</DrawerTitle>
+        </DrawerHeader>
         <div className="grid grid-cols-3 gap-4 mt-6 pb-4">
           <button
             onClick={handleCameraCapture}
@@ -167,8 +167,8 @@ const MediaUploadSheet = ({
             />
           </label>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 };
 

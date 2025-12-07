@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
@@ -162,15 +162,14 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete, uploadType:
  };
 
   return (
-    <Sheet open={open} onOpenChange={handleClose}>
-     <SheetContent
-       side="bottom"
-       className={`rounded-t-[24px] bg-white border-t border-border/30 p-0 shadow-2xl ${
-         isDesktop
-           ? uploadType ? 'h-[350px] max-w-2xl mx-auto' : 'h-[280px] max-w-lg mx-auto'
-           : uploadType ? 'h-[45vh]' : 'h-[280px]'
-       }`}
-     >
+    <Drawer open={open} onOpenChange={handleClose}>
+      <DrawerContent
+        className={`bg-white p-0 shadow-2xl ${
+          isDesktop
+            ? uploadType ? 'h-[350px] max-w-2xl mx-auto' : 'h-[280px] max-w-lg mx-auto'
+            : uploadType ? 'h-[45vh]' : 'h-[280px]'
+        }`}
+      >
         {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-2">
           <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
@@ -316,8 +315,8 @@ const UploadSheet = ({ open, onOpenChange, userId, onUploadComplete, uploadType:
             </div>
           )}
         </div>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 };
 

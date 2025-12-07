@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -174,11 +174,11 @@ const ClientSettingsSheet = ({ open, onOpenChange }: ClientSettingsSheetProps) =
 
   return (
     <>
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="bottom" className="h-auto max-h-[85vh] rounded-t-3xl overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>{t('settings.title')}</SheetTitle>
-          </SheetHeader>
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto px-4 pb-6">
+          <DrawerHeader>
+            <DrawerTitle>{t('settings.title')}</DrawerTitle>
+          </DrawerHeader>
 
           <div className="mt-6 space-y-6 pb-6">
             {/* Language Selection */}
@@ -271,8 +271,8 @@ const ClientSettingsSheet = ({ open, onOpenChange }: ClientSettingsSheetProps) =
               </Button>
             </div>
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
 
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
         <AlertDialogContent>

@@ -8,11 +8,11 @@ import { useToast } from "@/hooks/use-toast";
 import ImageUpload from "@/components/shared/ImageUpload";
 import { useTranslation } from "react-i18next";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 
 interface CreatePostProps {
   userId: string;
@@ -218,14 +218,14 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
       </div>
 
       {/* Bottom Sheet moderno stile iOS */}
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="bottom" className="h-[80vh] rounded-t-3xl border-0 bg-white p-6">
-          <SheetHeader className="pb-4">
+      <Drawer open={sheetOpen} onOpenChange={setSheetOpen}>
+        <DrawerContent className="h-[80vh] bg-white p-6">
+          <DrawerHeader className="pb-4">
             <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
-            <SheetTitle className="text-center text-xl font-bold text-gray-900">
+            <DrawerTitle className="text-center text-xl font-bold text-gray-900">
               Crea un nuovo post
-            </SheetTitle>
-          </SheetHeader>
+            </DrawerTitle>
+          </DrawerHeader>
 
           <form onSubmit={handleSubmit} className="h-full flex flex-col">
             {/* Header con avatar */}
@@ -355,8 +355,8 @@ const CreatePost = ({ userId, userProfile, onPostCreated }: CreatePostProps) => 
               </div>
             </div>
           </form>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 };

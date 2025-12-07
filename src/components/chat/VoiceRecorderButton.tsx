@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Mic, X, Send, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useToast } from "@/hooks/use-toast";
 
 interface VoiceRecorderButtonProps {
@@ -212,14 +212,11 @@ const VoiceRecorderButton = ({ onRecordingComplete, disabled }: VoiceRecorderBut
         <Mic className="w-5 h-5" />
       </Button>
 
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetContent 
-          side="bottom" 
-          className="h-[400px] border-none"
-        >
-          <SheetHeader>
-            <SheetTitle className="text-center">Mensaje de voz</SheetTitle>
-          </SheetHeader>
+      <Drawer open={isOpen} onOpenChange={setIsOpen}>
+        <DrawerContent className="h-[400px]">
+          <DrawerHeader>
+            <DrawerTitle className="text-center">Mensaje de voz</DrawerTitle>
+          </DrawerHeader>
           
           <div className="flex flex-col items-center justify-center h-full gap-6 pb-8">
             {/* Waveform visualization */}
@@ -290,8 +287,8 @@ const VoiceRecorderButton = ({ onRecordingComplete, disabled }: VoiceRecorderBut
               <X className="w-5 h-5" />
             </Button>
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 };
