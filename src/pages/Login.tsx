@@ -182,15 +182,19 @@ const Login = () => {
         
         {/* Logo and Title */}
         <div className="relative z-10 flex flex-col items-center justify-center pt-8">
-          <motion.img 
-            src={logo} 
-            alt="Students Life" 
-            className="w-28 h-28 drop-shadow-2xl"
+          <motion.div
+            className="w-32 h-32 rounded-full bg-white shadow-2xl flex items-center justify-center"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5, type: "spring" }}
-          />
-          <motion.p 
+          >
+            <img 
+              src={logo} 
+              alt="Students Life" 
+              className="w-24 h-24"
+            />
+          </motion.div>
+          <motion.p
             className="text-white/90 mt-3 text-lg font-medium"
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
