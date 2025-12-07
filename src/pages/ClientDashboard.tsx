@@ -527,42 +527,58 @@ const handlePartnerSearch = async (query: string) => {
         </div>
       )}
     </div>
-          {/* Recent Partners */}
-          <div className="mt-6">
-            <RecentPartners userId={user.id} />
+          {/* Hero Section with Glovo-style gradient background */}
+          <div className="relative overflow-hidden">
+            {/* Gradient Background - Celeste/Azzurro */}
+            <div className="absolute inset-0 bg-gradient-to-b from-cyan-400 via-blue-400 to-blue-500" />
+            
+            {/* Decorative curved wave at bottom */}
+            <div className="absolute bottom-0 left-0 right-0">
+              <svg viewBox="0 0 1440 120" className="w-full h-24" preserveAspectRatio="none">
+                <path
+                  fill="#f9fafb"
+                  d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,48C672,43,768,53,864,64C960,75,1056,85,1152,80C1248,75,1344,53,1392,42.7L1440,32L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z"
+                />
+              </svg>
+            </div>
+
+            {/* Category Grid - Glovo Style */}
+            <div className="relative z-10 px-4 pt-6 pb-16">
+              <CategoryCarousel onSelectCategory={setSelectedCategory} />
+            </div>
           </div>
 
-          {/* Category Carousel */}
-          <div className="mt-6 px-4">
-            <h3 className="text-2xl font-bold mb-4 text-foreground">{t('partner.category')}</h3>
-            <CategoryCarousel onSelectCategory={setSelectedCategory} />
-          </div>
+          {/* Content on white background */}
+          <div className="bg-gray-50 -mt-4">
+            {/* Recent Partners Section */}
+            <div className="pt-2">
+              <RecentPartners userId={user.id} />
+            </div>
 
- {/* Partners List */}
-          {selectedCategory && (
-            <div className="mt-8">
-              <h3 className="text-2xl font-bold mb-4 px-4 text-foreground">{t('navigation.partners')}</h3>
-              <div className="px-4">
+            {/* Partners List - shown when category selected */}
+            {selectedCategory && (
+              <div className="mt-6 px-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">{t('navigation.partners')}</h3>
+                  <button
+                    onClick={() => setSelectedCategory(null)}
+                    className="text-sm text-cyan-600 font-medium hover:text-cyan-700"
+                  >
+                    {t('common.close')}
+                  </button>
+                </div>
                 <PartnersList category={selectedCategory} />
               </div>
+            )}
+
+            {/* Partners Map */}
+            <div className="mt-8 px-4 pb-4">
+              <h3 className="text-xl font-bold mb-4 text-gray-900">{t('partner.mapTitle')}</h3>
+              <div className="rounded-3xl overflow-hidden shadow-lg">
+                <PartnersMap />
+              </div>
             </div>
-          )}
-
-
-          {/* Partners Map */}
-          <div className="mt-8">
-            <h3 className="text-2xl font-bold mb-4 px-4 text-foreground">{t('partner.mapTitle')}</h3>
-            <PartnersMap />
           </div>
-
-
-          {!selectedCategory && (
-            <div className="mt-12 text-center px-4">
-              <p className="text-muted-foreground text-base">
-                {t('partner.selectCategory')}
-              </p>
-            </div>
-          )}
         </>
       )}
 
