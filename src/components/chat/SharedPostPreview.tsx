@@ -40,12 +40,12 @@ const SharedPostPreview = ({ postId, isOwn }: SharedPostPreviewProps) => {
 
   const loadPost = async () => {
     try {
-      // Load post with profile
+      // Load post with profile using public_profiles view
       const { data: postData } = await supabase
         .from("posts")
         .select(`
           id, video_url, image_url, content, user_id, created_at,
-          profiles:user_id (first_name, last_name, business_name, profile_image_url)
+          public_profiles!posts_user_id_fkey (first_name, last_name, business_name, profile_image_url)
         `)
         .eq("id", postId)
         .single();
@@ -53,7 +53,7 @@ const SharedPostPreview = ({ postId, isOwn }: SharedPostPreviewProps) => {
       if (postData) {
         setPost({
           ...postData,
-          profile: postData.profiles as any
+          profile: postData.public_profiles as any
         });
       }
 
