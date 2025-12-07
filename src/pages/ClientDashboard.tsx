@@ -567,70 +567,69 @@ const handlePartnerSearch = async (query: string) => {
         </>
       )}
 
-      {/* Bottom Navigation - Glovo Style */}
+      {/* Bottom Navigation - Compact Glovo Style */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-2xl">
-        <div className="flex items-center justify-around h-20 px-4 max-w-md mx-auto">
+        <div className="flex items-center justify-around h-16 px-2 max-w-md mx-auto">
           <button
             onClick={() => setActiveTab("social")}
-            className={`flex flex-col items-center gap-1 p-3 rounded-2xl transition-all duration-300 ${
+            className={`flex flex-col items-center gap-0.5 p-2 rounded-xl transition-all duration-300 ${
               activeTab === "social"
-                ? "bg-gradient-to-br from-cyan-400 to-blue-500 text-white shadow-lg shadow-cyan-200/50 scale-105"
+                ? "bg-gradient-to-br from-cyan-400 to-blue-500 text-white shadow-md shadow-cyan-200/50"
                 : "text-gray-400 hover:text-cyan-600 hover:bg-cyan-50"
             }`}
             data-onboarding="social-tab"
           >
-            <Users className="w-6 h-6" />
-            <span className="text-[10px] font-bold">{t('navigation.social')}</span>
+            <Users className="w-5 h-5" />
+            <span className="text-[9px] font-semibold">{t('navigation.social')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab("partners")}
-            className={`flex flex-col items-center gap-1 p-3 rounded-2xl transition-all duration-300 ${
+            className={`flex flex-col items-center gap-0.5 p-2 rounded-xl transition-all duration-300 ${
               activeTab === "partners"
-                ? "bg-gradient-to-br from-cyan-400 to-blue-500 text-white shadow-lg shadow-cyan-200/50 scale-105"
+                ? "bg-gradient-to-br from-cyan-400 to-blue-500 text-white shadow-md shadow-cyan-200/50"
                 : "text-gray-400 hover:text-cyan-600 hover:bg-cyan-50"
             }`}
             data-onboarding="partners-tab"
           >
-            <Home className="w-6 h-6" />
-            <span className="text-[10px] font-bold">{t('navigation.partners')}</span>
+            <Home className="w-5 h-5" />
+            <span className="text-[9px] font-semibold">{t('navigation.partners')}</span>
           </button>
 
-          {/* Central Upload Button - Glovo Style */}
+          {/* Central Upload Button - Compact */}
           <button
             onClick={() => setUploadSheetOpen(true)}
-            className="relative -mt-8 h-16 w-16 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-white shadow-xl shadow-cyan-300/50 flex items-center justify-center hover:shadow-2xl hover:scale-110 transition-all duration-300"
+            className="relative -mt-5 h-12 w-12 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-white shadow-lg shadow-cyan-300/50 flex items-center justify-center hover:shadow-xl hover:scale-105 transition-all duration-300"
             data-onboarding="upload-button"
           >
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 blur-md opacity-50" />
-            <Plus className="w-8 h-8 relative z-10" />
+            <Plus className="w-6 h-6" />
           </button>
 
           <button
             onClick={() => setLikesSheetOpen(true)}
-            className="flex flex-col items-center gap-1 p-3 rounded-2xl transition-all duration-300 text-gray-400 relative hover:text-cyan-600 hover:bg-cyan-50"
+            className="flex flex-col items-center gap-0.5 p-2 rounded-xl transition-all duration-300 text-gray-400 relative hover:text-cyan-600 hover:bg-cyan-50"
           >
             <div className="relative">
-              <Heart className="w-6 h-6" />
+              <Heart className="w-5 h-5" />
               <NotificationBadge count={unreadNotifications} />
             </div>
-            <span className="text-[10px] font-bold">Notifiche</span>
+            <span className="text-[9px] font-semibold">Notifiche</span>
           </button>
 
           <button
             onClick={() => setActiveTab("chats")}
-            className={`flex flex-col items-center gap-1 p-3 rounded-2xl transition-all duration-300 relative ${
+            className={`flex flex-col items-center gap-0.5 p-2 rounded-xl transition-all duration-300 relative ${
               activeTab === "chats"
-                ? "bg-gradient-to-br from-cyan-400 to-blue-500 text-white shadow-lg shadow-cyan-200/50 scale-105"
+                ? "bg-gradient-to-br from-cyan-400 to-blue-500 text-white shadow-md shadow-cyan-200/50"
                 : "text-gray-400 hover:text-cyan-600 hover:bg-cyan-50"
             }`}
             data-onboarding="chat-tab"
           >
             <div className="relative">
-              <MessageCircle className="w-6 h-6" />
+              <MessageCircle className="w-5 h-5" />
               <NotificationBadge count={totalUnread} />
             </div>
-            <span className="text-[10px] font-bold">{t('navigation.chat')}</span>
+            <span className="text-[9px] font-semibold">{t('navigation.chat')}</span>
           </button>
         </div>
       </div>
