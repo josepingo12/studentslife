@@ -11,15 +11,15 @@ interface VideoFeedProps {
   onLikeToggle: (postId: string, isLiked: boolean) => void;
 }
 
-const SWIPE_THRESHOLD = 30; // Reduced for more sensitivity
-const SWIPE_VELOCITY_THRESHOLD = 0.2; // Reduced for faster response
+const SWIPE_THRESHOLD = 30;
+const SWIPE_VELOCITY_THRESHOLD = 0.2;
 
 const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggle }: VideoFeedProps) => {
   const [posts, setPosts] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [direction, setDirection] = useState(0); // 1 = next, -1 = prev
+  const [direction, setDirection] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   
   // Touch tracking
@@ -28,6 +28,7 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
   const touchCurrentY = useRef(0);
   const isSwiping = useRef(false);
   const swipeHandled = useRef(false);
+  const touchStartTarget = useRef<EventTarget | null>(null);
 
   useEffect(() => {
     if (open && initialPost) {
@@ -51,9 +52,7 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
 
       if (error) throw error;
 
-      // Find initial post index
       const initialIndex = data.findIndex(post => post.id === initialPost.id);
-
       setPosts(data);
       setCurrentIndex(initialIndex >= 0 ? initialIndex : 0);
     } catch (error) {
@@ -81,10 +80,19 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
     }
   }, [currentIndex, isTransitioning]);
 
+  const isInteractiveElement = (target: EventTarget | null): boolean => {
+    if (!target || !(target instanceof HTMLElement)) return false;
+    
+    // Check if target or any parent is an interactive element
+    const interactiveSelectors = 'button, [role="button"], input, textarea, a, [data-radix-collection-item]';
+    return target.closest(interactiveSelectors) !== null;
+  };
+
   const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartTarget.current = e.target;
+    
     // Don't interfere with touches on interactive elements
-    const target = e.target as HTMLElement;
-    if (target.closest('button') || target.closest('[role="button"]') || target.closest('input') || target.closest('textarea')) {
+    if (isInteractiveElement(e.target)) {
       isSwiping.current = false;
       return;
     }
@@ -98,11 +106,11 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isSwiping.current || swipeHandled.current) return;
+    if (isInteractiveElement(touchStartTarget.current)) return;
     
     touchCurrentY.current = e.touches[0].clientY;
     const deltaY = touchStartY.current - touchCurrentY.current;
     
-    // Prevent scroll if we're swiping vertically
     if (Math.abs(deltaY) > 10) {
       e.preventDefault();
     }
@@ -110,20 +118,22 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
 
   const handleTouchEnd = () => {
     if (!isSwiping.current || swipeHandled.current) return;
+    if (isInteractiveElement(touchStartTarget.current)) {
+      isSwiping.current = false;
+      return;
+    }
+    
     isSwiping.current = false;
 
     const deltaY = touchStartY.current - touchCurrentY.current;
     const deltaTime = Date.now() - touchStartTime.current;
     const velocity = Math.abs(deltaY) / deltaTime;
 
-    // Check if swipe is strong enough (distance or velocity)
     if (Math.abs(deltaY) > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD) {
       swipeHandled.current = true;
       if (deltaY > 0) {
-        // Swipe up - go to next
         goToNext();
       } else {
-        // Swipe down - go to previous
         goToPrev();
       }
     }
@@ -143,8 +153,8 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
   if (!open || posts.length === 0) return null;
 
   const currentPost = posts[currentIndex];
+  const nextPost = posts[currentIndex + 1];
 
-  // Animation variants for smooth transitions
   const slideVariants = {
     enter: (dir: number) => ({
       y: dir > 0 ? '100%' : '-100%',
@@ -163,21 +173,22 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 bg-black z-[100] touch-none overflow-hidden"
+      className="fixed inset-0 bg-black z-[100] overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onWheel={handleWheel}
     >
-      {/* Position indicator */}
-      <div 
-        className="absolute right-4 z-[110] bg-black/50 rounded-full px-3 py-1" 
-        style={{ top: 'calc(env(safe-area-inset-top, 16px) + 8px)' }}
-      >
-        <span className="text-white text-sm">
-          {currentIndex + 1} / {posts.length}
-        </span>
-      </div>
+      {/* Preload next video */}
+      {nextPost && (
+        <video
+          src={nextPost.video_url}
+          preload="auto"
+          muted
+          playsInline
+          className="hidden"
+        />
+      )}
 
       {/* Current video with animation */}
       <AnimatePresence mode="wait" custom={direction}>
@@ -204,16 +215,16 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
         </motion.div>
       </AnimatePresence>
 
-      {/* Scroll indicators - subtle bars */}
+      {/* Subtle scroll indicators */}
       {currentIndex > 0 && (
         <div className="absolute top-24 left-1/2 transform -translate-x-1/2 pointer-events-none z-[110]">
-          <div className="w-8 h-1 bg-white/30 rounded-full" />
+          <div className="w-8 h-1 bg-white/20 rounded-full" />
         </div>
       )}
 
       {currentIndex < posts.length - 1 && (
         <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 pointer-events-none z-[110]">
-          <div className="w-8 h-1 bg-white/30 rounded-full animate-pulse" />
+          <div className="w-8 h-1 bg-white/20 rounded-full animate-pulse" />
         </div>
       )}
     </div>

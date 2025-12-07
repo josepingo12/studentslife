@@ -336,7 +336,7 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
       />
 
       {/* Controls Right Side - ICONE GRANDI STILE INSTAGRAM */}
-      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col items-center gap-5 z-10">
+      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col items-center gap-5 z-10 pointer-events-auto">
         {/* Like Button */}
         <div className="flex flex-col items-center">
           <Button
@@ -374,15 +374,21 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
         </div>
 
         {/* Share Button */}
-        <div className="flex flex-col items-center">
+        <div 
+          className="flex flex-col items-center"
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            setShareOpen(true);
+          }}
+          onTouchEnd={(e) => {
+            e.stopPropagation();
+          }}
+        >
           <Button
             variant="ghost"
             size="icon"
-            className="text-white hover:bg-white/20 rounded-full h-12 w-12"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShareOpen(true);
-            }}
+            className="text-white hover:bg-white/20 rounded-full h-12 w-12 pointer-events-auto"
           >
             <Send style={{ width: '26px', height: '26px' }} />
           </Button>
