@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Folder } from "lucide-react";
+import { Folder, Utensils, ShoppingBag, Scissors, Sparkles, Music, Dumbbell, GraduationCap, PartyPopper, Coffee, Beer, Pizza } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface CategoryCarouselProps {
   onSelectCategory: (category: string) => void;
@@ -13,16 +14,23 @@ interface Category {
   image_url: string | null;
 }
 
-const gradients = [
-  "from-orange-400 to-red-500",
-  "from-green-400 to-emerald-500",
-  "from-purple-400 to-pink-500",
-  "from-blue-400 to-cyan-500",
-  "from-yellow-400 to-orange-500",
-  "from-pink-400 to-rose-500",
-];
+// Icon mapping for categories
+const categoryIcons: { [key: string]: React.ComponentType<any> } = {
+  restaurante: Utensils,
+  tienda: ShoppingBag,
+  peluqueria: Scissors,
+  belleza: Sparkles,
+  discoteca: Music,
+  gimnasio: Dumbbell,
+  academia: GraduationCap,
+  eventos: PartyPopper,
+  cafeteria: Coffee,
+  bar: Beer,
+  pizzeria: Pizza,
+};
 
 const CategoryCarousel = ({ onSelectCategory }: CategoryCarouselProps) => {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,80 +56,102 @@ const CategoryCarousel = ({ onSelectCategory }: CategoryCarouselProps) => {
   };
 
   const handleSelect = (value: string) => {
-    setSelected(value);
-    onSelectCategory(value);
+    const newSelected = selected === value ? null : value;
+    setSelected(newSelected);
+    onSelectCategory(newSelected || "");
+  };
+
+  const getCategoryIcon = (name: string) => {
+    const normalizedName = name.toLowerCase().replace(/\s+/g, "");
+    return categoryIcons[normalizedName] || Folder;
   };
 
   if (loading) {
     return (
-      <div className="flex gap-4 pb-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="flex-shrink-0 w-40 ios-card p-6 animate-pulse">
-            <div className="w-16 h-16 rounded-2xl mx-auto mb-3 bg-muted" />
-            <div className="h-4 bg-muted rounded" />
+      <div className="grid grid-cols-2 gap-4">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div key={i} className="bg-white rounded-3xl p-6 animate-pulse shadow-sm">
+            <div className="w-16 h-16 rounded-full mx-auto mb-3 bg-gradient-to-br from-cyan-100 to-blue-100" />
+            <div className="h-4 bg-gray-100 rounded-full w-3/4 mx-auto" />
           </div>
         ))}
       </div>
     );
   }
 
-  return (
-    <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide px-1">
-      {categories.map((category, idx) => {
-        const isSelected = selected === category.name;
-        const gradient = gradients[idx % gradients.length];
+  // Calculate grid layout - 2 items first row, 3 items second row pattern like Glovo
+  const renderCategoryGrid = () => {
+    const rows: Category[][] = [];
+    let i = 0;
+    let rowIndex = 0;
+    
+    while (i < categories.length) {
+      const itemsInRow = rowIndex % 2 === 0 ? 2 : 3;
+      rows.push(categories.slice(i, i + itemsInRow));
+      i += itemsInRow;
+      rowIndex++;
+    }
 
-        return (
-          <button
-            key={category.id}
-            onClick={() => handleSelect(category.name)}
-            className={`
-              flex-shrink-0 w-[110px] snap-center
-              bg-card rounded-3xl p-4 transition-all duration-300 border-2
-              ${isSelected 
-                ? "scale-105 shadow-2xl border-primary bg-primary/5" 
-                : "hover:scale-[1.02] shadow-md border-border/50 active:scale-95"
-              }
-            `}
-            style={{
-              transform: isSelected ? 'translateY(-4px)' : 'translateY(0)',
-            }}
-          >
-            {category.image_url ? (
+    return rows.map((row, rowIdx) => (
+      <div 
+        key={rowIdx} 
+        className={`flex gap-3 ${rowIdx % 2 === 0 ? 'justify-center' : 'justify-center'}`}
+      >
+        {row.map((category) => {
+          const isSelected = selected === category.name;
+          const IconComponent = getCategoryIcon(category.name);
+
+          return (
+            <button
+              key={category.id}
+              onClick={() => handleSelect(category.name)}
+              className={`
+                flex flex-col items-center gap-2 p-4 rounded-3xl transition-all duration-300
+                ${rowIdx % 2 === 0 ? 'w-[140px]' : 'w-[110px]'}
+                ${isSelected 
+                  ? "bg-gradient-to-br from-cyan-400 to-blue-500 shadow-lg shadow-blue-200/50 scale-105" 
+                  : "bg-white hover:bg-gradient-to-br hover:from-cyan-50 hover:to-blue-50 shadow-md hover:shadow-lg hover:scale-[1.02]"
+                }
+              `}
+            >
+              {/* Category Icon Container */}
               <div className={`
-                w-14 h-14 rounded-2xl mx-auto mb-2.5 overflow-hidden shadow-lg
-                transition-all duration-300
-                ${isSelected ? "ring-4 ring-primary/30" : ""}
+                w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300
+                ${isSelected 
+                  ? "bg-white/30 backdrop-blur-sm" 
+                  : "bg-gradient-to-br from-cyan-100 to-blue-100"
+                }
               `}>
-                <img
-                  src={category.image_url}
-                  alt={category.display_name}
-                  className="w-full h-full object-cover"
-                />
+                {category.image_url ? (
+                  <img
+                    src={category.image_url}
+                    alt={category.display_name}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <IconComponent 
+                    className={`w-7 h-7 ${isSelected ? "text-white" : "text-cyan-600"}`} 
+                  />
+                )}
               </div>
-            ) : (
-              <div
-                className={`
-                  w-14 h-14 rounded-2xl mx-auto mb-2.5
-                  bg-gradient-to-br ${gradient}
-                  flex items-center justify-center
-                  transition-all duration-300 shadow-lg
-                  ${isSelected ? "ring-4 ring-primary/30 scale-110" : ""}
-                `}
-              >
-                <Folder className="w-7 h-7 text-white" />
-              </div>
-            )}
-            <p className={`
-              font-bold text-xs text-center leading-tight
-              transition-colors duration-300
-              ${isSelected ? "text-primary" : "text-foreground"}
-            `}>
-              {category.display_name}
-            </p>
-          </button>
-        );
-      })}
+
+              {/* Category Name */}
+              <span className={`
+                text-xs font-semibold text-center leading-tight line-clamp-2
+                ${isSelected ? "text-white" : "text-gray-700"}
+              `}>
+                {category.display_name}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    ));
+  };
+
+  return (
+    <div className="space-y-3">
+      {renderCategoryGrid()}
     </div>
   );
 };
