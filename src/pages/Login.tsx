@@ -183,7 +183,7 @@ const Login = () => {
         {/* Logo and Title */}
         <div className="relative z-10 flex flex-col items-center justify-center pt-8">
           <motion.div
-            className="w-32 h-32 rounded-full bg-white shadow-2xl flex items-center justify-center"
+            className="w-32 h-32 rounded-full bg-white shadow-2xl flex items-center justify-center border-4 border-cyan-300"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5, type: "spring" }}
