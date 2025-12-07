@@ -97,20 +97,14 @@ const UserVideoFeed = ({ open, onOpenChange, initialPost, userId, currentUserId,
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 bg-black z-50"
+      className="fixed inset-0 bg-black z-[100]"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onWheel={handleWheel}
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
     >
-      {/* Indicatore di posizione */}
-      <div className="absolute top-4 right-4 z-20 bg-black/50 rounded-full px-3 py-1">
-        <span className="text-white text-sm">
-          {currentIndex + 1} / {posts.length}
-        </span>
-      </div>
-
-      {/* Video corrente */}
+      {/* Video corrente - fullscreen senza barra */}
       <VideoViewer
         open={true}
         onOpenChange={onOpenChange}
@@ -118,19 +112,6 @@ const UserVideoFeed = ({ open, onOpenChange, initialPost, userId, currentUserId,
         currentUserId={currentUserId}
         onLikeToggle={onLikeToggle}
       />
-
-      {/* Indicatori di scroll */}
-      {currentIndex > 0 && (
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-full">
-          <div className="text-white/50 text-xs animate-bounce">↑ Scorri su</div>
-        </div>
-      )}
-
-      {currentIndex < posts.length - 1 && (
-        <div className="absolute bottom-1/2 left-1/2 transform -translate-x-1/2 translate-y-full">
-          <div className="text-white/50 text-xs animate-bounce">↓ Scorri giù</div>
-        </div>
-      )}
     </div>
   );
 };
