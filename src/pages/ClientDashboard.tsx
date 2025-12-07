@@ -407,7 +407,7 @@ const handlePartnerSearch = async (query: string) => {
       ) : (
         <>
           {/* Epic Hero Section with animated gradient background */}
-          <div className="relative overflow-hidden min-h-[420px]">
+          <div className="relative overflow-hidden min-h-[520px]">
             {/* Animated Gradient Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-500 animate-gradient-shift" />
             
