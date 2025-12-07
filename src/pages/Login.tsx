@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Globe } from "lucide-react";
+import { Loader2, Globe, Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +21,7 @@ const Login = () => {
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -137,29 +139,95 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary flex items-center justify-center p-4">
-      <div className="w-full max-w-md ios-card p-6 space-y-6">
-        <div className="text-center">
-          <img src={logo} alt="Students Life" className="w-32 h-32 mx-auto mb-2" />
-          <p className="text-muted-foreground mt-2">{t("auth.loginTitle")}</p>
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Hero Gradient Background - Glovo Style */}
+      <div className="absolute top-0 left-0 right-0 bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 pb-32 pt-16" style={{ minHeight: '45vh', borderBottomLeftRadius: '40px', borderBottomRightRadius: '40px' }}>
+        {/* Floating Decorative Circles */}
+        <motion.div 
+          className="absolute top-20 left-10 w-24 h-24 rounded-full bg-white/10 blur-xl"
+          animate={{ 
+            y: [0, -20, 0],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{ 
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div 
+          className="absolute top-32 right-8 w-32 h-32 rounded-full bg-white/10 blur-xl"
+          animate={{ 
+            y: [0, 20, 0],
+            scale: [1, 0.9, 1]
+          }}
+          transition={{ 
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div 
+          className="absolute bottom-20 left-1/4 w-20 h-20 rounded-full bg-white/15 blur-lg"
+          animate={{ 
+            x: [0, 15, 0],
+            y: [0, -10, 0]
+          }}
+          transition={{ 
+            duration: 6,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        
+        {/* Logo and Title */}
+        <div className="relative z-10 flex flex-col items-center justify-center pt-8">
+          <motion.img 
+            src={logo} 
+            alt="Students Life" 
+            className="w-28 h-28 drop-shadow-2xl"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5, type: "spring" }}
+          />
+          <motion.p 
+            className="text-white/90 mt-3 text-lg font-medium"
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            {t("auth.loginTitle")}
+          </motion.p>
         </div>
+      </div>
 
-        {/* Language Selector */}
+      {/* Login Card - Modern Floating Style */}
+      <motion.div 
+        className="relative z-20 mx-4 mt-[35vh] bg-background rounded-[28px] shadow-2xl p-6 space-y-5"
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3, type: "spring", stiffness: 100 }}
+      >
+        {/* Language Selector - Compact Modern */}
         <div className="flex justify-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Globe className="h-4 w-4" />
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2 rounded-full border-border/50 bg-muted/50 hover:bg-muted"
+              >
+                <Globe className="h-4 w-4 text-muted-foreground" />
                 <span>{currentLanguage.flag}</span>
-                <span>{currentLanguage.name}</span>
+                <span className="text-sm">{currentLanguage.name}</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="center">
+            <DropdownMenuContent align="center" className="rounded-xl">
               {languages.map((language) => (
                 <DropdownMenuItem
                   key={language.code}
                   onClick={() => changeLanguage(language.code)}
-                  className="gap-2"
+                  className="gap-2 rounded-lg"
                 >
                   <span>{language.flag}</span>
                   <span>{language.name}</span>
@@ -170,74 +238,119 @@ const Login = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Email Field */}
           <div className="space-y-2">
-            <Label htmlFor="email">{t("auth.email")}</Label>
-            <Input
-              id="email"
-              type="email"
-              required
-              className="ios-input"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            />
+            <Label htmlFor="email" className="text-sm font-medium text-foreground/80">
+              {t("auth.email")}
+            </Label>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Input
+                id="email"
+                type="email"
+                required
+                placeholder="tu@email.com"
+                className="pl-12 h-14 rounded-2xl bg-muted/50 border-border/30 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+            </div>
           </div>
 
+          {/* Password Field with Toggle */}
           <div className="space-y-2">
-            <Label htmlFor="password">{t("auth.password")}</Label>
-            <Input
-              id="password"
-              type="password"
-              required
-              className="ios-input"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            />
+            <Label htmlFor="password" className="text-sm font-medium text-foreground/80">
+              {t("auth.password")}
+            </Label>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                required
+                placeholder="••••••••"
+                className="pl-12 pr-12 h-14 rounded-2xl bg-muted/50 border-border/30 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
 
+          {/* Forgot Password */}
           <div className="text-right">
             <Link
               to="/reset-password"
-              className="text-sm text-primary hover:underline"
+              className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
             >
               {t("auth.forgotPassword")}
             </Link>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full ios-button h-12"
-            disabled={loading}
+          {/* Login Button - Gradient Style */}
+          <motion.div
+            whileTap={{ scale: 0.98 }}
           >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {t("auth.loggingIn")}
-              </>
-            ) : (
-              t("auth.login")
-            )}
-          </Button>
+            <Button
+              type="submit"
+              className="w-full h-14 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 hover:from-cyan-600 hover:via-blue-600 hover:to-indigo-700 text-white font-semibold text-base shadow-lg shadow-blue-500/30 transition-all"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  {t("auth.loggingIn")}
+                </>
+              ) : (
+                t("auth.login")
+              )}
+            </Button>
+          </motion.div>
 
-          <div className="text-center space-y-2">
-            <p className="text-sm text-muted-foreground">{t("auth.noAccount")}</p>
-            <div className="flex gap-2 justify-center">
-              <Link
-                to="/register-client"
-                className="text-sm text-primary hover:underline"
-              >
-                {t("auth.registerClient")}
-              </Link>
-              <span className="text-muted-foreground">{t("auth.orText")}</span>
-              <Link
-                to="/register-partner"
-                className="text-sm text-primary hover:underline"
-              >
-                {t("auth.registerPartner")}
-              </Link>
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border/50"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-3 text-muted-foreground">
+                {t("auth.noAccount")}
+              </span>
             </div>
           </div>
+
+          {/* Register Links - Modern Cards */}
+          <div className="grid grid-cols-2 gap-3">
+            <motion.div whileTap={{ scale: 0.97 }}>
+              <Link to="/register-client">
+                <div className="p-4 rounded-2xl bg-muted/50 border border-border/30 hover:border-primary/50 hover:bg-muted transition-all text-center">
+                  <p className="text-sm font-semibold text-foreground">{t("auth.registerClient")}</p>
+                </div>
+              </Link>
+            </motion.div>
+            <motion.div whileTap={{ scale: 0.97 }}>
+              <Link to="/register-partner">
+                <div className="p-4 rounded-2xl bg-muted/50 border border-border/30 hover:border-primary/50 hover:bg-muted transition-all text-center">
+                  <p className="text-sm font-semibold text-foreground">{t("auth.registerPartner")}</p>
+                </div>
+              </Link>
+            </motion.div>
+          </div>
         </form>
-      </div>
+      </motion.div>
+
+      {/* Bottom Safe Area */}
+      <div className="h-8" />
     </div>
   );
 };
