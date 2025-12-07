@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
@@ -241,14 +241,14 @@ const NotificationsSheet = ({ open, onOpenChange, userId, userRole }: Notificati
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[70vh] rounded-t-3xl">
-        <SheetHeader className="pb-4 border-b">
-          <SheetTitle className="flex items-center gap-2 justify-center">
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="h-[70vh]">
+        <DrawerHeader className="pb-4 border-b">
+          <DrawerTitle className="flex items-center gap-2 justify-center">
             <Heart className="w-5 h-5 text-primary fill-primary" />
             <span className="text-lg font-bold">{t('notifications.title')}</span>
-          </SheetTitle>
-        </SheetHeader>
+          </DrawerTitle>
+        </DrawerHeader>
 
         <ScrollArea className="h-[calc(70vh-80px)] mt-4">
           {loading ? (
@@ -332,8 +332,8 @@ const NotificationsSheet = ({ open, onOpenChange, userId, userRole }: Notificati
             </div>
           )}
         </ScrollArea>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 };
 

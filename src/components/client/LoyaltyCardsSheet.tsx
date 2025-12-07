@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CreditCard, Sparkles, Gift } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -161,14 +161,14 @@ const LoyaltyCardsSheet = ({ open, onOpenChange, clientId }: LoyaltyCardsSheetPr
 
   return (
     <>
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl">
-          <SheetHeader className="pb-4">
-            <SheetTitle className="flex items-center justify-center gap-2 text-xl">
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="h-[85vh]">
+          <DrawerHeader className="pb-4">
+            <DrawerTitle className="flex items-center justify-center gap-2 text-xl">
               <CreditCard className="w-6 h-6 text-primary" />
               {t("loyaltyCard.myCards")}
-            </SheetTitle>
-          </SheetHeader>
+            </DrawerTitle>
+          </DrawerHeader>
 
           <div className="overflow-y-auto h-[calc(100%-80px)] pb-8">
             {loading ? (
@@ -296,8 +296,8 @@ const LoyaltyCardsSheet = ({ open, onOpenChange, clientId }: LoyaltyCardsSheetPr
               </div>
             )}
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
 
       {currentReward && (
         <LoyaltyRewardPopup

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, QrCode, Trash2 } from "lucide-react";
@@ -116,18 +116,18 @@ const WalletSheet = ({ open, onOpenChange, userId }: WalletSheetProps) => {
 
   return (
     <>
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl bg-gradient-to-b from-background to-blue-50/30">
-          <SheetHeader className="mb-2">
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="h-[85vh] bg-gradient-to-b from-background to-blue-50/30">
+          <DrawerHeader className="mb-2">
             <div className="flex items-center justify-center gap-3">
               <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
                 <QrCode className="w-6 h-6 text-white" />
               </div>
-              <SheetTitle className="text-2xl font-bold">
+              <DrawerTitle className="text-2xl font-bold">
                 {t("wallet.title")}
-              </SheetTitle>
+              </DrawerTitle>
             </div>
-          </SheetHeader>
+          </DrawerHeader>
 
           <div className="mt-6 space-y-3 overflow-y-auto h-[calc(85vh-120px)] px-1">
             {loading ? (
@@ -198,8 +198,8 @@ const WalletSheet = ({ open, onOpenChange, userId }: WalletSheetProps) => {
               ))
             )}
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
