@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
-import { it } from "date-fns/locale";
-
+import { it, es, enUS, fr, de } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 interface CommentsSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -18,9 +18,20 @@ interface CommentsSheetProps {
 
 const CommentsSheet = ({ open, onOpenChange, postId, currentUserId }: CommentsSheetProps) => {
   const { toast } = useToast();
+  const { t, i18n } = useTranslation();
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const getDateLocale = () => {
+    switch (i18n.language) {
+      case 'en': return enUS;
+      case 'es': return es;
+      case 'fr': return fr;
+      case 'de': return de;
+      default: return it;
+    }
+  };
 
   useEffect(() => {
     if (open) {
@@ -132,17 +143,17 @@ const CommentsSheet = ({ open, onOpenChange, postId, currentUserId }: CommentsSh
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-3xl h-[80vh] flex flex-col">
-        <SheetHeader>
-          <SheetTitle>Commenti ({comments.length})</SheetTitle>
-        </SheetHeader>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="h-[80vh] flex flex-col z-[200]">
+        <DrawerHeader>
+          <DrawerTitle>{t('social.comments')} ({comments.length})</DrawerTitle>
+        </DrawerHeader>
 
         {/* Comments List */}
-        <div className="flex-1 overflow-y-auto space-y-4 mt-6">
+        <div className="flex-1 overflow-y-auto space-y-4 px-4">
           {comments.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              Nessun commento ancora. Sii il primo a commentare!
+              {t('social.noComments')}
             </div>
           ) : (
             comments.map((comment) => (
@@ -161,7 +172,7 @@ const CommentsSheet = ({ open, onOpenChange, postId, currentUserId }: CommentsSh
                     <span className="text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(comment.created_at), {
                         addSuffix: true,
-                        locale: it,
+                        locale: getDateLocale(),
                       })}
                     </span>
                   </div>
@@ -173,9 +184,9 @@ const CommentsSheet = ({ open, onOpenChange, postId, currentUserId }: CommentsSh
         </div>
 
         {/* Comment Input */}
-        <div className="border-t pt-4 flex gap-2">
+        <div className="border-t p-4 flex gap-2">
           <Textarea
-            placeholder="Scrivi un commento..."
+            placeholder={t('social.writeComment')}
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             className="flex-1 min-h-[50px] max-h-[100px] resize-none"
@@ -195,8 +206,8 @@ const CommentsSheet = ({ open, onOpenChange, postId, currentUserId }: CommentsSh
             <Send className="w-5 h-5" />
           </Button>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 };
 

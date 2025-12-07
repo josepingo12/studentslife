@@ -143,8 +143,14 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
   };
 
   const handleTouchEnd = () => {
-    if (!isSwiping.current || swipeHandled.current || sheetOpen) return;
+    if (!isSwiping.current || swipeHandled.current) return;
     if (isInteractiveElement(touchStartTarget.current)) {
+      isSwiping.current = false;
+      return;
+    }
+    
+    // Block swipes when sheet is open
+    if (sheetOpen) {
       isSwiping.current = false;
       return;
     }
@@ -156,8 +162,8 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
     const deltaTime = Date.now() - touchStartTime.current;
     const velocityY = Math.abs(deltaY) / deltaTime;
     
-    // Check for horizontal swipe left to exit
-    if (deltaX > HORIZONTAL_SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY)) {
+    // Check for horizontal swipe left to exit (positive deltaX means swipe left)
+    if (deltaX > HORIZONTAL_SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
       swipeHandled.current = true;
       onOpenChange(false);
       return;

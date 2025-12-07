@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -253,19 +253,18 @@ const SharePostSheet = ({ open, onOpenChange, postId, currentUserId, onShareComp
   const sheetHeight = keyboardOpen ? '50vh' : '85vh';
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent 
-        side="bottom" 
-        className="rounded-t-3xl transition-all duration-200 z-[200] pointer-events-auto"
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent 
+        className="transition-all duration-200 z-[200]"
         style={{ height: sheetHeight }}
       >
-        <SheetHeader className="pb-4">
-          <SheetTitle className="text-center">{t('social.share')}</SheetTitle>
-        </SheetHeader>
+        <DrawerHeader className="pb-4">
+          <DrawerTitle className="text-center">{t('social.share')}</DrawerTitle>
+        </DrawerHeader>
 
         {/* Search - not auto-focused */}
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+        <div className="relative mb-4 px-4">
+          <Search className="absolute left-7 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <Input
             placeholder={t('chat.searchContacts')}
             value={searchQuery}
@@ -279,7 +278,7 @@ const SharePostSheet = ({ open, onOpenChange, postId, currentUserId, onShareComp
         {/* Content */}
         <div 
           ref={contentRef}
-          className="flex-1 overflow-y-auto"
+          className="flex-1 overflow-y-auto px-4"
           style={{ maxHeight: keyboardOpen ? 'calc(50vh - 180px)' : 'calc(85vh - 200px)' }}
         >
           {/* Favorites */}
@@ -354,8 +353,8 @@ const SharePostSheet = ({ open, onOpenChange, postId, currentUserId, onShareComp
             </Button>
           </div>
         )}
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 };
 
