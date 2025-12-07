@@ -12,6 +12,7 @@ import { formatDistanceToNow } from "date-fns";
 import { it, enUS, es, fr, de } from "date-fns/locale";
 import CommentsSheet from "./CommentsSheet";
 import SharePostSheet from "./SharePostSheet";
+import HeartAnimation from "./HeartAnimation";
 
 interface VideoViewerProps {
   open: boolean;
@@ -38,6 +39,9 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [showHeartAnimation, setShowHeartAnimation] = useState(false);
+  const lastTapTime = useRef(0);
+  const DOUBLE_TAP_DELAY = 300;
 
   // Reset and reload counters when post changes
   useEffect(() => {
@@ -205,12 +209,31 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
   };
 
   const handleVideoClick = () => {
-    if (videoRef.current) {
-      if (videoRef.current.paused) {
-        videoRef.current.play();
-      } else {
-        videoRef.current.pause();
+    const now = Date.now();
+    const timeSinceLastTap = now - lastTapTime.current;
+    
+    if (timeSinceLastTap < DOUBLE_TAP_DELAY && timeSinceLastTap > 0) {
+      // Double tap - like animation
+      if (!isLiked) {
+        handleLike();
       }
+      setShowHeartAnimation(true);
+      setTimeout(() => setShowHeartAnimation(false), 1200);
+      lastTapTime.current = 0;
+    } else {
+      // Single tap - toggle play/pause
+      lastTapTime.current = now;
+      setTimeout(() => {
+        if (lastTapTime.current === now) {
+          if (videoRef.current) {
+            if (videoRef.current.paused) {
+              videoRef.current.play();
+            } else {
+              videoRef.current.pause();
+            }
+          }
+        }
+      }, DOUBLE_TAP_DELAY);
     }
   };
 
@@ -323,17 +346,19 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
       </div>
 
       {/* Video */}
-      <video
-        ref={videoRef}
-        src={videoSrc}
-        className="w-full h-full object-contain"
-        autoPlay
-        loop
-        muted={isMuted}
-        playsInline
-        controls={false}
-        onClick={handleVideoClick}
-      />
+      <div className="w-full h-full relative" onClick={handleVideoClick}>
+        <video
+          ref={videoRef}
+          src={videoSrc}
+          className="w-full h-full object-contain"
+          autoPlay
+          loop
+          muted={isMuted}
+          playsInline
+          controls={false}
+        />
+        <HeartAnimation show={showHeartAnimation} />
+      </div>
 
       {/* Controls Right Side - ICONE GRANDI STILE INSTAGRAM */}
       <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col items-center gap-5 z-10 pointer-events-auto">
@@ -374,21 +399,22 @@ const VideoViewer = ({ open, onOpenChange, post, currentUserId, onLikeToggle }: 
         </div>
 
         {/* Share Button */}
-        <div 
-          className="flex flex-col items-center"
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            setShareOpen(true);
-          }}
-          onTouchEnd={(e) => {
-            e.stopPropagation();
-          }}
-        >
+        <div className="flex flex-col items-center">
           <Button
             variant="ghost"
             size="icon"
-            className="text-white hover:bg-white/20 rounded-full h-12 w-12 pointer-events-auto"
+            className="text-white hover:bg-white/20 rounded-full h-12 w-12"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setShareOpen(true);
+            }}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setShareOpen(true);
+            }}
           >
             <Send style={{ width: '26px', height: '26px' }} />
           </Button>
