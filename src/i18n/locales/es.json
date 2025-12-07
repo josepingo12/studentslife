@@ -372,7 +372,10 @@
     "sendTo": "Enviar a",
     "views": "visualizaciones",
     "allUsers": "Usuarios",
-    "postNotFound": "Publicación no disponible"
+    "postNotFound": "Publicación no disponible",
+    "comments": "Comentarios",
+    "noComments": "¡Sé el primero en comentar!",
+    "writeComment": "Añade un comentario..."
   },
   "chat": {
     "chats": "Chats",
