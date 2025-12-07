@@ -256,7 +256,7 @@ const SharePostSheet = ({ open, onOpenChange, postId, currentUserId, onShareComp
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent 
         side="bottom" 
-        className="rounded-t-3xl transition-all duration-200"
+        className="rounded-t-3xl transition-all duration-200 z-[200] pointer-events-auto"
         style={{ height: sheetHeight }}
       >
         <SheetHeader className="pb-4">
