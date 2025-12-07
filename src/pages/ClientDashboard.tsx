@@ -551,10 +551,15 @@ const handlePartnerSearch = async (query: string) => {
               </div>
             )}
 
-            {/* Partners Map */}
+            {/* Partners Map Section */}
             <div className="mt-8 px-4 pb-6">
-              <h3 className="text-xl font-bold mb-4 text-gray-900">{t('partner.mapTitle')}</h3>
-              <div className="rounded-3xl overflow-hidden shadow-xl ring-1 ring-gray-100">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-md">
+                  <MapPin className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">{t('partner.mapTitle')}</h3>
+              </div>
+              <div className="rounded-[28px] overflow-hidden shadow-2xl ring-1 ring-cyan-100/50 bg-white">
                 <PartnersMap />
               </div>
             </div>
@@ -562,61 +567,62 @@ const handlePartnerSearch = async (query: string) => {
         </>
       )}
 
-      {/* Bottom Navigation - Updated with modern, rounded, light blue icons */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
+      {/* Bottom Navigation - Glovo Style */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-2xl">
         <div className="flex items-center justify-around h-20 px-4 max-w-md mx-auto">
           <button
             onClick={() => setActiveTab("social")}
-            className={`flex flex-col items-center gap-1 p-2 rounded-full transition-colors ${
+            className={`flex flex-col items-center gap-1 p-3 rounded-2xl transition-all duration-300 ${
               activeTab === "social"
-                ? "bg-blue-100 text-blue-600"
-                : "text-gray-500 hover:bg-blue-50"
+                ? "bg-gradient-to-br from-cyan-400 to-blue-500 text-white shadow-lg shadow-cyan-200/50 scale-105"
+                : "text-gray-400 hover:text-cyan-600 hover:bg-cyan-50"
             }`}
             data-onboarding="social-tab"
           >
             <Users className="w-6 h-6" />
-            <span className="text-xs font-medium">{t('navigation.social')}</span>
+            <span className="text-[10px] font-bold">{t('navigation.social')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab("partners")}
-            className={`flex flex-col items-center gap-1 p-2 rounded-full transition-colors ${
+            className={`flex flex-col items-center gap-1 p-3 rounded-2xl transition-all duration-300 ${
               activeTab === "partners"
-                ? "bg-blue-100 text-blue-600"
-                : "text-gray-500 hover:bg-blue-50"
+                ? "bg-gradient-to-br from-cyan-400 to-blue-500 text-white shadow-lg shadow-cyan-200/50 scale-105"
+                : "text-gray-400 hover:text-cyan-600 hover:bg-cyan-50"
             }`}
             data-onboarding="partners-tab"
           >
             <Home className="w-6 h-6" />
-            <span className="text-xs font-medium">{t('navigation.partners')}</span>
+            <span className="text-[10px] font-bold">{t('navigation.partners')}</span>
           </button>
 
-          {/* Central Upload Button - Now a large circular button with a Plus icon */}
+          {/* Central Upload Button - Glovo Style */}
           <button
             onClick={() => setUploadSheetOpen(true)}
-            className="relative -mt-6 h-16 w-16 rounded-full bg-blue-500 text-white shadow-lg flex items-center justify-center hover:bg-blue-600 hover:scale-105 transition-all"
+            className="relative -mt-8 h-16 w-16 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-white shadow-xl shadow-cyan-300/50 flex items-center justify-center hover:shadow-2xl hover:scale-110 transition-all duration-300"
             data-onboarding="upload-button"
           >
-            <Plus className="w-8 h-8" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 blur-md opacity-50" />
+            <Plus className="w-8 h-8 relative z-10" />
           </button>
 
           <button
             onClick={() => setLikesSheetOpen(true)}
-            className="flex flex-col items-center gap-1 p-2 rounded-full transition-colors text-gray-500 relative hover:bg-blue-50"
+            className="flex flex-col items-center gap-1 p-3 rounded-2xl transition-all duration-300 text-gray-400 relative hover:text-cyan-600 hover:bg-cyan-50"
           >
             <div className="relative">
               <Heart className="w-6 h-6" />
               <NotificationBadge count={unreadNotifications} />
             </div>
-            <span className="text-xs font-medium">Notifiche</span>
+            <span className="text-[10px] font-bold">Notifiche</span>
           </button>
 
           <button
             onClick={() => setActiveTab("chats")}
-            className={`flex flex-col items-center gap-1 p-2 rounded-full transition-colors relative ${
+            className={`flex flex-col items-center gap-1 p-3 rounded-2xl transition-all duration-300 relative ${
               activeTab === "chats"
-                ? "bg-blue-100 text-blue-600"
-                : "text-gray-500 hover:bg-blue-50"
+                ? "bg-gradient-to-br from-cyan-400 to-blue-500 text-white shadow-lg shadow-cyan-200/50 scale-105"
+                : "text-gray-400 hover:text-cyan-600 hover:bg-cyan-50"
             }`}
             data-onboarding="chat-tab"
           >
@@ -624,7 +630,7 @@ const handlePartnerSearch = async (query: string) => {
               <MessageCircle className="w-6 h-6" />
               <NotificationBadge count={totalUnread} />
             </div>
-            <span className="text-xs font-medium">{t('navigation.chat')}</span>
+            <span className="text-[10px] font-bold">{t('navigation.chat')}</span>
           </button>
         </div>
       </div>
