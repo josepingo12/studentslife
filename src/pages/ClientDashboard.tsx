@@ -406,163 +406,143 @@ const handlePartnerSearch = async (query: string) => {
         </div>
       ) : (
         <>
-    {/* Header moderno per Partners con Wallet e Search */}
-    <div className="mt-4 mx-4 mb-6 relative">
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl px-6 py-5 shadow-xl">
-        {/* Top row: Titolo e Wallet */}
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-2xl font-bold text-white">Socios</h2>
-            <p className="text-blue-100 text-sm">Encuentra partners cerca</p>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setLoyaltyCardsSheetOpen(true)}
-              className="flex flex-col items-center gap-1 text-white hover:scale-105 transition-all"
-              data-onboarding="loyalty-cards"
-            >
-              <CreditCard className="w-5 h-6" />
-              <span className="text-xs font-semibold">Tarjetas</span>
-            </button>
-            <button
-              onClick={() => setWalletSheetOpen(true)}
-              className="flex flex-col items-center gap-1 text-white hover:scale-105 transition-all"
-              data-onboarding="wallet"
-            >
-              <Wallet className="w-5 h-6" />
-              <span className="text-xs font-semibold">Wallet</span>
-            </button>
-          </div>
-          </div>
-        {/* Search Bar moderna */}
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400 z-10" />
-          <Input
-            type="text"
-            placeholder="Busca socios, restaurantes, tiendas..."
-            value={partnerSearchQuery}
-            onChange={(e) => handlePartnerSearch(e.target.value)}
-            className="w-full pl-12 pr-10 py-4 rounded-2xl border-none bg-white/95 backdrop-blur-sm text-gray-800 placeholder:text-gray-500 focus-visible:ring-0 focus:bg-white text-base font-medium shadow-lg"
-          />
-          {partnerSearchQuery && (
-            <button
-              onClick={() => handlePartnerSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-10 bg-gray-100 hover:bg-gray-200 rounded-full p-2 transition-colors"
-            >
-              <X className="w-4 h-4 text-gray-600" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Search Results Dropdown - Più elegante */}
-      {partnerSearchQuery && (
-        <div className="absolute top-[calc(100%+0.5rem)] left-0 right-0 mt-0 bg-white rounded-3xl shadow-2xl border border-gray-100 z-50 max-h-80 overflow-y-auto backdrop-blur-lg">
-          {partnerSearching ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-3"></div>
-              <p className="text-sm text-gray-500">Buscando socios...</p>
-            </div>
-          ) : partnerSearchResults.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Search className="w-8 h-8 text-gray-400" />
-              </div>
-              <p className="text-sm text-gray-500">No se encontraron socios</p>
-              <p className="text-xs text-gray-400 mt-1">Intenta con otros términos</p>
-            </div>
-          ) : (
-            <div className="py-3">
-              {partnerSearchResults.map((result, index) => (
-                <button
-                  key={result.id}
-                  onClick={() => {
-                    navigate(`/partner/${result.id}`);
-                    setPartnerSearchQuery("");
-                    setPartnerSearchResults([]);
-                  }}
-                  className={`w-full flex items-center gap-4 px-6 py-4 hover:bg-blue-50 transition-all duration-200 ${
-                    index === 0 ? 'rounded-t-3xl' : ''
-                  } ${
-                    index === partnerSearchResults.length - 1 ? 'rounded-b-3xl' : ''
-                  }`}
-                >
-                  <div className="relative">
-                    <Avatar className="h-14 w-14 ring-2 ring-blue-100">
-                      <AvatarImage src={result.profile_image_url} />
-                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold">
-                        {(result.business_name || result.first_name || "S")[0].toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></div>
-                  </div>
-
-                  <div className="text-left flex-1">
-                    <p className="font-bold text-gray-900 text-lg">
-                      {result.business_name || `${result.first_name} ${result.last_name || ""}`.trim()}
-                    </p>
-                    {result.business_name && result.first_name && (
-                      <p className="text-sm text-gray-500">{result.first_name} {result.last_name}</p>
-                    )}
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                        <span className="text-xs text-green-600 font-medium">Activo</span>
-                      </div>
-                      <span className="text-xs text-gray-400">•</span>
-                      <span className="text-xs text-gray-500">2.3 km</span>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                      Ver
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-          {/* Hero Section with Glovo-style gradient background */}
-          <div className="relative overflow-hidden">
-            {/* Gradient Background - Celeste/Azzurro */}
-            <div className="absolute inset-0 bg-gradient-to-b from-cyan-400 via-blue-400 to-blue-500" />
+          {/* Epic Hero Section with animated gradient background */}
+          <div className="relative overflow-hidden min-h-[420px]">
+            {/* Animated Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-500 animate-gradient-shift" />
             
-            {/* Decorative curved wave at bottom */}
-            <div className="absolute bottom-0 left-0 right-0">
-              <svg viewBox="0 0 1440 120" className="w-full h-24" preserveAspectRatio="none">
-                <path
-                  fill="#f9fafb"
-                  d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,48C672,43,768,53,864,64C960,75,1056,85,1152,80C1248,75,1344,53,1392,42.7L1440,32L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z"
+            {/* Floating decorative circles */}
+            <div className="absolute top-10 left-4 w-32 h-32 bg-white/10 rounded-full blur-2xl animate-pulse" />
+            <div className="absolute top-32 right-0 w-48 h-48 bg-cyan-300/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+            <div className="absolute bottom-20 left-10 w-24 h-24 bg-blue-300/20 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+
+            {/* Header with Wallet and Search */}
+            <div className="relative z-20 px-5 pt-5 pb-3">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-3xl font-extrabold text-white tracking-tight">Socios</h2>
+                  <p className="text-cyan-100 text-sm font-medium">Descubre lugares increíbles</p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setLoyaltyCardsSheetOpen(true)}
+                    className="flex flex-col items-center gap-1 text-white p-3 rounded-2xl bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:scale-105 transition-all duration-300"
+                    data-onboarding="loyalty-cards"
+                  >
+                    <CreditCard className="w-6 h-6" />
+                    <span className="text-[10px] font-bold">Tarjetas</span>
+                  </button>
+                  <button
+                    onClick={() => setWalletSheetOpen(true)}
+                    className="flex flex-col items-center gap-1 text-white p-3 rounded-2xl bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:scale-105 transition-all duration-300"
+                    data-onboarding="wallet"
+                  >
+                    <Wallet className="w-6 h-6" />
+                    <span className="text-[10px] font-bold">Wallet</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Search Bar with glass effect */}
+              <div className="relative">
+                <div className="absolute inset-0 bg-white/20 backdrop-blur-xl rounded-2xl" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70 z-10" />
+                <Input
+                  type="text"
+                  placeholder="Busca restaurantes, tiendas, bares..."
+                  value={partnerSearchQuery}
+                  onChange={(e) => handlePartnerSearch(e.target.value)}
+                  className="relative w-full pl-12 pr-10 py-4 rounded-2xl border-2 border-white/30 bg-transparent text-white placeholder:text-white/60 focus-visible:ring-0 focus:border-white/50 focus:bg-white/10 text-base font-medium"
                 />
-              </svg>
+                {partnerSearchQuery && (
+                  <button
+                    onClick={() => handlePartnerSearch("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 z-10 bg-white/20 hover:bg-white/30 rounded-full p-2 transition-colors"
+                  >
+                    <X className="w-4 h-4 text-white" />
+                  </button>
+                )}
+              </div>
+
+              {/* Search Results Dropdown */}
+              {partnerSearchQuery && (
+                <div className="absolute top-full left-0 right-0 mt-2 mx-0 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 z-50 max-h-80 overflow-y-auto">
+                  {partnerSearching ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mr-3"></div>
+                      <p className="text-sm text-gray-500">Buscando socios...</p>
+                    </div>
+                  ) : partnerSearchResults.length === 0 ? (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Search className="w-8 h-8 text-cyan-500" />
+                      </div>
+                      <p className="text-sm text-gray-500">No se encontraron socios</p>
+                    </div>
+                  ) : (
+                    <div className="py-3">
+                      {partnerSearchResults.map((result, index) => (
+                        <button
+                          key={result.id}
+                          onClick={() => {
+                            navigate(`/partner/${result.id}`);
+                            setPartnerSearchQuery("");
+                            setPartnerSearchResults([]);
+                          }}
+                          className="w-full flex items-center gap-4 px-6 py-4 hover:bg-cyan-50 transition-all duration-200"
+                        >
+                          <Avatar className="h-14 w-14 ring-2 ring-cyan-100">
+                            <AvatarImage src={result.profile_image_url} />
+                            <AvatarFallback className="bg-gradient-to-br from-cyan-400 to-blue-500 text-white font-bold">
+                              {(result.business_name || result.first_name || "S")[0].toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="text-left flex-1">
+                            <p className="font-bold text-gray-900">{result.business_name || `${result.first_name} ${result.last_name || ""}`.trim()}</p>
+                          </div>
+                          <div className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white px-4 py-1.5 rounded-full text-xs font-bold">
+                            Ver
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Category Grid - Glovo Style */}
-            <div className="relative z-10 px-4 pt-6 pb-16">
+            <div className="relative z-10 px-4 pt-2 pb-8">
               <CategoryCarousel onSelectCategory={setSelectedCategory} />
+            </div>
+            
+            {/* Decorative curved wave at bottom */}
+            <div className="absolute bottom-0 left-0 right-0">
+              <svg viewBox="0 0 1440 100" className="w-full h-16" preserveAspectRatio="none">
+                <path
+                  fill="#f9fafb"
+                  d="M0,40L60,45C120,50,240,60,360,55C480,50,600,30,720,25C840,20,960,30,1080,40C1200,50,1320,60,1380,65L1440,70L1440,100L1380,100C1320,100,1200,100,1080,100C960,100,840,100,720,100C600,100,480,100,360,100C240,100,120,100,60,100L0,100Z"
+                />
+              </svg>
             </div>
           </div>
 
           {/* Content on white background */}
-          <div className="bg-gray-50 -mt-4">
+          <div className="bg-gray-50">
             {/* Recent Partners Section */}
-            <div className="pt-2">
+            <div className="pt-4">
               <RecentPartners userId={user.id} />
             </div>
 
             {/* Partners List - shown when category selected */}
             {selectedCategory && (
-              <div className="mt-6 px-4">
+              <div className="mt-6 px-4 animate-fade-in">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xl font-bold text-gray-900">{t('navigation.partners')}</h3>
                   <button
                     onClick={() => setSelectedCategory(null)}
-                    className="text-sm text-cyan-600 font-medium hover:text-cyan-700"
+                    className="text-sm text-cyan-600 font-semibold hover:text-cyan-700 bg-cyan-50 px-3 py-1 rounded-full transition-colors"
                   >
                     {t('common.close')}
                   </button>
@@ -572,9 +552,9 @@ const handlePartnerSearch = async (query: string) => {
             )}
 
             {/* Partners Map */}
-            <div className="mt-8 px-4 pb-4">
+            <div className="mt-8 px-4 pb-6">
               <h3 className="text-xl font-bold mb-4 text-gray-900">{t('partner.mapTitle')}</h3>
-              <div className="rounded-3xl overflow-hidden shadow-lg">
+              <div className="rounded-3xl overflow-hidden shadow-xl ring-1 ring-gray-100">
                 <PartnersMap />
               </div>
             </div>
