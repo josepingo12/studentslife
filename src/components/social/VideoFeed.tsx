@@ -13,6 +13,7 @@ interface VideoFeedProps {
 
 const SWIPE_THRESHOLD = 30;
 const SWIPE_VELOCITY_THRESHOLD = 0.2;
+const HORIZONTAL_SWIPE_THRESHOLD = 80;
 
 const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggle }: VideoFeedProps) => {
   const [posts, setPosts] = useState<any[]>([]);
@@ -20,12 +21,15 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
   const [loading, setLoading] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [direction, setDirection] = useState(0);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
   // Touch tracking
   const touchStartY = useRef(0);
+  const touchStartX = useRef(0);
   const touchStartTime = useRef(0);
   const touchCurrentY = useRef(0);
+  const touchCurrentX = useRef(0);
   const isSwiping = useRef(false);
   const swipeHandled = useRef(false);
   const touchStartTarget = useRef<EventTarget | null>(null);
@@ -83,12 +87,31 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
   const isInteractiveElement = (target: EventTarget | null): boolean => {
     if (!target || !(target instanceof HTMLElement)) return false;
     
-    // Check if target or any parent is an interactive element
-    const interactiveSelectors = 'button, [role="button"], input, textarea, a, [data-radix-collection-item]';
+    // Check if target or any parent is an interactive element or sheet
+    const interactiveSelectors = 'button, [role="button"], input, textarea, a, [data-radix-collection-item], [data-radix-dialog-content], [data-state="open"]';
     return target.closest(interactiveSelectors) !== null;
   };
 
+  // Detect if a sheet/modal is open
+  useEffect(() => {
+    const checkSheetOpen = () => {
+      const openSheet = document.querySelector('[data-state="open"][role="dialog"]');
+      setSheetOpen(!!openSheet);
+    };
+    
+    const observer = new MutationObserver(checkSheetOpen);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-state'] });
+    
+    return () => observer.disconnect();
+  }, []);
+
   const handleTouchStart = (e: React.TouchEvent) => {
+    // Don't handle swipes when sheet is open
+    if (sheetOpen) {
+      isSwiping.current = false;
+      return;
+    }
+    
     touchStartTarget.current = e.target;
     
     // Don't interfere with touches on interactive elements
@@ -98,17 +121,20 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
     }
     
     touchStartY.current = e.touches[0].clientY;
+    touchStartX.current = e.touches[0].clientX;
     touchStartTime.current = Date.now();
     touchCurrentY.current = e.touches[0].clientY;
+    touchCurrentX.current = e.touches[0].clientX;
     isSwiping.current = true;
     swipeHandled.current = false;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isSwiping.current || swipeHandled.current) return;
+    if (!isSwiping.current || swipeHandled.current || sheetOpen) return;
     if (isInteractiveElement(touchStartTarget.current)) return;
     
     touchCurrentY.current = e.touches[0].clientY;
+    touchCurrentX.current = e.touches[0].clientX;
     const deltaY = touchStartY.current - touchCurrentY.current;
     
     if (Math.abs(deltaY) > 10) {
@@ -117,7 +143,7 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
   };
 
   const handleTouchEnd = () => {
-    if (!isSwiping.current || swipeHandled.current) return;
+    if (!isSwiping.current || swipeHandled.current || sheetOpen) return;
     if (isInteractiveElement(touchStartTarget.current)) {
       isSwiping.current = false;
       return;
@@ -126,10 +152,19 @@ const VideoFeed = ({ open, onOpenChange, initialPost, currentUserId, onLikeToggl
     isSwiping.current = false;
 
     const deltaY = touchStartY.current - touchCurrentY.current;
+    const deltaX = touchStartX.current - touchCurrentX.current;
     const deltaTime = Date.now() - touchStartTime.current;
-    const velocity = Math.abs(deltaY) / deltaTime;
+    const velocityY = Math.abs(deltaY) / deltaTime;
+    
+    // Check for horizontal swipe left to exit
+    if (deltaX > HORIZONTAL_SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY)) {
+      swipeHandled.current = true;
+      onOpenChange(false);
+      return;
+    }
 
-    if (Math.abs(deltaY) > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD) {
+    // Vertical swipe for video change
+    if (Math.abs(deltaY) > SWIPE_THRESHOLD || velocityY > SWIPE_VELOCITY_THRESHOLD) {
       swipeHandled.current = true;
       if (deltaY > 0) {
         goToNext();

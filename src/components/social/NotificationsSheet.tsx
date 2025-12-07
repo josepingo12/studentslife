@@ -6,8 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Heart, MessageCircle, QrCode } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import { it } from "date-fns/locale";
+import { it, enUS, es, fr, de } from "date-fns/locale";
 import VideoThumbnail from "@/components/shared/VideoThumbnail";
+import { useTranslation } from "react-i18next";
 
 interface NotificationsSheetProps {
   open: boolean;
@@ -31,8 +32,19 @@ type Notification = {
 
 const NotificationsSheet = ({ open, onOpenChange, userId, userRole }: NotificationsSheetProps) => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const getDateLocale = () => {
+    switch (i18n.language) {
+      case 'en': return enUS;
+      case 'es': return es;
+      case 'fr': return fr;
+      case 'de': return de;
+      default: return it;
+    }
+  };
 
   useEffect(() => {
     if (open) {
@@ -189,7 +201,7 @@ const NotificationsSheet = ({ open, onOpenChange, userId, userRole }: Notificati
     if (profile?.first_name) {
       return `${profile.first_name} ${profile.last_name || ""}`.trim();
     }
-    return profile?.business_name || "Utente";
+    return profile?.business_name || t('common.user');
   };
 
   const handleProfileClick = (profileUserId: string) => {
@@ -218,11 +230,11 @@ const NotificationsSheet = ({ open, onOpenChange, userId, userRole }: Notificati
   const getNotificationText = (notification: Notification) => {
     switch (notification.type) {
       case "like":
-        return " ha messo mi piace al tuo post";
+        return ` ${t('notifications.likedYourPost')}`;
       case "comment":
-        return " ha commentato il tuo post";
+        return ` ${t('notifications.commentedYourPost')}`;
       case "qr_code":
-        return ` ha scaricato il QR code per ${notification.events?.title || "il tuo evento"}`;
+        return ` ${t('notifications.downloadedQrFor')} ${notification.events?.title || t('notifications.yourEvent')}`;
       default:
         return "";
     }
@@ -234,7 +246,7 @@ const NotificationsSheet = ({ open, onOpenChange, userId, userRole }: Notificati
         <SheetHeader className="pb-4 border-b">
           <SheetTitle className="flex items-center gap-2 justify-center">
             <Heart className="w-5 h-5 text-primary fill-primary" />
-            <span className="text-lg font-bold">Notifiche</span>
+            <span className="text-lg font-bold">{t('notifications.title')}</span>
           </SheetTitle>
         </SheetHeader>
 
@@ -246,7 +258,7 @@ const NotificationsSheet = ({ open, onOpenChange, userId, userRole }: Notificati
           ) : notifications.length === 0 ? (
             <div className="text-center py-12">
               <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-              <p className="text-muted-foreground">Nessuna notifica ancora</p>
+              <p className="text-muted-foreground">{t('notifications.empty')}</p>
             </div>
           ) : (
             <div className="space-y-1 pb-4">
@@ -283,7 +295,7 @@ const NotificationsSheet = ({ open, onOpenChange, userId, userRole }: Notificati
                       </p>
                     )}
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: it })}
+                      {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: getDateLocale() })}
                     </p>
                   </div>
                   {notification.posts?.image_url && (

@@ -424,5 +424,13 @@
     "deleteDescription": "¿Estás seguro de que quieres eliminar este código QR de tu wallet?",
     "deleteSuccess": "Código QR eliminado correctamente",
     "deleteError": "Error al eliminar el código QR"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "empty": "Aún no tienes notificaciones",
+    "likedYourPost": "le dio me gusta a tu publicación",
+    "commentedYourPost": "comentó tu publicación",
+    "downloadedQrFor": "descargó el código QR para",
+    "yourEvent": "tu evento"
   }
 }
